@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbitrary Rule Generator — Flow School</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;
+  --surface:rgba(255,255,255,.05);
+  --surface-2:rgba(255,255,255,.09);
+  --border:rgba(255,255,255,.10);
+  --border-light:rgba(255,255,255,.06);
+  --text-1:#FFFFFF;
+  --text-2:rgba(255,255,255,.62);
+  --text-3:rgba(255,255,255,.35);
+  --accent:#DDE36A;
+  --accent-dim:rgba(221,227,106,.10);
+  --accent-border:rgba(221,227,106,.20);
+  --r:16px;--rf:100px;--rs:10px;
+  --glass:blur(24px);
+  --font:'Helvetica Neue',Helvetica,Arial,sans-serif
+}
+html{font-family:var(--font);font-size:16px;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--text-1);min-height:100vh;overflow-x:hidden}
+
+.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0}
+.orb-1{width:640px;height:640px;background:#2D0A5C;top:-180px;left:-180px;opacity:.75;animation:drift1 28s ease-in-out infinite alternate}
+.orb-2{width:720px;height:720px;background:#0A1F5C;top:-120px;right:-220px;opacity:.65;animation:drift2 22s ease-in-out infinite alternate}
+.orb-3{width:520px;height:520px;background:#0A3D2D;bottom:-80px;left:30%;opacity:.55;animation:drift3 34s ease-in-out infinite alternate}
+@keyframes drift1{0%{transform:translate(0,0)}100%{transform:translate(80px,100px)}}
+@keyframes drift2{0%{transform:translate(0,0)}100%{transform:translate(-90px,70px)}}
+@keyframes drift3{0%{transform:translate(0,0)}100%{transform:translate(60px,-80px)}}
+
+header,section,.wrap,.toast{position:relative;z-index:1}
+
+h1{font-size:clamp(2.2rem,5vw,3.4rem);font-weight:700;letter-spacing:-.04em;line-height:1.06;background:linear-gradient(155deg,#fff 55%,rgba(255,255,255,.45));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+p{line-height:1.6;color:var(--text-2)}
+
+.inner{max-width:820px;margin:0 auto;padding:0 28px}
+.wrap{max-width:820px;margin:0 auto;padding:0 28px 100px}
+
+.hdr{background:rgba(8,8,8,.72);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);border-bottom:1px solid var(--border-light);position:sticky;top:0;z-index:100}
+.hdr-i{max-width:820px;margin:0 auto;padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between}
+.hdr-brand{display:flex;align-items:center;gap:10px;font-size:.875rem}
+.hdr-logo{font-weight:700;letter-spacing:-.01em;color:var(--text-1)}
+.hdr-sep{color:var(--text-3)}
+.hdr-tool{color:var(--text-3)}
+.btn-ghost{background:none;border:none;color:var(--text-3);padding:8px 12px;border-radius:var(--rs);font-size:.875rem;cursor:pointer;transition:color .15s,background .15s;font-family:var(--font);text-decoration:none;display:inline-flex;align-items:center}
+.btn-ghost:hover{color:var(--text-1);background:rgba(255,255,255,.06)}
+
+.hero{padding:72px 0 48px}
+.hero p{font-size:1.125rem;margin-top:16px;color:var(--text-3)}
+
+/* ── Controls ── */
+.controls-bar{padding:32px 0 28px;border-bottom:1px solid var(--border-light);margin-bottom:40px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.ctl-label{font-size:.6875rem;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px}
+.count-group{display:flex;flex-direction:column;gap:0}
+.count-btns{display:flex;gap:6px}
+.count-btn{width:48px;height:40px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);color:var(--text-3);font-size:.9375rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:var(--font)}
+.count-btn:hover{border-color:rgba(255,255,255,.35);color:var(--text-2);background:rgba(255,255,255,.07)}
+.count-btn.active{background:#fff;border-color:#fff;color:#080808}
+.generate-btn{display:flex;align-items:center;gap:9px;background:var(--accent);color:#080808;border:none;padding:12px 28px;border-radius:var(--rf);font-size:.9375rem;font-weight:700;font-family:var(--font);cursor:pointer;transition:opacity .15s,transform .1s,box-shadow .15s;box-shadow:0 0 28px rgba(221,227,106,.15);white-space:nowrap}
+.generate-btn:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 0 40px rgba(221,227,106,.25)}
+.generate-btn:active{transform:translateY(0)}
+.generate-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ── Challenge card ── */
+.challenge-card{border:1px solid var(--border);border-radius:var(--r);padding:44px;background:rgba(255,255,255,.018);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);margin-bottom:36px}
+.challenge-card.animate{animation:slideUp .4s cubic-bezier(.22,.68,0,1.2)}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.hidden{display:none!important}
+
+/* Card top row */
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px}
+
+/* Single rule */
+.rule-cat-tag{font-size:.625rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:var(--rf);background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);display:inline-block}
+.rule-text-single{font-size:clamp(1.875rem,4.5vw,2.75rem);font-weight:700;letter-spacing:-.04em;line-height:1.1;color:var(--text-1);margin-bottom:14px}
+.rule-invite{font-size:.9375rem;color:var(--text-3);font-style:italic}
+
+/* Multi rules */
+.challenge-label{font-size:.6875rem;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--text-3)}
+.rule-items{display:flex;flex-direction:column}
+.rule-item{display:flex;gap:20px;padding:22px 0;border-bottom:1px solid var(--border-light)}
+.rule-item:first-child{padding-top:0}
+.rule-item:last-child{border-bottom:none;padding-bottom:0}
+.rule-n{font-size:.75rem;font-weight:700;color:var(--accent);flex-shrink:0;min-width:20px;padding-top:5px;font-variant-numeric:tabular-nums}
+.rule-cat-small{font-size:.5625rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);display:block;margin-bottom:7px}
+.rule-text-item{font-size:clamp(1.125rem,2.5vw,1.375rem);font-weight:700;letter-spacing:-.025em;line-height:1.25;color:var(--text-1)}
+
+/* Card actions */
+.card-actions{display:flex;align-items:center;gap:10px;margin-top:36px;padding-top:28px;border-top:1px solid var(--border-light)}
+.btn-icon{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--text-2);cursor:pointer;transition:all .15s;flex-shrink:0}
+.btn-icon:hover{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.28);color:var(--text-1)}
+.btn-icon.saved{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.35);color:#fff}
+.btn-regen{background:var(--surface);color:var(--text-2);border:1px solid var(--border);padding:10px 20px;border-radius:var(--rf);font-size:.875rem;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .15s}
+.btn-regen:hover{background:var(--surface-2);color:var(--text-1);border-color:rgba(255,255,255,.22)}
+
+/* ── Saved section ── */
+.saved-section{border-top:1px solid var(--border-light);padding-top:44px;margin-top:8px}
+.saved-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.saved-toggle{background:none;border:none;color:var(--text-2);font-size:.9375rem;font-family:var(--font);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:9px;padding:0;transition:color .15s}
+.saved-toggle:hover{color:var(--text-1)}
+.saved-badge{font-size:.6875rem;font-weight:700;background:var(--accent);color:#080808;padding:2px 8px;border-radius:var(--rf);line-height:1.5}
+.saved-badge.empty{background:var(--surface-2);color:var(--text-3)}
+.saved-arrow{color:var(--text-3);font-size:.75rem;transition:transform .2s;display:inline-block}
+.saved-toggle.open .saved-arrow{transform:rotate(180deg)}
+.clear-btn{background:none;border:none;color:var(--text-3);font-size:.8125rem;font-family:var(--font);cursor:pointer;transition:color .15s;padding:0}
+.clear-btn:hover{color:var(--text-2)}
+.saved-body{padding-top:8px}
+.saved-empty{color:var(--text-3);font-size:.9375rem;padding:16px 0}
+.saved-item{display:flex;align-items:flex-start;justify-content:space-between;padding:13px 14px;border-radius:10px;transition:background .15s;gap:12px}
+.saved-item:hover{background:var(--surface)}
+.saved-rules-preview{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+.saved-rule-line{font-size:.875rem;color:var(--text-2);font-weight:500;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.saved-rule-line+.saved-rule-line{font-size:.8125rem;color:var(--text-3)}
+.saved-item:hover .saved-rule-line{color:var(--text-1)}
+.saved-item:hover .saved-rule-line+.saved-rule-line{color:var(--text-2)}
+.saved-btns{display:flex;gap:6px;flex-shrink:0;padding-top:2px}
+.saved-view-btn,.saved-rm-btn{background:none;border:none;font-size:.75rem;font-family:var(--font);cursor:pointer;padding:4px 10px;border-radius:var(--rf);transition:all .15s}
+.saved-view-btn{color:var(--text-3)}
+.saved-view-btn:hover{color:var(--text-1);background:var(--surface-2)}
+.saved-rm-btn{color:var(--text-3)}
+.saved-rm-btn:hover{color:rgba(255,100,100,.8)}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(255,255,255,.10);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.18);color:#fff;padding:13px 24px;border-radius:var(--rf);font-size:.875rem;font-weight:500;transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:200;white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:580px){
+  .wrap{padding:0 20px 72px}
+  .inner{padding:0 20px}
+  .hero{padding:48px 0 32px}
+  h1{font-size:clamp(1.9rem,7vw,2.6rem)}
+  .challenge-card{padding:28px 22px}
+  .controls-bar{flex-direction:column;align-items:flex-start}
+  .generate-btn{width:100%;justify-content:center}
+  .rule-text-single{font-size:clamp(1.5rem,6vw,2rem)}
+}
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="toast" id="toast"></div>
+
+<header class="hdr">
+  <div class="hdr-i">
+    <div class="hdr-brand">
+      <span class="hdr-logo">Flow School</span>
+      <span class="hdr-sep">/</span>
+      <span class="hdr-tool">Arbitrary Rules</span>
+    </div>
+    <a href="index.html" class="btn-ghost">← Tools</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="inner">
+    <h1>Every constraint is an invitation.</h1>
+    <p>Creative constraints for curious teachers. Sometimes the fastest path to a new idea is removing an old one. Generate a rule. Build a flow. See what happens.</p>
+  </div>
+</section>
+
+<div class="wrap">
+
+  <div class="controls-bar">
+    <div class="count-group">
+      <p class="ctl-label">Number of rules</p>
+      <div class="count-btns">
+        <button class="count-btn active" data-n="1">1</button>
+        <button class="count-btn" data-n="2">2</button>
+        <button class="count-btn" data-n="3">3</button>
+      </div>
+    </div>
+    <button class="generate-btn" id="generate-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 3 21 3 21 8"></polyline>
+        <line x1="4" y1="20" x2="21" y2="3"></line>
+        <polyline points="21 16 21 21 16 21"></polyline>
+        <line x1="15" y1="15" x2="21" y2="21"></line>
+        <line x1="4" y1="4" x2="9" y2="9"></line>
+      </svg>
+      <span>Generate Rule</span>
+    </button>
+  </div>
+
+  <div id="challenge-card" class="challenge-card"></div>
+
+  <div class="saved-section">
+    <div class="saved-header">
+      <button class="saved-toggle" id="saved-toggle">
+        Saved Challenges
+        <span class="saved-badge empty" id="saved-badge">0</span>
+        <span class="saved-arrow">&#9660;</span>
+      </button>
+      <button class="clear-btn" id="clear-btn">Clear all</button>
+    </div>
+    <div class="saved-body hidden" id="saved-body"></div>
+  </div>
+
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const CATEGORIES = {
+  pose:       'Pose Constraint',
+  start:      'Starting Position',
+  movement:   'Movement',
+  body:       'Body Position',
+  wildcard:   'Wildcard',
+};
+
+const RULES = [
+  // Pose Constraints
+  { id:1,  cat:'pose',       text:'No Warrior 2.' },
+  { id:2,  cat:'pose',       text:'No Down Dog.' },
+  { id:3,  cat:'pose',       text:'No lunges of any kind.' },
+  { id:4,  cat:'pose',       text:'No standing balances.' },
+  { id:5,  cat:'pose',       text:'No Chaturanga.' },
+  { id:6,  cat:'pose',       text:'No hands and knees.' },
+  { id:7,  cat:'pose',       text:'No Sun Salutations.' },
+  { id:8,  cat:'pose',       text:'No Chair Pose.' },
+  { id:9,  cat:'pose',       text:'No forward folds.' },
+  { id:10, cat:'pose',       text:"No Child's Pose." },
+  { id:11, cat:'pose',       text:'No Pigeon.' },
+  { id:12, cat:'pose',       text:'No Triangle Pose.' },
+  { id:13, cat:'pose',       text:'No twists.' },
+  { id:14, cat:'pose',       text:"Only use poses you've never taught before." },
+  { id:15, cat:'pose',       text:'No Warrior 1.' },
+  { id:16, cat:'pose',       text:'No Cobra or Upward-Facing Dog.' },
+  { id:17, cat:'pose',       text:'No Plank of any kind.' },
+  { id:18, cat:'pose',       text:'No seated poses.' },
+  { id:83, cat:'pose',       text:'No backbends.' },
+  { id:84, cat:'pose',       text:'No side angle.' },
+  { id:85, cat:'pose',       text:'No half moon.' },
+  { id:86, cat:'pose',       text:'No wild thing.' },
+  { id:114, cat:'pose',      text:'Only use symmetrical postures.' },
+
+  // Starting Position
+  { id:19, cat:'start',      text:'Begin seated.' },
+  { id:20, cat:'start',      text:'Begin lying on your back.' },
+  { id:21, cat:'start',      text:'Begin on your belly.' },
+  { id:22, cat:'start',      text:'Begin kneeling.' },
+  { id:23, cat:'start',      text:'Begin standing at the back of the mat.' },
+  { id:24, cat:'start',      text:'Begin in Savasana.' },
+  { id:25, cat:'start',      text:"Begin in Child's Pose." },
+  { id:26, cat:'start',      text:'Begin in Plank.' },
+  { id:27, cat:'start',      text:'Begin inverted.' },
+  { id:28, cat:'start',      text:'Begin at the short edge of the mat, facing sideways.' },
+  { id:29, cat:'start',      text:'Begin balanced on one leg.' },
+  { id:30, cat:'start',      text:'Begin at the center of the mat.' },
+  { id:87, cat:'start',      text:'Begin in a twist.' },
+  { id:88, cat:'start',      text:'Begin in a squat.' },
+  { id:89, cat:'start',      text:'Begin with eyes closed.' },
+  { id:90, cat:'start',      text:'Begin in stillness for two minutes.' },
+  { id:91, cat:'start',      text:'Begin with one hand touching the floor.' },
+
+  // Movement Constraints
+  { id:31, cat:'movement',   text:'Include at least three twists.' },
+  { id:32, cat:'movement',   text:'Include one jump.' },
+  { id:33, cat:'movement',   text:'Stay below standing for the entire flow.' },
+  { id:34, cat:'movement',   text:'Never face the front of the mat.' },
+  { id:35, cat:'movement',   text:'Use only lateral movement.' },
+  { id:36, cat:'movement',   text:'Use only circular transitions.' },
+  { id:37, cat:'movement',   text:'Every transition must change the height of your hips.' },
+  { id:38, cat:'movement',   text:'Every posture must include a different arm position.' },
+  { id:39, cat:'movement',   text:'Never use the same pose twice.' },
+  { id:40, cat:'movement',   text:'Move only backward along the mat.' },
+  { id:41, cat:'movement',   text:'Alternate between bent and straight legs on every posture.' },
+  { id:42, cat:'movement',   text:'Alternate between square hips and open hips throughout.' },
+  { id:43, cat:'movement',   text:'Stay on one side of the mat only.' },
+  { id:44, cat:'movement',   text:'The flow must include a turn-around.' },
+  { id:92, cat:'movement',   text:'No pose held longer than one breath.' },
+  { id:93, cat:'movement',   text:'Never sit down.' },
+  { id:94, cat:'movement',   text:'Never lie down.' },
+  { id:95, cat:'movement',   text:'Hands touch the floor only once.' },
+  { id:96, cat:'movement',   text:'Keep one hand on the floor at all times.' },
+  { id:97, cat:'movement',   text:'Rotate 360° throughout the flow.' },
+  { id:98, cat:'movement',   text:'Change directions every pose.' },
+  { id:99, cat:'movement',   text:'Use only diagonal pathways.' },
+  { id:100, cat:'movement',  text:'Keep your gaze on one hand.' },
+  { id:101, cat:'movement',  text:'Arms stay in a T shape.' },
+  { id:102, cat:'movement',  text:'Keep palms touching the entire flow.' },
+  { id:103, cat:'movement',  text:'Never use symmetrical arms.' },
+  { id:104, cat:'movement',  text:'Stay until your body asks for the next shape.' },
+  { id:105, cat:'movement',  text:'Hold every pose for 5 breaths.' },
+  { id:106, cat:'movement',  text:'Hold every pose for 10 breaths.' },
+  { id:107, cat:'movement',  text:'Move only on exhales.' },
+  { id:108, cat:'movement',  text:'Move only on inhales.' },
+  { id:109, cat:'movement',  text:'Flow at half speed.' },
+  { id:115, cat:'movement',  text:'Keep one leg straight for the entire flow.' },
+  { id:116, cat:'movement',  text:'Swim your arms through every transition.' },
+  { id:117, cat:'movement',  text:'Change your gaze direction every time you move to a new pose.' },
+  { id:118, cat:'movement',  text:'Find a new way from Down Dog to the top of the mat — no stepping from single-leg Down Dog.' },
+  { id:119, cat:'movement',  text:'Build a flow that travels from the back of the mat to the front, then reverses — without repeating.' },
+
+  // Body Position
+  { id:45, cat:'body',       text:'Include a symmetrical pose.' },
+  { id:46, cat:'body',       text:'Include a lateral lean.' },
+  { id:47, cat:'body',       text:'Include a single-arm position.' },
+  { id:48, cat:'body',       text:'Include a squat.' },
+  { id:49, cat:'body',       text:'Include a backbend.' },
+  { id:50, cat:'body',       text:'Include a single-leg posture.' },
+  { id:51, cat:'body',       text:'Include an inversion.' },
+  { id:52, cat:'body',       text:'Include a hip hinge.' },
+  { id:53, cat:'body',       text:'Include one posture with hands on the floor and one with no hands at all.' },
+  { id:54, cat:'body',       text:'Include a posture where both feet are off the floor.' },
+  { id:55, cat:'body',       text:'Include a posture where your back is on the ground.' },
+  { id:56, cat:'body',       text:'Include an arm balance.' },
+  { id:110, cat:'body',      text:'Include three asymmetrical poses.' },
+  { id:111, cat:'body',      text:'Include one balance.' },
+  { id:112, cat:'body',      text:'Include one kneeling twist.' },
+  { id:113, cat:'body',      text:'Include one side-body shape.' },
+  { id:120, cat:'body',      text:'In each pose, move through 5 different arm shapes before transitioning.' },
+  { id:121, cat:'body',      text:'Alternate between open hands and closed fists throughout the flow.' },
+  { id:122, cat:'body',      text:'At least one hand must be touching your body at all times.' },
+
+  // Wildcards
+  { id:69, cat:'wildcard',   text:'Teach the class you wish someone had taught you.' },
+  { id:70, cat:'wildcard',   text:'Design this class for one specific student. Pick them. Build it for them.' },
+  { id:71, cat:'wildcard',   text:"Let a song you can't stop listening to lead the whole thing." },
+  { id:72, cat:'wildcard',   text:'Steal something you love from another teacher. Make it yours.' },
+  { id:73, cat:'wildcard',   text:'Build a class that would surprise your past self.' },
+  { id:74, cat:'wildcard',   text:"Build the class you'd want to take, not the one you think you should teach." },
+  { id:75, cat:'wildcard',   text:'Pick a texture — soft, sharp, heavy, light. Let it shape everything.' },
+  { id:76, cat:'wildcard',   text:"Build this class for someone who swears they're not flexible." },
+  { id:77, cat:'wildcard',   text:"Build this class for a body that's been sitting all day." },
+  { id:78, cat:'wildcard',   text:'Teach it like a conversation, not a performance.' },
+  { id:79, cat:'wildcard',   text:'Build the whole class around one transition you find beautiful.' },
+  { id:80, cat:'wildcard',   text:'Let something you felt this week lead the whole thing.' },
+  { id:81, cat:'wildcard',   text:'Build a class that makes movement feel inevitable.' },
+  { id:82, cat:'wildcard',   text:'Design the flow around the word "enough."' },
+  { id:123, cat:'wildcard',  text:'Build a class for a body that is tired.' },
+  { id:124, cat:'wildcard',  text:'Start with the hardest thing. Build everything else around it.' },
+  { id:125, cat:'wildcard',  text:"Build a class that could make someone feel something they didn't expect." },
+  { id:126, cat:'wildcard',  text:'Design this class like it needs an arc — beginning, peak, release.' },
+  { id:127, cat:'wildcard',  text:"Build a class you've been too afraid to teach." },
+  { id:128, cat:'wildcard',  text:'Create a class that has nothing to do with what you normally teach.' },
+];
+
+const INVITES = [
+  'Build a flow. See what happens.',
+  'Everything is an experiment.',
+  'There is more than one way to be right.',
+  'Play before you plan.',
+  'There are no rules. Except this one.',
+  'Curiosity over certainty.',
+  'Let it be easy.',
+  'Free to move.',
+  'Perfect is boring. This is better.',
+  'Choose your own adventure from here.',
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+let ruleCount = 1;
+let currentRuleIds = [];
+let saved = JSON.parse(localStorage.getItem('flowschool_arules') || '[]');
+
+// ─── GENERATE ────────────────────────────────────────────────────────────────
+
+function pickRules(count) {
+  const n = Math.min(count, RULES.length);
+  const shuffled = [...RULES].sort(() => Math.random() - 0.5);
+  const selected = [];
+  const usedCats = new Set();
+
+  // First pass: prefer different categories; hard-cap "start" at one per challenge
+  for (const r of shuffled) {
+    if (selected.length >= n) break;
+    if (r.cat === 'start' && usedCats.has('start')) continue;
+    if (usedCats.has(r.cat)) continue;
+    selected.push(r);
+    usedCats.add(r.cat);
+  }
+
+  // Second pass: fill remaining slots, still capping "start" at one
+  for (const r of shuffled) {
+    if (selected.length >= n) break;
+    if (r.cat === 'start' && selected.some(s => s.cat === 'start')) continue;
+    if (!selected.includes(r)) selected.push(r);
+  }
+
+  return selected;
+}
+
+function generate() {
+  const rules = pickRules(ruleCount);
+  if (!rules.length) return;
+  rules.sort((a, b) => (a.cat === 'start' ? -1 : b.cat === 'start' ? 1 : 0));
+  currentRuleIds = rules.map(r => r.id);
+  renderCard(rules);
+}
+
+// ─── RENDER CARD ─────────────────────────────────────────────────────────────
+
+function renderCard(rules) {
+  const card = document.getElementById('challenge-card');
+  const alreadySaved = isChallengeInSaved(currentRuleIds);
+  const saveBtn = `<button class="btn-icon${alreadySaved?' saved':''}" id="save-btn" title="${alreadySaved?'Saved':'Save challenge'}"><svg width="15" height="15" viewBox="0 0 15 15" fill="${alreadySaved?'currentColor':'none'}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 1.5h8v12l-4-2.2-4 2.2V1.5z"/></svg></button>`;
+
+  if (rules.length === 1) {
+    const r = rules[0];
+    const invite = INVITES[Math.floor(Math.random() * INVITES.length)];
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="rule-cat-tag">${CATEGORIES[r.cat]}</span>
+        ${saveBtn}
+      </div>
+      <div class="rule-text-single">${r.text}</div>
+      <div class="rule-invite">${invite}</div>`;
+  } else {
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="challenge-label">Your Challenge</div>
+        ${saveBtn}
+      </div>
+      <div class="rule-items">
+        ${rules.map((r, i) => `
+          <div class="rule-item">
+            <span class="rule-n">0${i + 1}</span>
+            <div>
+              <span class="rule-cat-small">${CATEGORIES[r.cat]}</span>
+              <div class="rule-text-item">${r.text}</div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  document.getElementById('save-btn').addEventListener('click', handleSave);
+
+  card.classList.remove('animate');
+  void card.offsetWidth;
+  card.classList.add('animate');
+}
+
+// ─── SAVE ────────────────────────────────────────────────────────────────────
+
+function isChallengeInSaved(ids) {
+  return saved.some(c => c.ids.length === ids.length && c.ids.every((id, i) => id === ids[i]));
+}
+
+function handleSave() {
+  if (isChallengeInSaved(currentRuleIds)) {
+    saved = saved.filter(c => !(c.ids.length === currentRuleIds.length && c.ids.every((id, i) => id === currentRuleIds[i])));
+    toast('Challenge removed.');
+  } else {
+    saved.push({ id: Date.now(), ids: [...currentRuleIds] });
+    toast('Challenge saved.');
+  }
+  localStorage.setItem('flowschool_arules', JSON.stringify(saved));
+  updateSavedBadge();
+  renderSavedList();
+  const btn = document.getElementById('save-btn');
+  if (btn) {
+    const nowSaved = isChallengeInSaved(currentRuleIds);
+    btn.classList.toggle('saved', nowSaved);
+    btn.title = nowSaved ? 'Saved' : 'Save challenge';
+    btn.querySelector('svg').setAttribute('fill', nowSaved ? 'currentColor' : 'none');
+  }
+}
+
+function updateSavedBadge() {
+  const badge = document.getElementById('saved-badge');
+  badge.textContent = saved.length;
+  badge.classList.toggle('empty', saved.length === 0);
+}
+
+function renderSavedList() {
+  const body = document.getElementById('saved-body');
+  if (!saved.length) {
+    body.innerHTML = '<p class="saved-empty">No saved challenges yet. Generate one and save it.</p>';
+    return;
+  }
+  body.innerHTML = saved.map(c => {
+    const rules = c.ids.map(id => RULES.find(r => r.id === id)).filter(Boolean);
+    if (!rules.length) return '';
+    return `
+      <div class="saved-item">
+        <div class="saved-rules-preview">
+          ${rules.map(r => `<span class="saved-rule-line">${r.text}</span>`).join('')}
+        </div>
+        <div class="saved-btns">
+          <button class="saved-view-btn" data-id="${c.id}">View</button>
+          <button class="saved-rm-btn" data-id="${c.id}" title="Remove">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ─── COUNT TOGGLE ────────────────────────────────────────────────────────────
+
+document.querySelectorAll('.count-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ruleCount = parseInt(btn.dataset.n);
+    document.querySelector('#generate-btn span').textContent = ruleCount === 1 ? 'Generate Rule' : 'Generate Challenge';
+  });
+});
+
+// ─── SAVED EVENTS ────────────────────────────────────────────────────────────
+
+document.getElementById('saved-toggle').addEventListener('click', () => {
+  const body = document.getElementById('saved-body');
+  const toggle = document.getElementById('saved-toggle');
+  const isHidden = body.classList.toggle('hidden');
+  toggle.classList.toggle('open', !isHidden);
+  if (!isHidden) renderSavedList();
+});
+
+document.getElementById('saved-body').addEventListener('click', e => {
+  const viewBtn = e.target.closest('.saved-view-btn');
+  const rmBtn = e.target.closest('.saved-rm-btn');
+
+  if (viewBtn) {
+    const id = parseInt(viewBtn.dataset.id);
+    const challenge = saved.find(c => c.id === id);
+    if (!challenge) return;
+    const rules = challenge.ids.map(rid => RULES.find(r => r.id === rid)).filter(Boolean);
+    currentRuleIds = [...challenge.ids];
+    ruleCount = rules.length;
+    document.querySelectorAll('.count-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.n) === ruleCount));
+    document.querySelector('#generate-btn span').textContent = ruleCount === 1 ? 'Generate Rule' : 'Generate Challenge';
+    renderCard(rules);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  if (rmBtn) {
+    const id = parseInt(rmBtn.dataset.id);
+    saved = saved.filter(c => c.id !== id);
+    localStorage.setItem('flowschool_arules', JSON.stringify(saved));
+    updateSavedBadge();
+    renderSavedList();
+    const btn = document.getElementById('save-btn');
+    if (btn) {
+      const nowSaved = isChallengeInSaved(currentRuleIds);
+      btn.classList.toggle('saved', nowSaved);
+      btn.querySelector('svg').setAttribute('fill', nowSaved ? 'currentColor' : 'none');
+    }
+    toast('Challenge removed.');
+  }
+});
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+  if (!saved.length) return;
+  saved = [];
+  localStorage.setItem('flowschool_arules', JSON.stringify(saved));
+  updateSavedBadge();
+  renderSavedList();
+  const btn = document.getElementById('save-btn');
+  if (btn) { btn.classList.remove('saved'); btn.querySelector('svg').setAttribute('fill', 'none'); }
+  toast('Saved challenges cleared.');
+});
+
+// ─── GENERATE BUTTON ─────────────────────────────────────────────────────────
+
+document.getElementById('generate-btn').addEventListener('click', generate);
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+updateSavedBadge();
+generate();
+</script>
+</body>
+</html>
