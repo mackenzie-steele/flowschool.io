@@ -510,41 +510,33 @@ function svgCoords(svg, cx, cy){
   return pt.matrixTransform(svg.getScreenCTM().inverse());
 }
 
+function nearestKnot(svg, cx, cy){
+  const c = svgCoords(svg, cx, cy);
+  const xs = getXS();
+  let nearest = 0, minDist = Infinity;
+  xs.forEach((x, i) => { const d = Math.abs(c.x - x); if(d < minDist){ minDist = d; nearest = i; } });
+  return { index: nearest, svgY: c.y };
+}
+
 function setupDrag(){
   const svg = document.getElementById('curve-svg');
 
-  svg.addEventListener('mousedown', e=>{
-    const g = e.target.closest('.cp');
-    if(g){ drag = parseInt(g.getAttribute('data-i')); e.preventDefault(); }
+  svg.addEventListener('pointerdown', e=>{
+    const { index } = nearestKnot(svg, e.clientX, e.clientY);
+    drag = index;
+    svg.setPointerCapture(e.pointerId);
+    e.preventDefault();
   });
-  document.addEventListener('mousemove', e=>{
-    if(drag===null) return;
-    const svg = document.getElementById('curve-svg');
-    const c = svgCoords(svg, e.clientX, e.clientY);
-    S.pts[drag] = snapEnergy(yToE(Math.max(PAD_T, Math.min(SVG_H-PAD_B, c.y))));
-    renderCurve();
-  });
-  document.addEventListener('mouseup', ()=>{ drag=null; });
 
-  svg.addEventListener('touchstart', e=>{
-    const t=e.touches[0];
-    const c=svgCoords(svg,t.clientX,t.clientY);
-    const xs=getXS();
-    let nearest=0,minDist=Infinity;
-    xs.forEach((x,i)=>{ const d=Math.abs(c.x-x); if(d<minDist){minDist=d;nearest=i;} });
-    drag=nearest;
-    e.preventDefault();
-  },{passive:false});
-  document.addEventListener('touchmove', e=>{
-    if(drag===null) return;
-    const t=e.touches[0];
-    const svg=document.getElementById('curve-svg');
-    const c=svgCoords(svg,t.clientX,t.clientY);
-    S.pts[drag]=snapEnergy(yToE(Math.max(PAD_T,Math.min(SVG_H-PAD_B,c.y))));
+  svg.addEventListener('pointermove', e=>{
+    if(drag === null) return;
+    const c = svgCoords(svg, e.clientX, e.clientY);
+    S.pts[drag] = snapEnergy(yToE(Math.max(PAD_T, Math.min(SVG_H - PAD_B, c.y))));
     renderCurve();
-    e.preventDefault();
-  },{passive:false});
-  document.addEventListener('touchend', ()=>{ drag=null; });
+  });
+
+  svg.addEventListener('pointerup', () => { drag = null; });
+  svg.addEventListener('pointercancel', () => { drag = null; });
 }
 
 // ─── MINI CURVE ──────────────────────────────────────────────────────────────
