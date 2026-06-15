@@ -32,7 +32,7 @@
 .time-btns     { display: flex; gap: 6px; }
 
 /* ── Button row ── */
-.btn-row   { display: flex; align-items: center; gap: 10px; padding-top: 28px; border-top: 1px solid var(--border-light); }
+.controls-actions { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 12px; }
 .start-btn { padding: 12px 28px; }
 
 /* ── Ghost-small + Audio ── */
@@ -40,7 +40,7 @@
 .btn-ghost-sm:hover { color: var(--text-2); }
 .btn-ghost-sm:disabled { opacity: .3; cursor: not-allowed; }
 
-.audio-btn       { display: flex; align-items: center; justify-content: center; margin-left: auto; background: none; border: 1px solid rgba(255,255,255,.12); color: var(--text-3); padding: 10px; border-radius: var(--rf); cursor: pointer; transition: all .15s; }
+.audio-btn       { display: flex; align-items: center; justify-content: center; background: none; border: 1px solid rgba(255,255,255,.12); color: var(--text-3); padding: 10px; border-radius: var(--rf); cursor: pointer; transition: all .15s; }
 .audio-btn:hover { color: var(--text-2); border-color: rgba(255,255,255,.25); }
 .audio-btn.on    { color: var(--text-2); border-color: rgba(255,255,255,.2); }
 .audio-btn.off   { opacity: .45; }
@@ -111,6 +111,15 @@
   </div>
 
   <!-- Controls -->
+  <div class="controls-actions">
+    <button class="audio-btn on" id="audio-btn" title="Toggle sound">
+      <svg width="18" height="18"><use id="audio-icon" href="#sound-on"></use></svg>
+    </button>
+    <button class="start-btn" id="toggle-btn">
+      <svg width="16" height="16"><use id="toggle-icon" href="#play"></use></svg>
+      <span id="toggle-label">Start</span>
+    </button>
+  </div>
   <div class="controls-card">
     <div class="ctl-grid">
 
@@ -135,16 +144,6 @@
       </div>
 
 
-    </div>
-
-    <div class="btn-row">
-      <button class="start-btn" id="toggle-btn">
-        <svg width="16" height="16"><use id="toggle-icon" href="#play"></use></svg>
-        <span id="toggle-label">Start</span>
-      </button>
-      <button class="audio-btn on" id="audio-btn" title="Toggle sound">
-        <svg width="18" height="18"><use id="audio-icon" href="#sound-on"></use></svg>
-      </button>
     </div>
   </div>
 
