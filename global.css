@@ -166,6 +166,7 @@ header, section, .wrap, .inner, .content, .results-inner, footer {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
 }
+.hdr-i .btn-ghost { justify-self: start; }
 
 .hdr-logo {
   font-size: .875rem;
