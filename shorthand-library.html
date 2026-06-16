@@ -1,759 +1,1024 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shorthand Library</title>
-<link rel="stylesheet" href="global.css">
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shorthand Library</title>
+  <link rel="stylesheet" href="global.css">
+  <style>
+    /* ── Search ── */
+    .search-wrap {
+      position: relative;
+      margin-top: 32px;
+      margin-bottom: 14px;
+    }
 
-/* ── Search ── */
-.search-wrap { position: relative; margin-top: 32px; margin-bottom: 14px; }
-.search-input {
-  width: 100%;
-  background: rgba(255,255,255,.04);
-  border: 1px solid var(--border);
-  border-radius: var(--rs);
-  padding: 12px 40px 12px 44px;
-  color: var(--text-1);
-  font-size: var(--text-body-sm);
+    .search-input {
+      width: 100%;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 12px 40px 12px 44px;
+      color: var(--text-1);
+      font-size: var(--text-body-sm);
+      font-family: var(--font);
+      outline: none;
+      transition: border-color .15s, background .15s;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-3);
+    }
+
+    .search-input:focus {
+      border-color: rgba(255, 255, 255, .22);
+      background: rgba(255, 255, 255, .055);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-3);
+      font-size: var(--text-body-lg);
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: color .15s, background .15s;
+      font-family: var(--font);
+    }
+
+    .search-clear:hover {
+      color: var(--text-1);
+      background: rgba(255, 255, 255, .06);
+    }
+
+    /* ── Filter row ── */
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .filter-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-row .filter-chip {
+      flex-shrink: 0;
+    }
+
+    .result-count {
+      margin-left: auto;
+      font-size: var(--text-small);
+      color: var(--text-3);
+      font-weight: var(--weight-semibold);
+      white-space: nowrap;
+    }
+
+    /* Badge inside filter chip */
+    .lib-badge {
+      display: inline-block;
+      font-size: var(--text-nano);
+      font-weight: var(--weight-bold);
+      padding: 2px 6px;
+      border-radius: var(--rf);
+      background: rgba(255, 255, 255, .10);
+      color: var(--text-3);
+      border: 1px solid rgba(255, 255, 255, .10);
+      margin-left: 5px;
+      vertical-align: middle;
+      line-height: 1.5;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+
+    .filter-chip.active .lib-badge {
+      background: rgba(8, 8, 8, .08);
+      color: rgba(8, 8, 8, .40);
+      border-color: rgba(8, 8, 8, .08);
+    }
+
+    /* ── Library table ── */
+    .lib-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border-light);
+      border-radius: var(--r);
+      background: rgba(255, 255, 255, .018);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .lib-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 460px;
+    }
+
+    .lib-table th {
+      
+      text-align: left;
+      font-size: var(--text-nano);
+      font-weight: var(--weight-regular);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-3);
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--border-light);
+      white-space: nowrap;
+    }
+
+    .lib-table td {
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: middle;
+    }
+
+    .lib-row:last-child td {
+      border-bottom: none;
+    }
+
+    .lib-row {
+      transition: background .10s;
+    }
+
+    .lib-row:hover td {
+      background: rgba(255, 255, 255, .018);
+    }
+
+    /* Cell content */
+    .lib-short {
+      font-family: var(--font);
+  font-size: var(--fs-h7);
+  font-weight: var(--weight-regular)!important;
+  line-height: var(--lh-heading);
+  color: #ffffff;
+      white-space: nowrap;
+    }
+
+    .lib-full {
   font-family: var(--font);
-  outline: none;
-  transition: border-color .15s, background .15s;
-}
-.search-input::placeholder { color: var(--text-3); }
-.search-input:focus {
-  border-color: rgba(255,255,255,.22);
-  background: rgba(255,255,255,.055);
-}
-.search-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-3);
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-}
-.search-clear {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--text-3);
-  font-size: var(--text-body-lg);
-  line-height: 1;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: color .15s, background .15s;
-  font-family: var(--font);
-}
-.search-clear:hover { color: var(--text-1); background: rgba(255,255,255,.06); }
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: rgba(255,255,255,.50);
+    }
 
-/* ── Filter row ── */
-.filter-row { display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; align-items: center; margin-bottom: 20px; padding-bottom: 2px; scrollbar-width: none; }
-.filter-row::-webkit-scrollbar { display: none; }
-.filter-row .filter-chip { flex-shrink: 0; }
-.result-count { margin-left: auto; font-size: var(--text-small); color: var(--text-3); font-weight: var(--weight-semibold); white-space: nowrap; }
+    .lib-notes-text {
+      font-size: var(--text-small);
+      color: var(--text-3);
+      line-height: 1.5;
+    }
 
-/* Badge inside filter chip */
-.lib-badge {
-  display: inline-block;
-  font-size: var(--text-nano);
-  font-weight: var(--weight-bold);
-  padding: 2px 6px;
-  border-radius: var(--rf);
-  background: rgba(255,255,255,.10);
-  color: var(--text-3);
-  border: 1px solid rgba(255,255,255,.10);
-  margin-left: 5px;
-  vertical-align: middle;
-  line-height: 1.5;
-  transition: background .15s, color .15s, border-color .15s;
-}
-.filter-chip.active .lib-badge {
-  background: rgba(8,8,8,.08);
-  color: rgba(8,8,8,.40);
-  border-color: rgba(8,8,8,.08);
-}
+    /* Category tag variants */
+    .tag-general {
+      background: rgba(255, 220, 80, .10);
+      color: rgba(255, 225, 110, .90);
+      border-color: rgba(255, 220, 80, .20);
+    }
 
-/* ── Library table ── */
-.lib-wrap {
-  overflow-x: auto;
-  border: 1px solid var(--border-light);
-  border-radius: var(--r);
-  background: rgba(255,255,255,.018);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-.lib-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 460px;
-}
-.lib-table th {
-  text-align: left;
-  font-size: var(--text-nano);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-3);
-  padding: 18px 18px 14px;
-  border-bottom: 1px solid var(--border-light);
-  white-space: nowrap;
-}
-.lib-table td {
-  padding: 13px 18px;
-  border-bottom: 1px solid var(--border-light);
-  vertical-align: middle;
-}
-.lib-row:last-child td { border-bottom: none; }
-.lib-row { transition: background .10s; }
-.lib-row:hover td { background: rgba(255,255,255,.018); }
+    .tag-double-leg {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-color: var(--accent-border);
+    }
 
-/* Cell content */
-.lib-short {
-  font-weight: var(--weight-bold);
-  font-size: var(--text-body-sm);
-  color: var(--text-1);
-  letter-spacing: .03em;
-  white-space: nowrap;
-  font-family: var(--font-mono);
-}
-.lib-full { font-size: var(--text-body-sm); color: var(--text-2); }
-.lib-notes-text { font-size: var(--text-small); color: var(--text-3); line-height: 1.5; }
+    .tag-single-leg {
+      background: rgba(80, 200, 160, .10);
+      color: rgba(100, 210, 170, .90);
+      border-color: rgba(80, 200, 160, .20);
+    }
 
-/* Category tag variants */
-.tag-general     { background: rgba(255,220,80,.10);           color: rgba(255,225,110,.90);      border-color: rgba(255,220,80,.20); }
-.tag-double-leg  { background: var(--accent-dim);              color: var(--accent);              border-color: var(--accent-border); }
-.tag-single-leg  { background: rgba(80,200,160,.10);           color: rgba(100,210,170,.90);      border-color: rgba(80,200,160,.20); }
-.tag-hands-down  { background: rgba(80,160,255,.10);           color: rgba(110,175,255,.90);      border-color: rgba(80,160,255,.20); }
-.tag-floor       { background: rgba(255,155,80,.10);           color: rgba(255,165,100,.90);      border-color: rgba(255,155,80,.20); }
-.tag-custom      { background: rgba(190,130,255,.10);          color: rgba(200,150,255,.90);      border-color: rgba(190,130,255,.20); }
-.lib-table .tag  { white-space: nowrap; }
-.lib-table th:nth-child(3),
-.lib-table td:nth-child(3) { width: 120px; }
+    .tag-hands-down {
+      background: rgba(80, 160, 255, .10);
+      color: rgba(110, 175, 255, .90);
+      border-color: rgba(80, 160, 255, .20);
+    }
 
-/* Action buttons in table */
-.td-actions { width: 80px; }
-.lib-actions { display: flex; justify-content: flex-end; gap: 6px; }
-.lib-actions .btn-icon { width: 32px; height: 32px; border-radius: 8px; }
-.lib-actions .btn-icon svg { width: 14px; height: 14px; }
+    .tag-floor {
+      background: rgba(255, 155, 80, .10);
+      color: rgba(255, 165, 100, .90);
+      border-color: rgba(255, 155, 80, .20);
+    }
 
-/* Empty state */
-.lib-empty { text-align: center; padding: 52px 28px; }
-.lib-empty p { color: var(--text-3); font-size: var(--text-body-sm); }
-.lib-empty p + p { margin-top: 6px; font-size: var(--text-small); }
+    .tag-custom {
+      background: rgba(190, 130, 255, .10);
+      color: rgba(200, 150, 255, .90);
+      border-color: rgba(190, 130, 255, .20);
+    }
 
-/* ── Sequence demo card ── */
-.sh-demo-card { margin-top: 40px; }
-.demo-hdr {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-.demo-title { font-size: var(--text-body); font-weight: var(--weight-semibold); letter-spacing: -.01em; color: var(--text-2); margin-bottom: 4px; }
-.demo-desc  { font-size: var(--text-small); color: var(--text-3); }
-.mode-row   { display: flex; gap: 6px; flex-shrink: 0; }
-.mode-chip  { padding: 7px 14px; font-size: var(--text-small); }
+    .lib-table .tag {
+      white-space: nowrap;
+    }
 
-.seq-textarea {
-  width: 100%;
-  background: rgba(255,255,255,.04);
-  border: 1px solid var(--border);
-  border-radius: var(--rs);
-  padding: 14px 16px;
-  color: var(--text-1);
-  font-size: var(--text-body-sm);
-  font-family: var(--font);
-  outline: none;
-  resize: vertical;
-  min-height: 68px;
-  transition: border-color .15s, background .15s;
-  line-height: 1.7;
-}
-.seq-textarea:focus { border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.055); }
-.seq-textarea::placeholder { color: var(--text-3); }
+    .lib-table th:nth-child(3),
+    .lib-table td:nth-child(3) {
+      width: 120px;
+    }
 
-.seq-out-wrap {
-  margin-top: 14px;
-  padding: 16px;
-  background: rgba(255,255,255,.025);
-  border: 1px solid var(--border-light);
-  border-radius: var(--rs);
-  min-height: 52px;
-  font-size: var(--text-body-sm);
-  line-height: 1.8;
-}
-.seq-placeholder { color: var(--text-3); font-style: italic; }
-.seq-match       { color: var(--text-1); font-weight: var(--weight-semibold); }
-.seq-full-label  { color: var(--text-3); font-size: var(--text-small); }
-.seq-sep         { color: var(--text-3); }
-.seq-unknown     { color: rgba(255,120,100,.65); }
+    /* Action buttons in table */
+    .td-actions {
+      width: 80px;
+    }
 
-/* ── My Shorthand section ── */
-.sh-section-hdr  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.sh-section-title { font-size: var(--text-body); font-weight: var(--weight-semibold); color: var(--text-2); }
-.sh-section-desc  { font-size: var(--text-ui); color: var(--text-3); margin-bottom: 22px; }
+    .lib-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
 
-/* Add form */
-.sh-add-card { padding: 24px 28px; margin-bottom: 4px; }
-.sh-form-row { display: flex; gap: 12px; margin-bottom: 12px; }
-.sh-form-row .form-group { flex: 1; }
-.sh-form-row .fg-wide    { flex: 2; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-label { }
-.form-label .opt { font-weight: var(--weight-regular); text-transform: none; letter-spacing: 0; opacity: .55; }
-.form-input {
-  background: rgba(255,255,255,.04);
-  border: 1px solid var(--border);
-  border-radius: var(--rs);
-  padding: 10px 14px;
-  color: var(--text-1);
-  font-size: var(--text-ui);
-  font-family: var(--font);
-  outline: none;
-  transition: border-color .15s, background .15s;
-}
-.form-input:focus { border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.055); }
-.form-input::placeholder { color: var(--text-3); }
-.form-select {
-  background: rgba(255,255,255,.04);
-  border: 1px solid var(--border);
-  border-radius: var(--rs);
-  padding: 10px 32px 10px 14px;
-  color: var(--text-2);
-  font-size: var(--text-ui);
-  font-family: var(--font);
-  outline: none;
-  cursor: pointer;
-  transition: border-color .15s;
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.30)' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-}
-.form-select:focus { border-color: rgba(255,255,255,.22); }
-.form-select option { background: #111; color: #fff; }
+    .lib-actions .btn-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+    }
 
-.sh-add-btn { margin-top: 4px; padding: 10px 24px; font-size: var(--text-ui); }
+    .lib-actions .btn-icon .material-symbols-sharp {
+      font-size: 16px;
+    }
 
-/* Custom entries */
-.saved-item-main { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-.saved-arrow-sep { color: var(--text-3); font-size: var(--text-small); }
-.saved-item-notes { width: 100%; margin-top: 4px; }
+    /* Empty state */
+    .lib-empty {
+      text-align: center;
+      padding: 52px 28px;
+    }
 
-/* ── Responsive ── */
-@media (max-width: 620px) {
-  .demo-hdr { flex-direction: column; gap: 14px; }
-  .mode-row { flex-wrap: wrap; }
-  .sh-form-row { flex-direction: column; gap: 10px; }
-  .sh-form-row .fg-wide { flex: 1; }
-  .result-count { display: none; }
-}
+    .lib-empty p {
+      color: var(--text-3);
+      font-size: var(--text-body-sm);
+    }
 
-</style>
+    .lib-empty p+p {
+      margin-top: 6px;
+      font-size: var(--text-small);
+    }
+
+    /* ── Sequence demo card ── */
+    .sh-demo-card {
+      margin-top: 40px;
+    }
+
+    .demo-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .demo-title {
+      font-size: var(--text-body);
+      font-weight: var(--weight-semibold);
+      letter-spacing: -.01em;
+      color: var(--text-2);
+      margin-bottom: 4px;
+    }
+
+    .demo-desc {
+      font-size: var(--text-small);
+      color: var(--text-3);
+    }
+
+    .mode-row {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .mode-chip {
+      padding: 7px 14px;
+      font-size: var(--text-small);
+    }
+
+    .seq-textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 14px 16px;
+      color: var(--text-1);
+      font-size: var(--text-body-sm);
+      font-family: var(--font);
+      outline: none;
+      resize: vertical;
+      min-height: 68px;
+      transition: border-color .15s, background .15s;
+      line-height: 1.7;
+    }
+
+    .seq-textarea:focus {
+      border-color: rgba(255, 255, 255, .22);
+      background: rgba(255, 255, 255, .055);
+    }
+
+    .seq-textarea::placeholder {
+      color: var(--text-3);
+    }
+
+    /* ── Autocomplete chip ── */
+    .ac-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 5px 10px 5px 7px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid var(--border);
+      border-radius: var(--rf);
+      font-size: var(--text-small);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .1s;
+    }
+
+    .ac-chip.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .ac-key {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      background: rgba(255, 255, 255, .10);
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 4px;
+      padding: 2px 6px;
+      color: var(--text-3);
+      line-height: 1.5;
+    }
+
+    .ac-text {
+      color: var(--text-1);
+      font-weight: var(--weight-semibold);
+      font-family: var(--font-mono);
+      font-size: var(--text-small);
+    }
+
+    .ac-sep {
+      color: var(--text-3);
+    }
+
+    .ac-hint {
+      color: var(--text-3);
+    }
+
+    .seq-out-wrap {
+      margin-top: 14px;
+      padding: 16px;
+      background: rgba(255, 255, 255, .025);
+      border: 1px solid var(--border-light);
+      border-radius: var(--rs);
+      min-height: 52px;
+      font-size: var(--text-body-sm);
+      line-height: 1.8;
+    }
+
+    .seq-placeholder {
+      color: var(--text-3);
+      font-style: italic;
+    }
+
+    .seq-match {
+      color: var(--text-1);
+      font-weight: var(--weight-semibold);
+    }
+
+    .seq-full-label {
+      color: var(--text-3);
+      font-size: var(--text-small);
+    }
+
+    .seq-sep {
+      color: var(--text-3);
+    }
+
+    .seq-unknown {
+      color: rgba(255, 120, 100, .65);
+    }
+
+    /* ── My Shorthand section ── */
+    .sh-section-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .sh-section-title {
+      font-size: var(--text-body);
+      font-weight: var(--weight-semibold);
+      color: var(--text-2);
+    }
+
+    .sh-section-desc {
+      font-size: var(--text-ui);
+      color: var(--text-3);
+      margin-bottom: 22px;
+    }
+
+    /* Add form */
+    .sh-add-card {
+      padding: 24px 28px;
+      margin-bottom: 4px;
+    }
+
+    .sh-form-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .sh-form-row .form-group {
+      flex: 1;
+    }
+
+    .sh-form-row .fg-wide {
+      flex: 2;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {}
+
+    .form-label .opt {
+      font-weight: var(--weight-regular);
+      text-transform: none;
+      letter-spacing: 0;
+      opacity: .55;
+    }
+
+    .form-input {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 10px 14px;
+      color: var(--text-1);
+      font-size: var(--text-ui);
+      font-family: var(--font);
+      outline: none;
+      transition: border-color .15s, background .15s;
+    }
+
+    .form-input:focus {
+      border-color: rgba(255, 255, 255, .22);
+      background: rgba(255, 255, 255, .055);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-3);
+    }
+
+    .form-select {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 10px 32px 10px 14px;
+      color: var(--text-2);
+      font-size: var(--text-ui);
+      font-family: var(--font);
+      outline: none;
+      cursor: pointer;
+      transition: border-color .15s;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.30)' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+
+    .form-select:focus {
+      border-color: rgba(255, 255, 255, .22);
+    }
+
+    .form-select option {
+      background: #111;
+      color: #fff;
+    }
+
+    .sh-add-btn {
+      margin-top: 4px;
+      padding: 10px 24px;
+      font-size: var(--text-ui);
+    }
+
+    /* Custom entries */
+    .saved-item-main {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .saved-arrow-sep {
+      color: var(--text-3);
+      font-size: var(--text-small);
+    }
+
+    .saved-item-notes {
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    /* ── Section divider override ── */
+    .saved-section {
+      border-top: none;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 620px) {
+      .demo-hdr {
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .mode-row {
+        flex-wrap: wrap;
+      }
+
+      .sh-form-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .sh-form-row .fg-wide {
+        flex: 1;
+      }
+
+      .result-count {
+        display: none;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<div class="orb orb-3"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
 
-<header class="hdr">
-  <div class="hdr-i">
-    <a href="index.html" class="btn-ghost">← Tools</a>
-    <a href="index.html" class="hdr-logo">Flow School</a>
-    <div class="hdr-auth" id="hdr-auth"></div>
-  </div>
-</header>
+  <header class="hdr">
+    <div class="hdr-i">
+      <a href="index.html" class="btn-ghost">← Tools</a>
+      <a href="index.html" class="hdr-logo">Flow School</a>
+      <div class="hdr-auth" id="hdr-auth"></div>
+    </div>
+  </header>
 
-<section class="hero">
-  <div class="inner">
-    <p class="page-eyebrow">Write less. Teach more.</p>
-    <h1>Shorthand Library</h1>
-    <p>The Flow School Method shorthand for writing classes you can easily remember, repeat, and refine.</p>
-  </div>
-</section>
+  <section class="hero">
+    <div class="inner">
+      <p class="label-1">Write less. Teach more.</p>
+      <h3>Shorthand Library</h3>
+      <p>The Flow School Method shorthand for writing classes you can easily remember, repeat, and refine.</p>
+    </div>
+  </section>
 
-<div class="wrap">
+  <div class="wrap">
 
-  <!-- Search -->
-  <div class="search-wrap">
-    <span class="search-icon">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-    </span>
-    <input type="text" class="search-input" id="search-input" placeholder="Search shorthand, pose name, or category…" autocomplete="off">
-    <button class="search-clear hidden" id="search-clear" aria-label="Clear search">×</button>
-  </div>
+    <!-- Search -->
+    <div class="search-wrap">
+      <span class="search-icon">
+        <span class="material-symbols-sharp">search</span>
+      </span>
+      <input type="text" class="search-input" id="search-input" placeholder="Search shorthand, pose name, or category…"
+        autocomplete="off">
+      <button class="search-clear hidden" id="search-clear" aria-label="Clear search">×</button>
+    </div>
 
-  <!-- Filter chips -->
-  <div class="filter-row">
-    <button class="filter-chip active" data-filter="all">All</button>
-    <button class="filter-chip" data-filter="general">General</button>
-    <button class="filter-chip" data-filter="double-leg">Double Leg</button>
-    <button class="filter-chip" data-filter="single-leg">Single Leg</button>
-    <button class="filter-chip" data-filter="hands-down">Hands Down</button>
-    <button class="filter-chip" data-filter="floor">Floor</button>
-    <button class="filter-chip" data-filter="personal" id="personal-chip">My Library <span class="lib-badge" id="personal-badge">0</span></button>
-    <span class="result-count" id="result-count"></span>
-  </div>
+    <!-- Filter chips -->
+    <div class="filter-row">
+      <button class="filter-chip active" data-filter="all">All</button>
+      <button class="filter-chip" data-filter="general">General</button>
+      <button class="filter-chip" data-filter="double-leg">Double Leg</button>
+      <button class="filter-chip" data-filter="single-leg">Single Leg</button>
+      <button class="filter-chip" data-filter="hands-down">Hands Down</button>
+      <button class="filter-chip" data-filter="floor">Floor</button>
+      <span class="result-count" id="result-count"></span>
+    </div>
 
-  <!-- Library table -->
-  <div class="lib-wrap">
-    <table class="lib-table">
-      <thead>
-        <tr>
-          <th>Short</th>
-          <th>Full Name</th>
-          <th>Category</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="lib-tbody"></tbody>
-    </table>
-  </div>
+    <!-- Library table -->
+    <div class="lib-wrap">
+      <table class="lib-table">
+        <thead>
+          <tr>
+            <th>Short</th>
+            <th>Full Name</th>
+            <th>Category</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="lib-tbody"></tbody>
+      </table>
+    </div>
 
-  <!-- Sequence Demo -->
-  <div class="card sh-demo-card">
-    <p class="card-eyebrow">Try it</p>
-    <div class="demo-hdr">
-      <div>
-        <p class="demo-title">Expand a sequence</p>
-        <p class="demo-desc">Type using shorthand — separate poses with commas, /, or →</p>
+    <!-- Sequence Demo -->
+    <div class="card sh-demo-card">
+      <h5 class="eyebrow-label">Try it</h5>
+      <div class="demo-hdr">
+        <div>
+          <p class="" id="demo-desc">Type using shorthand — separate poses with "," or "/"</p>
+        </div>
+        <div class="mode-row">
+          <button class="chip mode-chip on" data-mode="expand">Shorthand → Full</button>
+          <button class="chip mode-chip" data-mode="compress">Full → Shorthand</button>
+        </div>
       </div>
-      <div class="mode-row">
-        <button class="chip mode-chip" data-mode="shorthand">Shorthand</button>
-        <button class="chip mode-chip on" data-mode="full">Full name</button>
-        <button class="chip mode-chip" data-mode="both">Both</button>
+      <textarea class="seq-textarea" id="seq-input" placeholder="e.g. TADA / W1 / CL / W2 / RW2 / FF"></textarea>
+      <div class="ac-chip" id="ac-chip">
+        <span class="ac-key">Tab</span>
+        <span class="ac-text" id="ac-text"></span>
+        <span class="ac-sep">·</span>
+        <span class="ac-hint" id="ac-hint"></span>
       </div>
-    </div>
-    <textarea class="seq-textarea" id="seq-input" placeholder="e.g. TADA / W1 / CL / W2 / RW2 / FF"></textarea>
-    <div class="seq-out-wrap" id="seq-output"></div>
-  </div>
-
-  <!-- My Shorthand -->
-  <div class="saved-section">
-    <div class="sh-section-hdr">
-      <span class="sh-section-title">My Shorthand</span>
-      <span class="saved-badge empty" id="custom-badge">0</span>
-    </div>
-    <p class="sh-section-desc">Add your own notation — saved to this device.</p>
-
-    <div class="card-light sh-add-card">
-      <form id="add-form">
-        <div class="sh-form-row">
-          <div class="form-group">
-            <label class="form-label text-label" for="f-short">Shorthand</label>
-            <input class="form-input" type="text" id="f-short" placeholder="e.g. Hal" required maxlength="14" autocomplete="off">
-          </div>
-          <div class="form-group fg-wide">
-            <label class="form-label text-label" for="f-full">Full Name</label>
-            <input class="form-input" type="text" id="f-full" placeholder="e.g. Halasana" required autocomplete="off">
-          </div>
-        </div>
-        <div class="sh-form-row">
-          <div class="form-group">
-            <label class="form-label text-label" for="f-category">Category</label>
-            <select class="form-select" id="f-category">
-              <option value="general">General</option>
-              <option value="double-leg">Double Leg</option>
-              <option value="single-leg">Single Leg</option>
-              <option value="hands-down">Hands Down</option>
-              <option value="floor">Floor</option>
-            </select>
-          </div>
-        </div>
-        <button type="submit" class="btn-primary sh-add-btn">+ Add shorthand</button>
-      </form>
+      <div class="seq-out-wrap" id="seq-output"></div>
     </div>
 
-    <div id="custom-list"></div>
-  </div>
 
-</div><!-- .wrap -->
+  </div><!-- .wrap -->
 
-<div class="toast" id="toast"></div>
+  <div class="toast" id="toast"></div>
 
-<script src="data/shorthand.js"></script>
-<script>
+  <script src="data/shorthand.js"></script>
+  <script>
 
-// ─── STATE ───────────────────────────────────────────────────────────────────
+    // ─── STATE ───────────────────────────────────────────────────────────────────
 
-const STATE = { filter: 'all', query: '', mode: 'full' };
-let savedIds = new Set(JSON.parse(localStorage.getItem('fs_sh_saved') || '[]'));
-let customEntries = JSON.parse(localStorage.getItem('fs_sh_custom') || '[]');
+    const STATE = { filter: 'all', query: '', mode: 'expand' };
 
-// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+    // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
-const CAT_LABELS  = { 'general':'General', 'double-leg':'Double Leg', 'single-leg':'Single Leg', 'hands-down':'Hands Down', 'floor':'Floor', 'custom':'Custom' };
-const CAT_CLASSES = { 'general':'tag-general', 'double-leg':'tag-double-leg', 'single-leg':'tag-single-leg', 'hands-down':'tag-hands-down', 'floor':'tag-floor', 'custom':'tag-custom' };
+    const CAT_LABELS = { 'general': 'General', 'double-leg': 'Double Leg', 'single-leg': 'Single Leg', 'hands-down': 'Hands Down', 'floor': 'Floor', 'custom': 'Custom' };
+    const CAT_CLASSES = { 'general': 'tag-general', 'double-leg': 'tag-double-leg', 'single-leg': 'tag-single-leg', 'hands-down': 'tag-hands-down', 'floor': 'tag-floor', 'custom': 'tag-custom' };
 
-// ─── PERSISTENCE ─────────────────────────────────────────────────────────────
+    // ─── PERSISTENCE ─────────────────────────────────────────────────────────────
 
-const saveSaved  = () => localStorage.setItem('fs_sh_saved',  JSON.stringify([...savedIds]));
-const saveCustom = () => localStorage.setItem('fs_sh_custom', JSON.stringify(customEntries));
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+    // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-function esc(s) {
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
-}
-
-function catTag(cat) {
-  const cls = CAT_CLASSES[cat] || 'tag-pose';
-  const lbl = CAT_LABELS[cat]  || cat;
-  return `<span class="tag ${cls}">${lbl}</span>`;
-}
-
-function buildLookup() {
-  const m = new Map();
-  SHORTHAND.forEach(s => m.set(s.short.trim().toLowerCase(), s.full));
-  customEntries.forEach(e => m.set(e.short.trim().toLowerCase(), e.full));
-  return m;
-}
-
-function buildGeneralMap() {
-  const m = new Map();
-  SHORTHAND.filter(s => s.category === 'general')
-    .forEach(s => m.set(s.short.trim().toLowerCase(), s.full));
-  return m;
-}
-
-function resolveToken(raw, lookup, generalMap) {
-  const key = raw.trim().toLowerCase();
-  if (!key) return null;
-
-  // 1. Direct match
-  if (lookup.has(key)) return lookup.get(key);
-
-  const words = raw.trim().split(/\s+/);
-
-  // 2. General prefix + known pose (longest prefix first)
-  for (let i = words.length - 1; i >= 1; i--) {
-    const prefix = words.slice(0, i).join(' ').toLowerCase();
-    const rest   = words.slice(i).join(' ').toLowerCase();
-    if (generalMap.has(prefix) && lookup.has(rest)) {
-      return `${generalMap.get(prefix)} ${lookup.get(rest)}`;
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
-  }
 
-  // 3. Known pose + general suffix (longest pose first)
-  for (let i = words.length - 1; i >= 1; i--) {
-    const pose   = words.slice(0, i).join(' ').toLowerCase();
-    const suffix = words.slice(i).join(' ').toLowerCase();
-    if (lookup.has(pose) && generalMap.has(suffix)) {
-      return `${lookup.get(pose)} ${generalMap.get(suffix)}`;
+    function catTag(cat) {
+      const cls = CAT_CLASSES[cat] || 'tag-pose';
+      const lbl = CAT_LABELS[cat] || cat;
+      return `<span class="tag ${cls}">${lbl}</span>`;
     }
-  }
 
-  return null;
-}
+    function buildLookup() {
+      const m = new Map();
+      SHORTHAND.forEach(s => m.set(s.short.trim().toLowerCase(), s.full));
+      return m;
+    }
 
-// ─── FILTERED DATA ────────────────────────────────────────────────────────────
+    const MODE_CONFIG = {
+      expand: { desc: 'Type using shorthand — separate poses with "," or "/"', placeholder: 'e.g. TADA / W1 / CL / W2 / RW2 / FF' },
+      compress: { desc: 'Type full pose names — separate with "," or "/"', placeholder: 'e.g. Tadasana / Warrior 1 / Crescent Lunge / Warrior 2' },
+    };
 
-function getFiltered() {
-  let pool;
+    function buildReverseLookup() {
+      const m = new Map();
+      SHORTHAND.forEach(s => m.set(s.full.trim().toLowerCase(), s.short));
+      return m;
+    }
 
-  if (STATE.filter === 'personal') {
-    const bookmarked = SHORTHAND.filter(s => savedIds.has(s.id)).map(s => ({ ...s }));
-    const custom = customEntries.map(e => ({ ...e, isCustom: true }));
-    pool = [...bookmarked, ...custom];
-  } else {
-    pool = STATE.filter === 'all'
-      ? [...SHORTHAND]
-      : SHORTHAND.filter(s => s.category === STATE.filter);
-  }
+    function buildReverseGeneralMap() {
+      const m = new Map();
+      SHORTHAND.filter(s => s.category === 'general').forEach(s => {
+        m.set(s.full.trim().toLowerCase(), s.short);
+        // also index with parentheticals stripped so "Revolved" matches "Revolved (twisted)"
+        const stripped = s.full.replace(/\s*\(.*?\)\s*/g, '').trim().toLowerCase();
+        if (stripped) m.set(stripped, s.short);
+      });
+      return m;
+    }
 
-  if (STATE.query) {
-    const q = STATE.query.toLowerCase();
-    pool = pool.filter(s =>
-      s.short.toLowerCase().includes(q) ||
-      s.full.toLowerCase().includes(q) ||
-      (s.notes || '').toLowerCase().includes(q) ||
-      s.category.toLowerCase().includes(q)
-    );
-  }
+    function resolveReverseToken(raw, reverseLookup, reverseGeneralMap) {
+      const key = raw.trim().toLowerCase();
+      if (!key) return null;
 
-  return pool;
-}
+      // 1. Direct match
+      if (reverseLookup.has(key)) return reverseLookup.get(key);
 
-// ─── RENDER LIBRARY ───────────────────────────────────────────────────────────
+      const words = raw.trim().split(/\s+/);
 
-function renderLib() {
-  const data = getFiltered();
-  const tbody = document.getElementById('lib-tbody');
-  const countEl = document.getElementById('result-count');
-
-  countEl.textContent = `${data.length} result${data.length !== 1 ? 's' : ''}`;
-
-  if (!data.length) {
-    const msg = STATE.filter === 'personal'
-      ? 'Nothing saved yet.'
-      : STATE.query
-        ? `No results for "${esc(STATE.query)}".`
-        : 'No entries.';
-    const hint = STATE.filter === 'personal'
-      ? 'Bookmark an entry from the table above, or add your own below.'
-      : '';
-    tbody.innerHTML = `<tr><td colspan="4"><div class="lib-empty">
-      <p>${msg}</p>${hint ? `<p>${hint}</p>` : ''}
-    </div></td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = data.map(s => {
-    const isSaved = savedIds.has(s.id);
-    const saveIcon = isSaved ? 'currentColor' : 'none';
-    return `<tr class="lib-row">
-      <td><span class="lib-short">${esc(s.short)}</span></td>
-      <td><span class="lib-full">${esc(s.full)}</span></td>
-      <td>${catTag(s.isCustom ? 'custom' : s.category)}</td>
-      <td class="td-actions">
-        <div class="lib-actions">
-          <button class="btn-icon copy-btn" data-short="${esc(s.short)}" title="Copy shorthand">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2"/>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-            </svg>
-          </button>
-          ${s.isCustom
-            ? `<button class="btn-icon rm-btn" data-id="${s.customId}" title="Remove">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6l-1 14H6L5 6"/>
-                  <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
-                </svg>
-               </button>`
-            : `<button class="btn-icon save-btn${isSaved ? ' saved' : ''}" data-id="${s.id}" title="${isSaved ? 'Remove from My Library' : 'Save to My Library'}">
-                <svg width="14" height="14" viewBox="0 0 15 15" fill="${saveIcon}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3.5 1.5h8v12l-4-2.2-4 2.2V1.5z"/>
-                </svg>
-               </button>`
-          }
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
-
-  tbody.querySelectorAll('.copy-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      navigator.clipboard.writeText(btn.dataset.short).catch(() => {});
-      showToast(`Copied "${btn.dataset.short}"`);
-    });
-  });
-
-  tbody.querySelectorAll('.save-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = Number(btn.dataset.id);
-      if (savedIds.has(id)) {
-        savedIds.delete(id);
-        showToast('Removed from My Library');
-      } else {
-        savedIds.add(id);
-        showToast('Saved to My Library');
+      // 2. General prefix full name + pose full name (longest prefix first)
+      for (let i = words.length - 1; i >= 1; i--) {
+        const prefix = words.slice(0, i).join(' ').toLowerCase();
+        const rest = words.slice(i).join(' ').toLowerCase();
+        if (reverseGeneralMap.has(prefix) && reverseLookup.has(rest)) {
+          return `${reverseGeneralMap.get(prefix)} ${reverseLookup.get(rest)}`;
+        }
       }
-      saveSaved();
-      updateBadges();
-      renderLib();
-    });
-  });
 
-  tbody.querySelectorAll('.rm-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const cid = Number(btn.dataset.id);
-      customEntries = customEntries.filter(e => e.customId !== cid);
-      saveCustom();
-      updateBadges();
-      renderLib();
-      renderCustomList();
-      showToast('Removed');
-    });
-  });
-}
+      // 3. Pose full name + general suffix full name (longest pose first)
+      for (let i = words.length - 1; i >= 1; i--) {
+        const pose = words.slice(0, i).join(' ').toLowerCase();
+        const suffix = words.slice(i).join(' ').toLowerCase();
+        if (reverseLookup.has(pose) && reverseGeneralMap.has(suffix)) {
+          return `${reverseLookup.get(pose)} ${reverseGeneralMap.get(suffix)}`;
+        }
+      }
 
-// ─── RENDER CUSTOM LIST ───────────────────────────────────────────────────────
+      return null;
+    }
 
-function renderCustomList() {
-  const el = document.getElementById('custom-list');
-  if (!customEntries.length) {
-    el.innerHTML = `<p class="saved-empty">No custom shorthand yet.</p>`;
-    return;
-  }
-  el.innerHTML = customEntries.map(e => `
-    <div class="saved-item">
-      <div class="saved-item-main">
-        <span class="lib-short">${esc(e.short)}</span>
-        <span class="saved-arrow-sep">→</span>
-        <span class="lib-full">${esc(e.full)}</span>
-        <span style="margin-left:4px">${catTag('custom')}</span>
+    function buildGeneralMap() {
+      const m = new Map();
+      SHORTHAND.filter(s => s.category === 'general')
+        .forEach(s => m.set(s.short.trim().toLowerCase(), s.full));
+      return m;
+    }
+
+    function resolveToken(raw, lookup, generalMap) {
+      const key = raw.trim().toLowerCase();
+      if (!key) return null;
+
+      // 1. Direct match
+      if (lookup.has(key)) return lookup.get(key);
+
+      const words = raw.trim().split(/\s+/);
+
+      // 2. General prefix + known pose (longest prefix first)
+      for (let i = words.length - 1; i >= 1; i--) {
+        const prefix = words.slice(0, i).join(' ').toLowerCase();
+        const rest = words.slice(i).join(' ').toLowerCase();
+        if (generalMap.has(prefix) && lookup.has(rest)) {
+          return `${generalMap.get(prefix)} ${lookup.get(rest)}`;
+        }
+      }
+
+      // 3. Known pose + general suffix (longest pose first)
+      for (let i = words.length - 1; i >= 1; i--) {
+        const pose = words.slice(0, i).join(' ').toLowerCase();
+        const suffix = words.slice(i).join(' ').toLowerCase();
+        if (lookup.has(pose) && generalMap.has(suffix)) {
+          return `${lookup.get(pose)} ${generalMap.get(suffix)}`;
+        }
+      }
+
+      return null;
+    }
+
+    // ─── FILTERED DATA ────────────────────────────────────────────────────────────
+
+    function getFiltered() {
+      let pool = STATE.filter === 'all'
+        ? [...SHORTHAND]
+        : SHORTHAND.filter(s => s.category === STATE.filter);
+
+      if (STATE.query) {
+        const q = STATE.query.toLowerCase();
+        pool = pool.filter(s =>
+          s.short.toLowerCase().includes(q) ||
+          s.full.toLowerCase().includes(q) ||
+          (s.notes || '').toLowerCase().includes(q) ||
+          s.category.toLowerCase().includes(q)
+        );
+      }
+
+      return pool;
+    }
+
+    // ─── RENDER LIBRARY ───────────────────────────────────────────────────────────
+
+    function renderLib() {
+      const data = getFiltered();
+      const tbody = document.getElementById('lib-tbody');
+      const countEl = document.getElementById('result-count');
+
+      countEl.textContent = `${data.length} result${data.length !== 1 ? 's' : ''}`;
+
+      if (!data.length) {
+        const msg = STATE.query ? `No results for "${esc(STATE.query)}".` : 'No entries.';
+        tbody.innerHTML = `<tr><td colspan="4"><div class="lib-empty"><p>${msg}</p></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(s => `<tr class="lib-row">
+    <td><span class="lib-short">${esc(s.short)}</span></td>
+    <td><span class="lib-full">${esc(s.full)}</span></td>
+    <td>${catTag(s.category)}</td>
+    <td class="td-actions">
+      <div class="lib-actions">
+        <button class="btn-icon copy-btn" data-short="${esc(s.short)}" title="Copy shorthand">
+          <span class="material-symbols-sharp">content_copy</span>
+        </button>
       </div>
-      <div class="saved-btns">
-        <button class="saved-rm-btn" data-id="${e.customId}">Remove</button>
-      </div>
-    </div>
-  `).join('');
+    </td>
+  </tr>`).join('');
 
-  el.querySelectorAll('.saved-rm-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const cid = Number(btn.dataset.id);
-      customEntries = customEntries.filter(e => e.customId !== cid);
-      saveCustom();
-      updateBadges();
-      renderCustomList();
-      if (STATE.filter === 'personal') renderLib();
-      showToast('Removed');
-    });
-  });
-}
-
-// ─── BADGES ──────────────────────────────────────────────────────────────────
-
-function updateBadges() {
-  const total = savedIds.size + customEntries.length;
-  document.getElementById('personal-badge').textContent = total;
-
-  const cb = document.getElementById('custom-badge');
-  cb.textContent = customEntries.length;
-  cb.className = `saved-badge${customEntries.length ? '' : ' empty'}`;
-}
-
-// ─── SEQUENCE DEMO ────────────────────────────────────────────────────────────
-
-function expandSeq(input, mode) {
-  if (!input.trim()) {
-    return '<span class="seq-placeholder">Expanded sequence will appear here…</span>';
-  }
-
-  const lookup     = buildLookup();
-  const generalMap = buildGeneralMap();
-  const parts = input.split(/(\s*(?:→|->|,|\/|;|\n)\s*)/);
-
-  return parts.map(part => {
-    if (/^\s*(?:→|->|,|\/|;)\s*$/.test(part)) {
-      return `<span class="seq-sep"> ${esc(part.trim())} </span>`;
+      tbody.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(btn.dataset.short).catch(() => { });
+          showToast(`Copied "${btn.dataset.short}"`);
+        });
+      });
     }
-    if (/^\s*\n\s*$/.test(part)) return '<br>';
-    if (!part.trim()) return '';
 
-    const full = resolveToken(part.trim(), lookup, generalMap);
 
-    if (mode === 'shorthand') {
-      return full
-        ? `<span class="seq-match" title="${esc(full)}">${esc(part.trim())}</span>`
-        : `<span class="seq-unknown">${esc(part.trim())}</span>`;
+    // ─── AUTOCOMPLETE ────────────────────────────────────────────────────────────
+
+    let currentSuggestion = null;
+
+    function getTokenInfo(textarea) {
+      const cursor = textarea.selectionStart;
+      const before = textarea.value.slice(0, cursor);
+      const sepIdx = Math.max(
+        before.lastIndexOf(','),
+        before.lastIndexOf('/'),
+        before.lastIndexOf(';'),
+        before.lastIndexOf('\n')
+      );
+      const afterSep = before.slice(sepIdx + 1);
+      const token = afterSep.trimStart();
+      const tokenStart = before.length - token.length;
+      return { token, tokenStart };
     }
-    if (mode === 'full') {
-      return full
-        ? `<span class="seq-match">${esc(full)}</span>`
-        : `<span class="seq-unknown">${esc(part.trim())}</span>`;
+
+    function getBestMatch(token, mode) {
+      if (!token) return null;
+      const lower = token.toLowerCase();
+      const pool = [...SHORTHAND];
+      if (mode === 'expand') {
+        const match = pool.find(s => s.short.toLowerCase().startsWith(lower) && s.short.toLowerCase() !== lower);
+        return match ? { completion: match.short, hint: match.full } : null;
+      } else {
+        const match = pool.find(s => s.full.toLowerCase().startsWith(lower) && s.full.toLowerCase() !== lower);
+        return match ? { completion: match.full, hint: match.short } : null;
+      }
     }
-    // both
-    return full
-      ? `<span class="seq-match">${esc(part.trim())}</span><span class="seq-full-label"> (${esc(full)})</span>`
-      : `<span class="seq-unknown">${esc(part.trim())}</span>`;
-  }).join('');
-}
 
-function renderSeqDemo() {
-  const input = document.getElementById('seq-input').value;
-  document.getElementById('seq-output').innerHTML = expandSeq(input, STATE.mode);
-}
+    function updateAutocomplete() {
+      const ta = document.getElementById('seq-input');
+      const chip = document.getElementById('ac-chip');
+      const { token } = getTokenInfo(ta);
+      const suggestion = getBestMatch(token, STATE.mode);
+      currentSuggestion = suggestion;
+      if (suggestion) {
+        document.getElementById('ac-text').textContent = suggestion.completion;
+        document.getElementById('ac-hint').textContent = suggestion.hint;
+        chip.classList.add('visible');
+      } else {
+        chip.classList.remove('visible');
+      }
+    }
 
-// ─── TOAST ───────────────────────────────────────────────────────────────────
+    function clearAutocomplete() {
+      currentSuggestion = null;
+      document.getElementById('ac-chip').classList.remove('visible');
+    }
 
-let toastTimer;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
-}
+    // ─── SEQUENCE DEMO ────────────────────────────────────────────────────────────
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
+    function expandSeq(input, mode) {
+      if (!input.trim()) {
+        return '<span class="seq-placeholder">Expanded sequence will appear here…</span>';
+      }
 
-function init() {
-  renderLib();
-  renderCustomList();
-  updateBadges();
-  renderSeqDemo();
+      const lookup = buildLookup();
+      const generalMap = buildGeneralMap();
+      const reverseLookup = buildReverseLookup();
+      const reverseGeneralMap = buildReverseGeneralMap();
+      const parts = input.split(/(\s*(?:,|\/|;|\n)\s*)/);
 
-  // Search
-  const searchInput = document.getElementById('search-input');
-  const searchClear = document.getElementById('search-clear');
+      return parts.map(part => {
+        if (/^\s*(?:,|\/|;)\s*$/.test(part)) {
+          return `<span class="seq-sep"> ${esc(part.trim())} </span>`;
+        }
+        if (/^\s*\n\s*$/.test(part)) return '<br>';
+        if (!part.trim()) return '';
 
-  searchInput.addEventListener('input', e => {
-    STATE.query = e.target.value;
-    searchClear.classList.toggle('hidden', !STATE.query);
-    renderLib();
-  });
+        if (mode === 'expand') {
+          const full = resolveToken(part.trim(), lookup, generalMap);
+          return full
+            ? `<span class="seq-match">${esc(full)}</span>`
+            : `<span class="seq-unknown">${esc(part.trim())}</span>`;
+        } else {
+          const short = resolveReverseToken(part.trim(), reverseLookup, reverseGeneralMap);
+          return short
+            ? `<span class="seq-match">${esc(short)}</span>`
+            : `<span class="seq-unknown">${esc(part.trim())}</span>`;
+        }
+      }).join('');
+    }
 
-  searchClear.addEventListener('click', () => {
-    searchInput.value = '';
-    STATE.query = '';
-    searchClear.classList.add('hidden');
-    renderLib();
-    searchInput.focus();
-  });
+    function renderSeqDemo() {
+      const input = document.getElementById('seq-input').value;
+      document.getElementById('seq-output').innerHTML = expandSeq(input, STATE.mode);
+    }
 
-  // Filter chips
-  document.querySelectorAll('.filter-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      STATE.filter = btn.dataset.filter;
-      document.querySelectorAll('.filter-chip').forEach(b => b.classList.toggle('active', b === btn));
+    // ─── TOAST ───────────────────────────────────────────────────────────────────
+
+    let toastTimer;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    // ─── INIT ────────────────────────────────────────────────────────────────────
+
+    function init() {
       renderLib();
-    });
-  });
-
-  // Mode chips (sequence demo)
-  document.querySelectorAll('.mode-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      STATE.mode = btn.dataset.mode;
-      document.querySelectorAll('.mode-chip').forEach(b => b.classList.toggle('on', b === btn));
       renderSeqDemo();
-    });
-  });
 
-  // Sequence textarea
-  document.getElementById('seq-input').addEventListener('input', renderSeqDemo);
+      // Search
+      const searchInput = document.getElementById('search-input');
+      const searchClear = document.getElementById('search-clear');
 
-  // Add custom form
-  document.getElementById('add-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const short    = document.getElementById('f-short').value.trim();
-    const full     = document.getElementById('f-full').value.trim();
-    const category = document.getElementById('f-category').value;
+      searchInput.addEventListener('input', e => {
+        STATE.query = e.target.value;
+        searchClear.classList.toggle('hidden', !STATE.query);
+        renderLib();
+      });
 
-    if (!short || !full) return;
+      searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        STATE.query = '';
+        searchClear.classList.add('hidden');
+        renderLib();
+        searchInput.focus();
+      });
 
-    customEntries.unshift({ customId: Date.now(), short, full, category, isCustom: true });
-    saveCustom();
-    e.target.reset();
-    updateBadges();
-    renderCustomList();
-    if (STATE.filter === 'personal') renderLib();
-    showToast(`"${short}" added to My Shorthand`);
-  });
-}
+      // Filter chips
+      document.querySelectorAll('.filter-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          STATE.filter = btn.dataset.filter;
+          document.querySelectorAll('.filter-chip').forEach(b => b.classList.toggle('active', b === btn));
+          renderLib();
+        });
+      });
 
-init();
+      // Mode chips (sequence demo)
+      document.querySelectorAll('.mode-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          STATE.mode = btn.dataset.mode;
+          document.querySelectorAll('.mode-chip').forEach(b => b.classList.toggle('on', b === btn));
+          const cfg = MODE_CONFIG[STATE.mode];
+          document.getElementById('demo-desc').textContent = cfg.desc;
+          const ta = document.getElementById('seq-input');
+          ta.placeholder = cfg.placeholder;
+          ta.value = '';
+          clearAutocomplete();
+          renderSeqDemo();
+        });
+      });
 
-</script>
-<script src="lib/nav.js"></script>
+      // Sequence textarea
+      const seqInput = document.getElementById('seq-input');
+      seqInput.addEventListener('input', () => { renderSeqDemo(); updateAutocomplete(); });
+      seqInput.addEventListener('keydown', e => {
+        if (e.key === 'Tab' && currentSuggestion) {
+          e.preventDefault();
+          const ta = e.target;
+          const { tokenStart } = getTokenInfo(ta);
+          const cursor = ta.selectionStart;
+          ta.value = ta.value.slice(0, tokenStart) + currentSuggestion.completion + ta.value.slice(cursor);
+          const newCursor = tokenStart + currentSuggestion.completion.length;
+          ta.setSelectionRange(newCursor, newCursor);
+          renderSeqDemo();
+          updateAutocomplete();
+        }
+        if (e.key === 'Escape') clearAutocomplete();
+      });
+
+    }
+
+    init();
+
+  </script>
+  <script src="lib/nav.js"></script>
 </body>
+
 </html>

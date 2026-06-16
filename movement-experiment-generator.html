@@ -1,1019 +1,1195 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Movement Experiments</title>
   <link rel="stylesheet" href="global.css">
   <style>
-/* ── Controls bar ── */
-.controls-bar     { padding: 32px 0 28px; border-bottom: 1px solid var(--border-light); margin-bottom: 40px; }
-.filter-chips     { display: flex; flex-wrap: wrap; gap: 8px; }
-.pool-count       { font-size: var(--text-small); color: var(--text-3); margin-top: 12px; }
-.pool-count strong { color: var(--text-2); font-weight: var(--weight-semibold); }
-.shuffle-btn      { padding: 12px 24px; }
+    /* ── Controls bar ── */
+    .controls-bar {
+      padding: 32px 0 28px;
+      margin-bottom: 32px;
+    }
 
-/* ── Experiment card ── */
-.experiment-card { padding: 44px; margin-bottom: 36px; }
-.exp-header      { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border-light); }
-.exp-tags        { display: none; }
-.exp-title-row   { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.exp-title       { font-size: var(--text-card-title); font-weight: var(--weight-bold); letter-spacing: var(--ls-tight); line-height: 1.08; flex: 1; }
+    .controls-filters {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
 
-/* ── Sections ── */
-.exp-sections          { display: flex; flex-direction: column; gap: 0; }
-.exp-section           { padding: 28px 0; border-bottom: 1px solid var(--border-light); }
-.exp-section:last-of-type { border-bottom: none; }
-.section-label         { font-size: var(--text-micro); font-weight: var(--weight-bold); letter-spacing: var(--ls-micro); text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex: 1;
+    }
 
-ol.rules-list          { list-style: none; counter-reset: rule-n; display: flex; flex-direction: column; gap: 10px; }
-ol.rules-list li       { counter-increment: rule-n; display: flex; gap: 14px; font-size: var(--text-body); line-height: var(--lh-body); color: var(--text-1); }
-ol.rules-list li::before { content: counter(rule-n) '.'; color: var(--accent); font-weight: var(--weight-bold); flex-shrink: 0; min-width: 18px; }
+    .pool-count {
+      font-size: var(--text-small);
+      color: var(--text-3);
+      margin-top: 12px;
+    }
 
-ul.item-list           { list-style: none; display: flex; flex-direction: column; gap: 9px; }
-ul.item-list li        { display: flex; gap: 12px; font-size: var(--text-body-sm); line-height: var(--lh-body); color: var(--text-2); }
-ul.item-list li::before { content: '—'; color: var(--text-3); flex-shrink: 0; }
+    .pool-count strong {
+      color: var(--text-2);
+      font-weight: var(--weight-semibold);
+    }
 
-.insight-body          { font-size: var(--text-body-sm); line-height: 1.72; color: rgba(255,255,255,.52); }
-.insight-body p + p    { margin-top: 14px; }
+    .shuffle-btn {
+      padding: 12px 24px;
+      flex-shrink: 0;
+    }
 
-.reflect-block         { margin-top: 28px; background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 12px; padding: 22px 26px; }
-.reflect-block .section-label { margin-bottom: 6px; }
-.reflect-q             { font-size: var(--text-body-lg); font-style: italic; font-weight: var(--weight-medium); color: var(--text-1); }
+    /* ── Experiment card ── */
+    .experiment-card {
+      padding: 44px;
+      margin-bottom: 36px;
+    }
 
-/* ── Actions ── */
-.exp-actions { display: flex; gap: 10px; margin-top: 36px; padding-top: 32px; border-top: 1px solid var(--border-light); flex-wrap: wrap; }
-.btn-act     { padding: 11px 22px; border-radius: var(--rf); font-size: var(--text-ui); font-weight: var(--weight-semibold); font-family: var(--font); cursor: pointer; transition: all .15s; border: 1px solid transparent; }
-#regen-btn   { background: var(--accent); color: #080808; border-color: var(--accent); }
-#regen-btn:hover { opacity: .85; }
-#copy-btn    { background: var(--surface); color: var(--text-2); border-color: var(--border); }
-#copy-btn:hover { background: var(--surface-2); color: var(--text-1); border-color: rgba(255,255,255,.22); }
-#copy-btn.copied { color: var(--accent); border-color: var(--accent-border); }
+    .exp-header {
+      margin-bottom: 40px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border-light);
+    }
 
-/* ── Favorites content ── */
-.fav-item  { align-items: center; }
-.fav-name  { font-size: var(--text-body-sm); color: var(--text-2); font-weight: var(--weight-medium); flex: 1; }
-.fav-item:hover .fav-name { color: var(--text-1); }
+    .exp-tags {
+      display: none;
+    }
 
-@media (max-width: 580px) {
-  .experiment-card { padding: 28px 22px; }
-  .exp-actions     { flex-direction: column; }
-  .btn-act         { text-align: center; }
-}
+    .exp-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .exp-title {
+      flex: 1;
+    }
+
+    /* ── Sections ── */
+    .exp-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .exp-section {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .exp-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .section-label {
+      margin-bottom: 14px;
+    }
+
+    ol.rules-list {
+      list-style: none;
+      counter-reset: rule-n;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    ol.rules-list li {
+        font-family: var(--font);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: rgba(255,255,255,.50);
+      counter-increment: rule-n;
+      display: flex;
+      gap: 14px;
+    }
+
+    ol.rules-list li::before {
+      content: counter(rule-n) '.';
+
+      flex-shrink: 0;
+      min-width: 18px;
+    }
+
+    ul.item-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    ul.item-list li {
+        font-family: var(--font);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: rgba(255,255,255,.50);
+      display: flex;
+      gap: 12px;
+    }
+
+    ul.item-list li::before {
+      content: '—';
+      flex-shrink: 0;
+    }
+
+    .insight-body {
+        font-family: var(--font);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: rgba(255,255,255,.50);
+    }
+
+    .insight-body p+p {
+      margin-top: 14px;
+    }
+
+    .reflect-block {
+      margin-top: 28px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: 12px;
+      padding: 22px 26px;
+    }
+
+    .reflect-block .section-label {
+      margin-bottom: 6px;
+    }
+
+    .reflect-q {
+      font-size: var(--text-body-lg);
+      font-style: italic;
+      font-weight: var(--weight-medium);
+      color: var(--text-1);
+    }
+
+    /* ── Actions ── */
+    .exp-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 36px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border-light);
+      flex-wrap: wrap;
+    }
+
+    .btn-act {
+      padding: 11px 22px;
+      border-radius: var(--rf);
+      font-size: var(--text-ui);
+      font-weight: var(--weight-semibold);
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all .15s;
+      border: 1px solid transparent;
+    }
+
+    #regen-btn {
+      background: var(--accent);
+      color: #080808;
+      border-color: var(--accent);
+    }
+
+    #regen-btn:hover {
+      opacity: .85;
+    }
+
+    #copy-btn {
+      background: var(--surface);
+      color: var(--text-2);
+      border-color: var(--border);
+    }
+
+    #copy-btn:hover {
+      background: var(--surface-2);
+      color: var(--text-1);
+      border-color: rgba(255, 255, 255, .22);
+    }
+
+    #copy-btn.copied {
+      color: var(--accent);
+      border-color: var(--accent-border);
+    }
+
+    /* ── Favorites content ── */
+    .fav-item {
+      align-items: center;
+    }
+
+    .fav-name {
+      font-size: var(--text-body-sm);
+      color: var(--text-2);
+      font-weight: var(--weight-medium);
+      flex: 1;
+    }
+
+    .fav-item:hover .fav-name {
+      color: var(--text-1);
+    }
+
+    @media (max-width: 580px) {
+      .experiment-card {
+        padding: 28px 22px;
+      }
+
+      .exp-actions {
+        flex-direction: column;
+      }
+
+      .btn-act {
+        text-align: center;
+      }
+    }
   </style>
 </head>
+
 <body>
 
-<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden">
-  <symbol id="shuffle" viewBox="0 0 24 24" fill="none">
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M17.9385 14.2062C17.6425 13.9462 17.2215 13.8842 16.8655 14.0452C16.5075 14.2072 16.2775 14.5632 16.2775 14.9562V16.1372C14.7665 15.6772 13.4255 14.5792 12.4075 11.9982C13.4245 9.41921 14.7665 8.32221 16.2775 7.86221V9.04021C16.2775 9.43421 16.5075 9.79021 16.8655 9.95221C16.9975 10.0112 17.1375 10.0402 17.2775 10.0402C17.5155 10.0402 17.7515 9.95521 17.9385 9.79121L20.8005 7.27121C21.0165 7.08121 21.1405 6.80821 21.1405 6.52021C21.1405 6.23321 21.0175 5.96021 20.8015 5.77021L17.9385 3.24921C17.6425 2.98821 17.2215 2.92821 16.8655 3.08821C16.5075 3.25021 16.2775 3.60621 16.2775 3.99921V5.80121C14.5085 6.20121 12.7315 7.17721 11.3545 9.56421C9.2215 5.52521 6.5025 5.52021 3.8595 5.52021C3.3065 5.52021 2.8595 5.96821 2.8595 6.52021C2.8595 7.07321 3.3065 7.52021 3.8595 7.52021C6.6635 7.52021 8.5405 7.53421 10.2585 11.9982C8.5405 16.4642 6.6635 16.4772 3.8595 16.4772C3.3065 16.4772 2.8595 16.9252 2.8595 17.4772C2.8595 18.0302 3.3065 18.4772 3.8595 18.4772C6.5015 18.4772 9.2215 18.4732 11.3545 14.4332C12.7315 16.8222 14.5085 17.7982 16.2775 18.1972V19.9982C16.2775 20.3912 16.5075 20.7472 16.8655 20.9092C16.9975 20.9682 17.1375 20.9982 17.2775 20.9982C17.5155 20.9982 17.7515 20.9122 17.9385 20.7482L20.8005 18.2282C21.0155 18.0382 21.1395 17.7652 21.1395 17.4772C21.1395 17.1902 21.0165 16.9172 20.8005 16.7272L17.9385 14.2062Z" fill="currentColor"/>
-  </symbol>
-</svg>
 
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<div class="orb orb-3"></div>
-<div class="toast" id="toast"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="toast" id="toast"></div>
 
-<header class="hdr">
-  <div class="hdr-i">
-    <a href="index.html" class="btn-ghost">← Tools</a>
-    <a href="index.html" class="hdr-logo">Flow School</a>
-    <div class="hdr-auth" id="hdr-auth"></div>
-  </div>
-</header>
+  <header class="hdr">
+    <div class="hdr-i">
+      <a href="index.html" class="btn-ghost">← Tools</a>
+      <a href="index.html" class="hdr-logo">Flow School</a>
+      <div class="hdr-auth" id="hdr-auth"></div>
+    </div>
+  </header>
 
-<section class="hero">
-  <div class="inner">
-    <p class="page-eyebrow">Play before you plan.</p>
-    <h1>Movement Experiments</h1>
-    <p>Movement experiments that will expand, challenge, break patterns, encourage, teach, and shake-up what you know.</p>
-  </div>
-</section>
+  <section class="hero">
+    <div class="inner">
+      <p class="label-1">Play before you plan.</p>
+      <h3>Movement Experiments</h3>
+      <p>Movement experiments that will expand, challenge, break patterns, encourage, teach, and shake-up what you know.
+      </p>
+    </div>
+  </section>
 
-<div class="wrap">
+  <div class="wrap">
 
-  <div class="controls-bar">
-    <div class="controls-filters">
-      <div class="filter-chips" id="filter-chips">
-        <button class="filter-chip" data-tag="props">Props</button>
-        <button class="filter-chip" data-tag="floor">Floor-Based</button>
-        <button class="filter-chip" data-tag="standing">Standing</button>
-        <button class="filter-chip" data-tag="gaze">Gaze &amp; Focus</button>
-        <button class="filter-chip" data-tag="arms-hands">Arms &amp; Hands</button>
-        <button class="filter-chip" data-tag="mat-orientation">Mat Orientation</button>
-        <button class="filter-chip" data-tag="slow-somatic">Slow &amp; Somatic</button>
-        <button class="filter-chip" data-tag="sequencing">Creative Sequencing</button>
+    <div class="controls-bar">
+      <div class="controls-filters">
+        <div class="filter-chips" id="filter-chips">
+          <button class="filter-chip" data-tag="props">Props</button>
+          <button class="filter-chip" data-tag="floor">Floor-Based</button>
+          <button class="filter-chip" data-tag="standing">Standing</button>
+          <button class="filter-chip" data-tag="gaze">Gaze &amp; Focus</button>
+          <button class="filter-chip" data-tag="arms-hands">Arms &amp; Hands</button>
+          <button class="filter-chip" data-tag="mat-orientation">Mat Orientation</button>
+          <button class="filter-chip" data-tag="slow-somatic">Slow &amp; Somatic</button>
+          <button class="filter-chip" data-tag="sequencing">Creative Sequencing</button>
+        </div>
+        <button class="shuffle-btn" id="shuffle-btn">
+          <span class="material-symbols-sharp">shuffle</span>
+          Shuffle
+        </button>
       </div>
       <p class="pool-count"><strong id="pool-num">28</strong> available</p>
     </div>
-  </div>
 
-  <div id="experiment-card" class="experiment-card">
-    <div class="exp-header">
-      <div class="exp-tags" id="exp-tags"></div>
-      <div class="exp-title-row">
-        <h2 class="exp-title" id="exp-title"></h2>
-        <button class="btn-icon" id="save-btn" title="Save experiment">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3.5 1.5h8v12l-4-2.2-4 2.2V1.5z"/>
-          </svg>
+    <div id="experiment-card" class="experiment-card">
+      <div class="exp-header">
+        <div class="exp-tags" id="exp-tags"></div>
+        <div class="exp-title-row">
+          <h4 class="exp-title" id="exp-title"></h4>
+          <button class="btn-icon" id="save-btn" title="Save experiment">
+            <span class="material-symbols-sharp save-icon">bookmark_border</span>
+          </button>
+        </div>
+      </div>
+      <div class="exp-sections">
+        <div class="exp-section">
+          <div class="section-label label-1">The Rules</div>
+          <ol class="rules-list" id="exp-rules"></ol>
+        </div>
+        <div class="exp-section">
+          <div class="section-label label-1">Before You Begin</div>
+          <ul class="item-list" id="exp-before"></ul>
+        </div>
+        <div class="exp-section">
+          <div class="section-label label-1">As You Move</div>
+          <ul class="item-list" id="exp-during"></ul>
+        </div>
+        <div class="exp-section">
+          <div class="section-label label-1">When the Song Ends</div>
+          <ul class="item-list" id="exp-after"></ul>
+        </div>
+        <div class="exp-section">
+          <div class="section-label label-1">Teaching Insight</div>
+          <div class="insight-body" id="exp-insight"></div>
+        </div>
+      </div>
+      <div class="reflect-block">
+        <div class="section-label label-1">Reflect</div>
+        <p class="reflect-q" id="exp-reflect"></p>
+      </div>
+    </div>
+
+    <div class="favorites-section">
+      <div class="favs-header">
+        <button class="favs-toggle" id="favs-toggle">
+          Saved Experiments
+          <span class="fav-badge empty" id="fav-badge">0</span>
+          <span class="favs-arrow">&#9660;</span>
         </button>
+        <button class="clear-all-btn" id="clear-btn">Clear all</button>
       </div>
+      <div class="favs-body hidden" id="favs-body"></div>
     </div>
-    <div class="exp-sections">
-      <div class="exp-section">
-        <div class="section-label">The Rules</div>
-        <ol class="rules-list" id="exp-rules"></ol>
-      </div>
-      <div class="exp-section">
-        <div class="section-label">Before You Begin</div>
-        <ul class="item-list" id="exp-before"></ul>
-      </div>
-      <div class="exp-section">
-        <div class="section-label">As You Move</div>
-        <ul class="item-list" id="exp-during"></ul>
-      </div>
-      <div class="exp-section">
-        <div class="section-label">When the Song Ends</div>
-        <ul class="item-list" id="exp-after"></ul>
-      </div>
-      <div class="exp-section">
-        <div class="section-label">Teaching Insight</div>
-        <div class="insight-body" id="exp-insight"></div>
-      </div>
-    </div>
-    <div class="reflect-block">
-      <div class="section-label">Reflect</div>
-      <p class="reflect-q" id="exp-reflect"></p>
-    </div>
-  </div>
 
-  <div class="favorites-section">
-    <div class="favs-header">
-      <button class="favs-toggle" id="favs-toggle">
-        Saved Experiments
-        <span class="fav-badge empty" id="fav-badge">0</span>
-        <span class="favs-arrow">&#9660;</span>
-      </button>
-      <button class="clear-all-btn" id="clear-btn">Clear all</button>
-    </div>
-    <div class="favs-body hidden" id="favs-body"></div>
+
   </div>
 
 
-</div>
+  <script>
+    // ─── DATA ────────────────────────────────────────────────────────────────────
 
-<div class="cta-bar">
-  <button class="shuffle-btn" id="shuffle-btn">
-    <svg width="16" height="16"><use href="#shuffle"></use></svg>
-    Shuffle
-  </button>
-</div>
+    const TAG_LABELS = {
+      'props': 'Props',
+      'floor': 'Floor-Based',
+      'standing': 'Standing',
+      'gaze': 'Gaze & Focus',
+      'arms-hands': 'Arms & Hands',
+      'mat-orientation': 'Mat Orientation',
+      'slow-somatic': 'Slow & Somatic',
+      'sequencing': 'Creative Sequencing'
+    };
 
-<script>
-// ─── DATA ────────────────────────────────────────────────────────────────────
+    const EXPERIMENTS = [
+      {
+        id: 1,
+        title: '5 Minutes to Move',
+        tags: ['sequencing'],
+        rules: [
+          'Move for 5 minutes.',
+          'Keep it continuous — no more than an inhale and exhale in each posture.',
+          'No repeating a single pose. Each pose can only be used once, not once per side (one Warrior 2 total, not one on left AND right).'
+        ],
+        beforeYouBegin: [
+          'Song recommendation: Gooey by Glass Animals.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
+          'Leave extra space around your mat so you can step off, turn around, and move in unexpected directions.'
+        ],
+        asYouMove: [
+          'Once you press play on the song, set yourself up in any posture, take a breath, and begin to move.',
+          'Remember you have many points of contact to explore: one foot, two feet, elbows, knees, back, belly, single arm, double arms, and sides. This isn\'t just about standing flow.',
+          'If you notice yourself repeating a similar shape, experiment with changing the position of your legs, arms, or the lean of your torso to create something new.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Shake it off.',
+          'Reflect.'
+        ],
+        teachingInsight: 'Often, teachers find they are deeply in-bodied and time passes super fast. If that\'s you, fantastic. Finding the freedom to move in this experiment, while using the form of yoga postures, can be translated into the classes you teach. As teachers, we\'re here to help our students find this kind of freedom.\n\nIf you find it difficult, you are not alone. This often happens for teachers who come from a strict sequencing background with a set order of postures or pace, have always done or believed that practice "counts" if both left AND right sides move through the same sequence, or who never considered breaking out of what has always been done. It can feel like a frustrating experiment and super heady. You didn\'t do it wrong if this was you. This is just information.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 2,
+        title: 'The Cheerleader',
+        tags: ['arms-hands'],
+        rules: [
+          'Strike a pose.',
+          'Stay in that pose until you move your arms in 5 different shapes — don\'t go fast.',
+          'Choose another posture and repeat with 5 different arm movements.',
+          'Repeat.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
+          'Optional: use pom-poms or other playful props like trophies, plants, cups of water, cookies, or dish towels.'
+        ],
+        asYouMove: [
+          'This experiment can be explored in all body positions: standing, seated, kneeling, or lying down.',
+          'This experiment can be explored while you\'re on your hands, but it will be extra challenging — in Down Dog, one position will be both hands down, after that one or both hands will have to explore other placement or reaching.',
+          'Let it be awkward. New things often are.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'If you had to point out the ways we most cue and use arms in yoga, it\'s probably: both arms up, both arms down to your side, hands to heart, prayer twist, or both arms out in the shape of a T. All of these are great, and there\'s more ways we can use our arms both in postures and in transitions.\n\nHow we use our arms in a pose greatly impacts where it feels most natural to flow next. As you experiment with cueing more arm movement, allow the transitions to be just as important as the postures.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 3,
+        title: 'Alternate the Bend',
+        tags: ['sequencing', 'standing'],
+        rules: [
+          'Choose a standing posture.',
+          'As you move into each new posture, alternate the bend in one or both legs (moving between bent and straight).',
+          'Repeat the phrase "change one or both" every time you move.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'The first time you try this experiment, stay in standing postures.',
+          'As you become more familiar, begin to explore "changing one or both" while kneeling, seated, on your belly, and/or on your back.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'This experiment will change sequencing everywhere if every teacher played with it. We\'re really playing with that "flow" feeling as we move between bent and straight legs. This is part of how flow can feel like a "yoga dance."\n\nThere is often a focus on the front leg in a class — this experiment changes that. If you\'ve ever led or been in a class where you kept your front leg bent for 8 postures in a row and it\'s burning, that\'s one way. This is another.\n\nAs you begin, it\'s gonna be a brain game. The more often you do this experiment, the more natural it will become. It might be interesting to go to others\' classes and pay attention to how this does or does not happen and what the feeling is with or without it.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 4,
+        title: 'Chair the Top',
+        tags: ['props'],
+        rules: [
+          'Set up a stable chair — anchor the front feet on the top end of your mat so it doesn\'t slide.',
+          'Use the chair as you move. Let it be part of your flow, expanding how you typically think about "chair yoga."'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
+          'Make sure the chair is sturdy enough for your weight so you feel comfortable stepping onto it.',
+          'Keeping the front chair feet on your mat helps prevent the chair from sliding.'
+        ],
+        asYouMove: [
+          'Notice how the chair can offer support, challenge, or entirely new possibilities.',
+          'Explore beyond your usual ideas of "chair yoga." Let the chair make things easier or more demanding, depending on how you engage with it.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'When we think of "chair yoga," we often picture older folks, people with limited mobility, strength, and stability, or those recovering from injury. It\'s typically taught to make a class objectively easier. We love this.\n\nIn this experiment, we expand outside the typical definition. You can certainly make postures more accessible with a chair, but you can also make them more challenging. Remember that "easy" and "hard" are personal. Explore using the chair in wild ways. Let it be weird. What happens when you play with a prop in a new way? How would using a chair like this in class help students explore the practice and their bodies in new ways?',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 5,
+        title: 'Roly-Poly',
+        tags: ['floor', 'slow-somatic'],
+        rules: [
+          'Begin low to the ground — drop into a posture close to the floor.',
+          'Stay low and keep moving. Emphasize rolling, wiggling, and movements that keep as much of your body in contact with the ground as possible.',
+          'Avoid long holds. This is not a stretch-and-stay practice — let movement remain continuous and fluid.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
+          'Consider practicing without a mat, or wear socks on a slippery surface to support rolling, sliding, and ease of movement.'
+        ],
+        asYouMove: [
+          'Let this experiment look different from a typical "practice." That\'s part of the invitation.',
+          'Use yoga postures softly, allowing them to blur, melt, and evolve as you stay close to the ground.',
+          'Emphasize sensation over shape.',
+          'Let it be weird.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'This one might get weird and not look like your typical "practice." That\'s perfect. A movement experiment is not about planning a class, but about finding play as a teacher. If you have a play practice and connect to your body, the way you show up in a room is more grounded and honest.\n\nThis experiment is about using yoga postures, but softly so. While you may not teach a class like this, allowing yourself to drape against the ground and move with the earth is a powerful practice. Remember, as teachers, it\'s our goal to be the weirdest one in the room.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 6,
+        title: 'Watch the Hand',
+        tags: ['gaze', 'slow-somatic'],
+        rules: [
+          'Keep your gaze on your hand. Move continuously while keeping your eyes on one hand the entire time.',
+          'Switch hands intentionally. If you want to change which hand you\'re watching, bring both hands together before switching your gaze.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
+          'Make sure you have a clear, open space to move in.'
+        ],
+        asYouMove: [
+          'Choose a specific point on your hand to focus on — such as the tip of your middle finger — or imagine you\'re holding a glowing object like a golden orb.',
+          'Move slowly so you don\'t get dizzy.',
+          'You don\'t have to stay standing — explore getting on and off the ground too.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'In Warrior 2, we often gaze at or past our front middle finger, but beyond that, there\'s not often a cue to keep our gaze in one spot while moving. Having continual attention on your hand brings a whole different pace and movement pattern. You might find yourself gazing in new directions throughout this experiment.\n\nHow can this impact your sequencing? Where do you cue to look? How does gaze affect transitions?',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 7,
+        title: 'Touch the Block',
+        tags: ['props'],
+        rules: [
+          'Continuously touch at least one block the entire time.',
+          'Any part of your body can touch the block to count.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Allow yourself to move in all directions.',
+          'Knees and elbows on the block count too.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'Using blocks in our practice is mostly given as a way to make a posture or transition more easeful. This experiment challenges and expands how you use blocks. Let it make a transition or pose harder. Let it be weird. Let it be wayyyyy outside the box of what you usually do with blocks.\n\nHow have you been using blocks in your classes? What would happen if you cued a block for the entire class — not just a side-piece, but necessary? What new ways of using a block come to you when you have to use it continuously? How might a block aid a pose in a way that you\'ve never tried?',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 8,
+        title: 'Stay',
+        tags: ['slow-somatic', 'floor'],
+        rules: [
+          'Begin in a long lunge twist (either with prayer hands or swoosh your arms to the side) and make sure you\'re in a deep knee bend to make it spicy.',
+          'STAY in that pose until you feel what your body wants next — not what your brain says comes next. Don\'t move until you feel it.',
+          'Once you move into a new pose, STAY again until you feel what your body wants, not what you typically do next just because it\'s "what is done" — pay attention to how your body feels on the inside.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'This isn\'t a fast movement experience — let it be slow.',
+          'After about 8 postures, if you can sense an inner felt sense of the postures, you can play with speeding up your flow.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'This is a potent experiment. Sequencing has long been passed down as a particular pattern and order. With this experiment, we tap into not just what our brain has learned but how it feels. Sequencing that feels good — natural and organic — can 100% exist and still use traditional postures, but perhaps in new orders and with new transitions. Let this teach you what your body wants.\n\nWhat is getting tired in a pose? What feels constricted or working or expanded or easy or not challenging or simple or complicated? What would feel delicious to your body next? How can you treat this as a movement puzzle from the inside out?',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 9,
+        title: 'Be a Wave',
+        tags: ['floor', 'sequencing'],
+        rules: [
+          'Begin seated on your knees at the back of the mat.',
+          'Make your way to standing at the front of the mat like a wave — take the long way to get there.',
+          'Return backward to sit on your knees at the back of the mat without repeating the same sequence.',
+          'Repeat this 2x total, making it a different sequence every time.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
+          'Doing the Alternate the Bend experiment first may be helpful.'
+        ],
+        asYouMove: [
+          'Use all the sides of the mat, use the floor, make it a winding path.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'A wave crashes up on the shore and then pulls back — over and over, there\'s a push and pull to it. There\'s a give and take. Being a wave as you flow means you\'re finding that feeling of reaching forward, then pulling back. It\'s being expansive, then receding.\n\nWhen you move like this, your body and breath might find common ground. Think of your lungs filling with air, then releasing it. If you want to play with moving your body to your breath, imagine your external body is doing the breathing as you move.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 10,
+        title: 'Use a Wall',
+        tags: ['props'],
+        rules: [
+          'Set the short or long end of your mat up against the wall.',
+          'Make the wall an integral part of your flow, not an afterthought — how many times can you touch the wall in your flow?'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Touch the wall as often as possible throughout your flow.',
+          'It will be a different experience facing the wall versus facing away from it.',
+          'Use the wall with different body parts — hands, feet, hips, knees, elbows, back, belly.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'Using a wall in practice could provide more balance, security getting upside down, and assist to explore shapes in new ways. Some things might feel easier, and some might feel trickier. We don\'t often get to play with a wall in a yoga studio, so in this home play practice, you can really let yourself get wild and creative.\n\nOnce you have played with the short end of the mat against the wall, try the long end next to the wall. The way you sequence, the postures you\'re called to, and the way the wall provides feedback will change.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 11,
+        title: 'Long Side Front Side',
+        tags: ['mat-orientation', 'sequencing'],
+        rules: [
+          'Declare the long side as the "front side" of the mat (not the short end).',
+          'Begin in a single-leg Tadasana facing the long side of the mat.',
+          'Move through a flow and find your way back to a single-leg Tadasana facing the long side.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Just like in a regular flow where the short side is the front, we turn sideways to the long sides in postures like Star, Warrior 2, Triangle, etc. — in this experiment, you can turn to the short sides of the mat.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'This one can feel funky. It\'s a movement puzzle and a brain game that changes the ritual of how we use the mat. The mat is a prop — it gives us cushion, a sticky surface to not slip on, and corners to cue to. And we don\'t need it more than that.\n\nWhen we turn to the long side, it\'s so not the thing that\'s typically done, so let it be weird. Play with getting on and off the floor in this, just as much as turning forward or back. Use all your body parts and let the path meander back to the single-leg Tadasana.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 12,
+        title: 'Keep it Straight',
+        tags: ['standing', 'sequencing'],
+        rules: [
+          'Keep one leg straight as you move through your flow.',
+          'Keep the leg straight even in moments you would normally bend it, especially in transitions.',
+          'After many postures, when the experiment feels complete, allow the leg to bend.',
+          'Once it bends, switch sides and keep the experiment going with the other leg straight.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Notice how often you normally bend a leg to prepare or transition — don\'t do it today.',
+          'Pay attention to the feeling of straight the whole time and how it feels to transition on a straight leg.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'You might find a disruption to patterns you typically use. That\'s great. So much of the experiment is about doing a thing on purpose and paying attention. How did this feel? What challenges does it present? What\'s tricky? What\'s fun? When do you finally let your leg melt into a bend? How can you use intentional leg straightening to bring a different kind of attention to movement for students?',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 13,
+        title: 'Starburst',
+        tags: ['arms-hands'],
+        rules: [
+          'Your hands are stars.',
+          'Alternate between fists and starburst — open and close your hands consciously in flow.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'It\'s not common for us to move our hands like this in flow — it might feel forced at first. Keep going. See where it can become natural and woven into the experience.',
+          'Where in your flow do you feel your body squeeze in? It could be a place for closed fists. Where do you feel it inhale, lift, and open? That could be open hand time.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'Our hands are highly energetic. This is all about exploring your hand motion while in flow. Use your fists and starbursts to create different energy in your postures and transitions. How do you express through your finger movement? In some yoga movement practices, finger movement isn\'t "allowed." This is the opposite. We\'re going for the full body experience.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 14,
+        title: 'Put Your Back Into It',
+        tags: ['floor', 'sequencing'],
+        rules: [
+          'Begin on your back — choose any posture where your back is connected to the ground.',
+          'Move yourself to standing. No rock-and-roll. Flow your way up.',
+          'Get back down to your back in flow. Do not sit down from Chair pose or Malasana — find a different way to get on the ground.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'You can use blocks to support your getting on and off the floor.',
+          'Remember you can move perpendicular to your mat, turn around, sit sideways, and do it differently.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'Getting on and off the floor in flow is so important. It\'s one of the most functional things and we want to keep doing it our whole lives. The odds are high that teachers mostly just rock-and-roll to get on and off the ground. There\'s more ways than that.\n\nIt can also be common that teachers have been told there\'s a seated part of class and then a standing part and they can\'t blend. They can. And they should. Start to pay attention in regular life. How do you stand up after sitting on the floor to fold clothes? How do you get down to clean up a spill or comfort a child? Make yoga mean something in real life. When we help students practice this skill in class, it will carry over to off-the-mat living.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 15,
+        title: 'Helicopter Arms',
+        tags: ['arms-hands', 'standing'],
+        rules: [
+          'Hold your arms in the shape of a "T." Keep them parallel with the ground the whole time.',
+          'Move through flow keeping your arms in this shape — they can bend in at the elbow as you move.',
+          'Imagine your arms are helicopter arms.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Your lower body and torso can be standing, kneeling, laying, seated, twisting, etc. — but keep your arms in the T-shape.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'Having a forced arm position can give us both the reminder of how impactful arms are in the flow and new ways to move. If it feels a bit frustrating, cool. Embrace and play with it. It\'s common for sequencing to be leg-focused — we can forget how the upper body integrates with legs.\n\nHow does this arm position challenge a pose? How does it bring more ease? What did it make you want in your body? We can blend thinking skills with body feeling in sequencing.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 16,
+        title: 'Tip it Over',
+        tags: ['sequencing'],
+        rules: [
+          'Pick a pose.',
+          'Tip it over — spin it sideways, up, down, left, right, upside down, standing, kneeling, laying, etc.',
+          'Repeat with another pose — once you\'ve tipped over a single pose as many times as possible, pick a new pose and go again.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'This isn\'t about staying on your mat or being in flow, but exploring shapes.',
+          'Using props (blocks, bolsters, chairs, walls) might be interesting in this experiment.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'When we wonder "how do I prep students for ____," we can figure it out by using this experiment. There\'s different demand in each position. We can increase or decrease the demand for mobility, stability, strength, flexibility, experience, and speed when we understand how postures are similar and different.\n\nAs we build warm-up flows, knowing the peak flow we\'re building toward, we can use postures that require less demand to help students build awareness and skill.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 17,
+        title: 'No Hands Flow',
+        tags: ['standing', 'sequencing'],
+        rules: [
+          'Flow using standing postures only. Your hands can only touch the ground as a balance support, not weight-bearing.',
+          'Pick a standing pose to begin in.',
+          'Move yourself around the mat in all directions — recall 5 Minutes to Move, but keep it standing.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Keep your arms and upper body moving and part of the flow — just not as a strength support.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'A No Hands Flow in a class can be a really good way to bridge a beginning of class that\'s on the floor to the peak flow that includes getting on and off the floor. Play with all the leg positions: move side to side, alternate between square and open hip, alternate the bend, use a turn around, include knee and single leg postures.\n\nMany students aren\'t used to having their hands and wrists be weight-bearing for so long, so this allows for a break. Being aware of how often we\'re asking students to have hands down can set them up for success.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 18,
+        title: 'Touch Yo\'self',
+        tags: ['arms-hands', 'slow-somatic'],
+        rules: [
+          'Pick a pose and connect your hands to your body.',
+          'As you flow, explore ways to touch yourself. There\'s lots of ways we do this in yoga — bring attention to it and explore how you do it.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Using hands in practice is a way we prop postures and transitions — positioning your bent leg higher in Tree, holding your back foot in Dancer, crossing a hand to knee in a seated twist. So this challenge isn\'t inherently new.',
+          'Focus on where your hands can be of support in a shape or change the flow in ways you haven\'t considered. It\'s okay if it feels awkward, it\'s new.',
+          'This can feel sensual, meaning it includes the sense of touch.',
+          'Play with the speed of transitions just as much as the postures.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'When we hear the phrase "touch yourself," it often comes with a sexual connotation. But when we get specific like "connect your palms and bring your hands to your heart" — which literally means your hands are touching your body — it doesn\'t come off as sexual. So if you\'re initially thinking sexually and it\'s throwing you off, pause, and lean in a little more.\n\nThis is a sensual experiment. This isn\'t gonna feel like a regular class or how you flow with arms swirling out, but rather how they connect to your body, then slide to a new posture. Explore your touch. Let it be a little wild and expansive. What do you find that could actually aid students? How might holding themselves support their own nervous system so they can find more play and embodiment?',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 19,
+        title: 'Make It Symmetrical',
+        tags: ['sequencing', 'standing'],
+        rules: [
+          'You can only move through symmetrical postures — both the left and right sides of your body have to do the same thing.',
+          'Turn symmetrical postures into a flow. This can include a Sun Salutation, but expand past this.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'You might transition between poses in a non-symmetrical way, but make sure you land in a symmetrical posture.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'It can feel brain-relieving to move through symmetrical poses. There\'s no left and right to think about. Both sides of your body are doing the same thing. Bonnie will intentionally use a Sun A in a flow to help students\' brains relax — doing something familiar, having less to think about.\n\nThat said, Sun A\'s have been coined as "the vinyasa" and that is far from the truth. Vinyasa is the way we place ourselves, the path between, the attention to the moment. If a whole class is a flow focus, then the whole class is Vinyasa. Sun A is a single type of Vinyasa in a class.\n\nHow else can you create symmetrical flow outside of a Sun A? How does this feel challenging? Relieving? Does your body want to stay symmetrical this much? How can it feel grounding to have symmetry in postures and also constricting?',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 20,
+        title: 'Move Your Eyeballs',
+        tags: ['gaze', 'slow-somatic'],
+        rules: [
+          'Begin in a low lunge. Gaze forward.',
+          'Choose the next posture by paying attention to your eyeballs — change how high your eyeballs are from the ground or the direction you\'re looking every time you move to a new posture.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'This is nuanced work because we\'re zoning in on what the eyes are doing and where they are gazing.',
+          'Changing where you gaze in a pose changes the experience — play with this.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'If you were to separate the entire nervous system from the rest of the body, the eyeballs are attached to it. Our gaze direction, height of eyes from the floor, and how we alternate between things makes a big difference in how we feel. Flow a bit slower so you can notice where your eyeballs are and notice how that impacts the flow.\n\nWhen you create classes, put them through this experiment. If you find that your flow keeps your eyes lower to the ground and never looking up or standing up, do some editing. And vice versa.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 21,
+        title: 'What\'s Behind You',
+        tags: ['mat-orientation', 'sequencing'],
+        rules: [
+          'Turn around as often as possible. This isn\'t supposed to be fast — take the long route, but continue flipping between facing forwards and backwards.',
+          'Don\'t turn around in the same way. Every time, explore a different set of postures and transitions to get there.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'For some this is new, for some you turn around in flows often — even if this is part of what you regularly do, expand how you\'re doing it.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'One of the ways teachers can help students drop into the present, into flow state, is to offer them something new. And cue it excellently. By offering a turn-around in a flow, even if for just a couple postures before you turn to face forward, it can change the entire experience.\n\nWhen you teach a turn-around flow, get your students\' buy-in. Tell them at the beginning of the flow that there will be a turn-around. Don\'t switch the "back of the mat" to be the "front of the mat" when you turn around — the short end at the front of the room will always be the "front" and the back will be the "back," even when you turn around. If students need to see you, get off your mat. Walk to the back of the room and stand between students as you guide.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 22,
+        title: 'Fork In The Road',
+        tags: ['props', 'sequencing'],
+        rules: [
+          'Begin in Down Dog.',
+          'Travel to High Lunge at the top of the mat.',
+          'Don\'t get there using a single-leg Down Dog to step forward — choose a different path.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'This is a slower experiment and will take some brain-power.',
+          'Using blocks could give something fun to this in many ways — try them under your hands, feet, etc.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'Have you ever watched a student try to step from Down Dog to the top of the mat and their foot gets partway there, then they have to inch-worm it forward, grab it with their hand to move it, or stand all the way up and step more? If we\'re really interested in guiding people to flow, that\'s really difficult if they lack the range of motion that is often cued or expected in a typical Vinyasa class.\n\nWe want to play, prepare, and offer more. How can we sequence so flow can meet more levels in the room? We expand our sequencing toolbox. This does that.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 23,
+        title: 'Invert Your Flow',
+        tags: ['sequencing'],
+        rules: [
+          'Begin upside down in an inversion or arm balance.',
+          'Travel in and out of inversions and/or arm balances. Add other postures between — but how often can you get into and out of them? How many can you use?',
+          'Don\'t use the same pose to get into the arm balance or inversion every time. Change the poses before and after inverting.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
+          'If arm balances and inversions aren\'t your thing currently, cool — come back when they are.'
+        ],
+        asYouMove: [
+          'Play and practice different versions so you can guide from experience.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'Weaving inversions and arm balances into flow makes them not just a pretty pose, but something that can help move the flow forward, be a place of play for students, and a way to grow more self-awareness in the practice.\n\nWhen offering this in a class: 1) have a small workshop to play with it and explore options, but don\'t make it mandatory for the flow, or 2) call out a spot in the flow where students can add an inversion or arm balance if they know it. The goal is to not do something like Standing Pigeon and make half the class hold that while the other half figures out how to fly their pigeon.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 24,
+        title: 'Freeze Tag',
+        tags: ['sequencing'],
+        rules: [
+          'Strike a pose.',
+          'Freeze.',
+          'Ask: "Where do I usually go from this pose?"',
+          'Tag a new posture — somewhere you don\'t usually go.',
+          'Once you\'re there, ask the question again.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Use the whole mat, turn around, go off your mat, etc. Let this one get wild.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'We are creatures of habit. We do the same things often. That can be really good because repetition helps us refine our skills. Other times it makes us feel stuck, uninspired, and bored. This experiment changes that and wants new answers.\n\nIf you want something different, you have to choose something different — and it\'s truly so often just one step away.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 25,
+        title: 'Where\'s Waldo',
+        tags: ['mat-orientation', 'sequencing'],
+        rules: [
+          'Pick a spot on the mat. Choose a pose to begin in.',
+          'Flow through 4–5 postures, then pause.',
+          'Pick a new spot on the mat. Choose the SAME posture you began in.',
+          'Flow through 4–5 postures, then pause.',
+          'Again, pick a new spot on the mat. Repeat.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Experiment with the top, middle, and back of the mat. Try facing forward, sideways, and backwards.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'When you open up the possibility of flow all over the mat, there\'s a whole new world unlocked. In this pattern-breaking experiment, let it be a little uncomfortable as you stand and begin flow in places and directions you may not have ever considered. We often do the same poses in the same spots always.\n\nThis experiment demands different poses and transitions because of the defined mat space. Keep the mat — it would be a whole different experience without one. When you teach, be specific about where you want students to land and stand. They will go to the regular spot or think they are doing it wrong if you don\'t communicate with them.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 26,
+        title: 'Swimming',
+        tags: ['arms-hands', 'sequencing'],
+        rules: [
+          'Swim your arms in transition as much as possible.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Go slow enough as you flow to notice how you usually move your arms — experiment with swimming them.',
+          'Swim either forward or backwards.',
+          'Notice the feeling of using your upper body more as you swim.',
+          'If you bring your hands/arms together during this experiment, see how quickly you can set yourself back up to swim your arms.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'The transition is where the dance lives. It can be common to call out postures and cue them and completely skip the transitions. It\'s where things can either become clunky or smooth in flow. Swimming your arms is one way to explore the space between.\n\nAs you move through this experiment, pay attention to the feeling of it. Let yourself be slow or fast as you test new things.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 27,
+        title: 'Wheel It Back',
+        tags: ['sequencing', 'standing'],
+        rules: [
+          'Put as many backward bends in a flow as possible.',
+          'Option to begin in Shiva and Funky Dancer.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Get wiggly and warm up before you land in bigger backward bends.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'We want to include all the body positions in flow — this includes spinal extension. We fold forward a lot in yoga classes, often way more than we backward bend.\n\nNot all backward bends are very easy to include in a flow, especially when moving at breath-pace. Backward bends aren\'t just peak poses — they\'re shapes that can live throughout a flow and balance the other body positions. Some options to play with: Low Lunge, High Lunge, Camel, Up Dog, Standing Backward Bend, Fallen Triangle, Rockstar, Bridge, Single Leg Bridge, Locust, Dancer, Funky Dancer, Cobra, Sphinx, Tiger, Bound Half Moon.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      },
+      {
+        id: 28,
+        title: 'Lunge Your Heart Out',
+        tags: ['standing', 'sequencing'],
+        rules: [
+          'Begin in Skandasana with your heel down.',
+          'Swoosh your arms to the back of the room.',
+          'Flow through 4–5 postures.',
+          'Return to Skandasana.',
+          'Try a new arm position and transition.',
+          'Flow through 4–5 postures. Repeat.'
+        ],
+        beforeYouBegin: [
+          'Choose a song or two to move to.',
+          'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
+        ],
+        asYouMove: [
+          'Feel how your arms impact where you want to go next — you\'re exploring keeping your heel down and Skandasana higher, but also how your arm position impacts the flow feeling.'
+        ],
+        whenSongEnds: [
+          'Pause and take a breath.',
+          'Reflect.'
+        ],
+        teachingInsight: 'Skandasana (if taught at all) is so often taught where you drop your ass low and balance on your back toe. This posture requires a lot of mobility, stability, and flexibility. To push out of it and stand back up, it requires a lot of strength.\n\nIt\'s a stellar pose to give us lateral movement in our flows — something that\'s really important — but it can be taught in more than one way. Keep your back heel down and only drop as low as you can keep it grounded. If you\'re someone who can drop low, don\'t go past your thigh parallel to the ground. When you stay in this higher Skandasana, there\'s more freedom to move.\n\nCueing points from Warrior 2: push your front leg straight, pop your back heel in a little, bend your back knee, point your front toes up to the ceiling, swoosh your arms toward the back of the room.',
+        reflectionPrompt: 'What\'s your takeaway?'
+      }
+    ];
 
-const TAG_LABELS = {
-  'props':           'Props',
-  'floor':           'Floor-Based',
-  'standing':        'Standing',
-  'gaze':            'Gaze & Focus',
-  'arms-hands':      'Arms & Hands',
-  'mat-orientation': 'Mat Orientation',
-  'slow-somatic':    'Slow & Somatic',
-  'sequencing':      'Creative Sequencing'
-};
+    // ─── STATE ───────────────────────────────────────────────────────────────────
 
-const EXPERIMENTS = [
-  {
-    id: 1,
-    title: '5 Minutes to Move',
-    tags: ['sequencing'],
-    rules: [
-      'Move for 5 minutes.',
-      'Keep it continuous — no more than an inhale and exhale in each posture.',
-      'No repeating a single pose. Each pose can only be used once, not once per side (one Warrior 2 total, not one on left AND right).'
-    ],
-    beforeYouBegin: [
-      'Song recommendation: Gooey by Glass Animals.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
-      'Leave extra space around your mat so you can step off, turn around, and move in unexpected directions.'
-    ],
-    asYouMove: [
-      'Once you press play on the song, set yourself up in any posture, take a breath, and begin to move.',
-      'Remember you have many points of contact to explore: one foot, two feet, elbows, knees, back, belly, single arm, double arms, and sides. This isn\'t just about standing flow.',
-      'If you notice yourself repeating a similar shape, experiment with changing the position of your legs, arms, or the lean of your torso to create something new.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Shake it off.',
-      'Reflect.'
-    ],
-    teachingInsight: 'Often, teachers find they are deeply in-bodied and time passes super fast. If that\'s you, fantastic. Finding the freedom to move in this experiment, while using the form of yoga postures, can be translated into the classes you teach. As teachers, we\'re here to help our students find this kind of freedom.\n\nIf you find it difficult, you are not alone. This often happens for teachers who come from a strict sequencing background with a set order of postures or pace, have always done or believed that practice "counts" if both left AND right sides move through the same sequence, or who never considered breaking out of what has always been done. It can feel like a frustrating experiment and super heady. You didn\'t do it wrong if this was you. This is just information.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 2,
-    title: 'The Cheerleader',
-    tags: ['arms-hands'],
-    rules: [
-      'Strike a pose.',
-      'Stay in that pose until you move your arms in 5 different shapes — don\'t go fast.',
-      'Choose another posture and repeat with 5 different arm movements.',
-      'Repeat.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
-      'Optional: use pom-poms or other playful props like trophies, plants, cups of water, cookies, or dish towels.'
-    ],
-    asYouMove: [
-      'This experiment can be explored in all body positions: standing, seated, kneeling, or lying down.',
-      'This experiment can be explored while you\'re on your hands, but it will be extra challenging — in Down Dog, one position will be both hands down, after that one or both hands will have to explore other placement or reaching.',
-      'Let it be awkward. New things often are.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'If you had to point out the ways we most cue and use arms in yoga, it\'s probably: both arms up, both arms down to your side, hands to heart, prayer twist, or both arms out in the shape of a T. All of these are great, and there\'s more ways we can use our arms both in postures and in transitions.\n\nHow we use our arms in a pose greatly impacts where it feels most natural to flow next. As you experiment with cueing more arm movement, allow the transitions to be just as important as the postures.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 3,
-    title: 'Alternate the Bend',
-    tags: ['sequencing', 'standing'],
-    rules: [
-      'Choose a standing posture.',
-      'As you move into each new posture, alternate the bend in one or both legs (moving between bent and straight).',
-      'Repeat the phrase "change one or both" every time you move.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'The first time you try this experiment, stay in standing postures.',
-      'As you become more familiar, begin to explore "changing one or both" while kneeling, seated, on your belly, and/or on your back.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'This experiment will change sequencing everywhere if every teacher played with it. We\'re really playing with that "flow" feeling as we move between bent and straight legs. This is part of how flow can feel like a "yoga dance."\n\nThere is often a focus on the front leg in a class — this experiment changes that. If you\'ve ever led or been in a class where you kept your front leg bent for 8 postures in a row and it\'s burning, that\'s one way. This is another.\n\nAs you begin, it\'s gonna be a brain game. The more often you do this experiment, the more natural it will become. It might be interesting to go to others\' classes and pay attention to how this does or does not happen and what the feeling is with or without it.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 4,
-    title: 'Chair the Top',
-    tags: ['props'],
-    rules: [
-      'Set up a stable chair — anchor the front feet on the top end of your mat so it doesn\'t slide.',
-      'Use the chair as you move. Let it be part of your flow, expanding how you typically think about "chair yoga."'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
-      'Make sure the chair is sturdy enough for your weight so you feel comfortable stepping onto it.',
-      'Keeping the front chair feet on your mat helps prevent the chair from sliding.'
-    ],
-    asYouMove: [
-      'Notice how the chair can offer support, challenge, or entirely new possibilities.',
-      'Explore beyond your usual ideas of "chair yoga." Let the chair make things easier or more demanding, depending on how you engage with it.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'When we think of "chair yoga," we often picture older folks, people with limited mobility, strength, and stability, or those recovering from injury. It\'s typically taught to make a class objectively easier. We love this.\n\nIn this experiment, we expand outside the typical definition. You can certainly make postures more accessible with a chair, but you can also make them more challenging. Remember that "easy" and "hard" are personal. Explore using the chair in wild ways. Let it be weird. What happens when you play with a prop in a new way? How would using a chair like this in class help students explore the practice and their bodies in new ways?',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 5,
-    title: 'Roly-Poly',
-    tags: ['floor', 'slow-somatic'],
-    rules: [
-      'Begin low to the ground — drop into a posture close to the floor.',
-      'Stay low and keep moving. Emphasize rolling, wiggling, and movements that keep as much of your body in contact with the ground as possible.',
-      'Avoid long holds. This is not a stretch-and-stay practice — let movement remain continuous and fluid.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
-      'Consider practicing without a mat, or wear socks on a slippery surface to support rolling, sliding, and ease of movement.'
-    ],
-    asYouMove: [
-      'Let this experiment look different from a typical "practice." That\'s part of the invitation.',
-      'Use yoga postures softly, allowing them to blur, melt, and evolve as you stay close to the ground.',
-      'Emphasize sensation over shape.',
-      'Let it be weird.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'This one might get weird and not look like your typical "practice." That\'s perfect. A movement experiment is not about planning a class, but about finding play as a teacher. If you have a play practice and connect to your body, the way you show up in a room is more grounded and honest.\n\nThis experiment is about using yoga postures, but softly so. While you may not teach a class like this, allowing yourself to drape against the ground and move with the earth is a powerful practice. Remember, as teachers, it\'s our goal to be the weirdest one in the room.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 6,
-    title: 'Watch the Hand',
-    tags: ['gaze', 'slow-somatic'],
-    rules: [
-      'Keep your gaze on your hand. Move continuously while keeping your eyes on one hand the entire time.',
-      'Switch hands intentionally. If you want to change which hand you\'re watching, bring both hands together before switching your gaze.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
-      'Make sure you have a clear, open space to move in.'
-    ],
-    asYouMove: [
-      'Choose a specific point on your hand to focus on — such as the tip of your middle finger — or imagine you\'re holding a glowing object like a golden orb.',
-      'Move slowly so you don\'t get dizzy.',
-      'You don\'t have to stay standing — explore getting on and off the ground too.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'In Warrior 2, we often gaze at or past our front middle finger, but beyond that, there\'s not often a cue to keep our gaze in one spot while moving. Having continual attention on your hand brings a whole different pace and movement pattern. You might find yourself gazing in new directions throughout this experiment.\n\nHow can this impact your sequencing? Where do you cue to look? How does gaze affect transitions?',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 7,
-    title: 'Touch the Block',
-    tags: ['props'],
-    rules: [
-      'Continuously touch at least one block the entire time.',
-      'Any part of your body can touch the block to count.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Allow yourself to move in all directions.',
-      'Knees and elbows on the block count too.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'Using blocks in our practice is mostly given as a way to make a posture or transition more easeful. This experiment challenges and expands how you use blocks. Let it make a transition or pose harder. Let it be weird. Let it be wayyyyy outside the box of what you usually do with blocks.\n\nHow have you been using blocks in your classes? What would happen if you cued a block for the entire class — not just a side-piece, but necessary? What new ways of using a block come to you when you have to use it continuously? How might a block aid a pose in a way that you\'ve never tried?',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 8,
-    title: 'Stay',
-    tags: ['slow-somatic', 'floor'],
-    rules: [
-      'Begin in a long lunge twist (either with prayer hands or swoosh your arms to the side) and make sure you\'re in a deep knee bend to make it spicy.',
-      'STAY in that pose until you feel what your body wants next — not what your brain says comes next. Don\'t move until you feel it.',
-      'Once you move into a new pose, STAY again until you feel what your body wants, not what you typically do next just because it\'s "what is done" — pay attention to how your body feels on the inside.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'This isn\'t a fast movement experience — let it be slow.',
-      'After about 8 postures, if you can sense an inner felt sense of the postures, you can play with speeding up your flow.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'This is a potent experiment. Sequencing has long been passed down as a particular pattern and order. With this experiment, we tap into not just what our brain has learned but how it feels. Sequencing that feels good — natural and organic — can 100% exist and still use traditional postures, but perhaps in new orders and with new transitions. Let this teach you what your body wants.\n\nWhat is getting tired in a pose? What feels constricted or working or expanded or easy or not challenging or simple or complicated? What would feel delicious to your body next? How can you treat this as a movement puzzle from the inside out?',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 9,
-    title: 'Be a Wave',
-    tags: ['floor', 'sequencing'],
-    rules: [
-      'Begin seated on your knees at the back of the mat.',
-      'Make your way to standing at the front of the mat like a wave — take the long way to get there.',
-      'Return backward to sit on your knees at the back of the mat without repeating the same sequence.',
-      'Repeat this 2x total, making it a different sequence every time.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
-      'Doing the Alternate the Bend experiment first may be helpful.'
-    ],
-    asYouMove: [
-      'Use all the sides of the mat, use the floor, make it a winding path.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'A wave crashes up on the shore and then pulls back — over and over, there\'s a push and pull to it. There\'s a give and take. Being a wave as you flow means you\'re finding that feeling of reaching forward, then pulling back. It\'s being expansive, then receding.\n\nWhen you move like this, your body and breath might find common ground. Think of your lungs filling with air, then releasing it. If you want to play with moving your body to your breath, imagine your external body is doing the breathing as you move.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 10,
-    title: 'Use a Wall',
-    tags: ['props'],
-    rules: [
-      'Set the short or long end of your mat up against the wall.',
-      'Make the wall an integral part of your flow, not an afterthought — how many times can you touch the wall in your flow?'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Touch the wall as often as possible throughout your flow.',
-      'It will be a different experience facing the wall versus facing away from it.',
-      'Use the wall with different body parts — hands, feet, hips, knees, elbows, back, belly.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'Using a wall in practice could provide more balance, security getting upside down, and assist to explore shapes in new ways. Some things might feel easier, and some might feel trickier. We don\'t often get to play with a wall in a yoga studio, so in this home play practice, you can really let yourself get wild and creative.\n\nOnce you have played with the short end of the mat against the wall, try the long end next to the wall. The way you sequence, the postures you\'re called to, and the way the wall provides feedback will change.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 11,
-    title: 'Long Side Front Side',
-    tags: ['mat-orientation', 'sequencing'],
-    rules: [
-      'Declare the long side as the "front side" of the mat (not the short end).',
-      'Begin in a single-leg Tadasana facing the long side of the mat.',
-      'Move through a flow and find your way back to a single-leg Tadasana facing the long side.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Just like in a regular flow where the short side is the front, we turn sideways to the long sides in postures like Star, Warrior 2, Triangle, etc. — in this experiment, you can turn to the short sides of the mat.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'This one can feel funky. It\'s a movement puzzle and a brain game that changes the ritual of how we use the mat. The mat is a prop — it gives us cushion, a sticky surface to not slip on, and corners to cue to. And we don\'t need it more than that.\n\nWhen we turn to the long side, it\'s so not the thing that\'s typically done, so let it be weird. Play with getting on and off the floor in this, just as much as turning forward or back. Use all your body parts and let the path meander back to the single-leg Tadasana.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 12,
-    title: 'Keep it Straight',
-    tags: ['standing', 'sequencing'],
-    rules: [
-      'Keep one leg straight as you move through your flow.',
-      'Keep the leg straight even in moments you would normally bend it, especially in transitions.',
-      'After many postures, when the experiment feels complete, allow the leg to bend.',
-      'Once it bends, switch sides and keep the experiment going with the other leg straight.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Notice how often you normally bend a leg to prepare or transition — don\'t do it today.',
-      'Pay attention to the feeling of straight the whole time and how it feels to transition on a straight leg.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'You might find a disruption to patterns you typically use. That\'s great. So much of the experiment is about doing a thing on purpose and paying attention. How did this feel? What challenges does it present? What\'s tricky? What\'s fun? When do you finally let your leg melt into a bend? How can you use intentional leg straightening to bring a different kind of attention to movement for students?',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 13,
-    title: 'Starburst',
-    tags: ['arms-hands'],
-    rules: [
-      'Your hands are stars.',
-      'Alternate between fists and starburst — open and close your hands consciously in flow.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'It\'s not common for us to move our hands like this in flow — it might feel forced at first. Keep going. See where it can become natural and woven into the experience.',
-      'Where in your flow do you feel your body squeeze in? It could be a place for closed fists. Where do you feel it inhale, lift, and open? That could be open hand time.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'Our hands are highly energetic. This is all about exploring your hand motion while in flow. Use your fists and starbursts to create different energy in your postures and transitions. How do you express through your finger movement? In some yoga movement practices, finger movement isn\'t "allowed." This is the opposite. We\'re going for the full body experience.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 14,
-    title: 'Put Your Back Into It',
-    tags: ['floor', 'sequencing'],
-    rules: [
-      'Begin on your back — choose any posture where your back is connected to the ground.',
-      'Move yourself to standing. No rock-and-roll. Flow your way up.',
-      'Get back down to your back in flow. Do not sit down from Chair pose or Malasana — find a different way to get on the ground.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'You can use blocks to support your getting on and off the floor.',
-      'Remember you can move perpendicular to your mat, turn around, sit sideways, and do it differently.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'Getting on and off the floor in flow is so important. It\'s one of the most functional things and we want to keep doing it our whole lives. The odds are high that teachers mostly just rock-and-roll to get on and off the ground. There\'s more ways than that.\n\nIt can also be common that teachers have been told there\'s a seated part of class and then a standing part and they can\'t blend. They can. And they should. Start to pay attention in regular life. How do you stand up after sitting on the floor to fold clothes? How do you get down to clean up a spill or comfort a child? Make yoga mean something in real life. When we help students practice this skill in class, it will carry over to off-the-mat living.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 15,
-    title: 'Helicopter Arms',
-    tags: ['arms-hands', 'standing'],
-    rules: [
-      'Hold your arms in the shape of a "T." Keep them parallel with the ground the whole time.',
-      'Move through flow keeping your arms in this shape — they can bend in at the elbow as you move.',
-      'Imagine your arms are helicopter arms.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Your lower body and torso can be standing, kneeling, laying, seated, twisting, etc. — but keep your arms in the T-shape.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'Having a forced arm position can give us both the reminder of how impactful arms are in the flow and new ways to move. If it feels a bit frustrating, cool. Embrace and play with it. It\'s common for sequencing to be leg-focused — we can forget how the upper body integrates with legs.\n\nHow does this arm position challenge a pose? How does it bring more ease? What did it make you want in your body? We can blend thinking skills with body feeling in sequencing.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 16,
-    title: 'Tip it Over',
-    tags: ['sequencing'],
-    rules: [
-      'Pick a pose.',
-      'Tip it over — spin it sideways, up, down, left, right, upside down, standing, kneeling, laying, etc.',
-      'Repeat with another pose — once you\'ve tipped over a single pose as many times as possible, pick a new pose and go again.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'This isn\'t about staying on your mat or being in flow, but exploring shapes.',
-      'Using props (blocks, bolsters, chairs, walls) might be interesting in this experiment.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'When we wonder "how do I prep students for ____," we can figure it out by using this experiment. There\'s different demand in each position. We can increase or decrease the demand for mobility, stability, strength, flexibility, experience, and speed when we understand how postures are similar and different.\n\nAs we build warm-up flows, knowing the peak flow we\'re building toward, we can use postures that require less demand to help students build awareness and skill.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 17,
-    title: 'No Hands Flow',
-    tags: ['standing', 'sequencing'],
-    rules: [
-      'Flow using standing postures only. Your hands can only touch the ground as a balance support, not weight-bearing.',
-      'Pick a standing pose to begin in.',
-      'Move yourself around the mat in all directions — recall 5 Minutes to Move, but keep it standing.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Keep your arms and upper body moving and part of the flow — just not as a strength support.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'A No Hands Flow in a class can be a really good way to bridge a beginning of class that\'s on the floor to the peak flow that includes getting on and off the floor. Play with all the leg positions: move side to side, alternate between square and open hip, alternate the bend, use a turn around, include knee and single leg postures.\n\nMany students aren\'t used to having their hands and wrists be weight-bearing for so long, so this allows for a break. Being aware of how often we\'re asking students to have hands down can set them up for success.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 18,
-    title: 'Touch Yo\'self',
-    tags: ['arms-hands', 'slow-somatic'],
-    rules: [
-      'Pick a pose and connect your hands to your body.',
-      'As you flow, explore ways to touch yourself. There\'s lots of ways we do this in yoga — bring attention to it and explore how you do it.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Using hands in practice is a way we prop postures and transitions — positioning your bent leg higher in Tree, holding your back foot in Dancer, crossing a hand to knee in a seated twist. So this challenge isn\'t inherently new.',
-      'Focus on where your hands can be of support in a shape or change the flow in ways you haven\'t considered. It\'s okay if it feels awkward, it\'s new.',
-      'This can feel sensual, meaning it includes the sense of touch.',
-      'Play with the speed of transitions just as much as the postures.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'When we hear the phrase "touch yourself," it often comes with a sexual connotation. But when we get specific like "connect your palms and bring your hands to your heart" — which literally means your hands are touching your body — it doesn\'t come off as sexual. So if you\'re initially thinking sexually and it\'s throwing you off, pause, and lean in a little more.\n\nThis is a sensual experiment. This isn\'t gonna feel like a regular class or how you flow with arms swirling out, but rather how they connect to your body, then slide to a new posture. Explore your touch. Let it be a little wild and expansive. What do you find that could actually aid students? How might holding themselves support their own nervous system so they can find more play and embodiment?',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 19,
-    title: 'Make It Symmetrical',
-    tags: ['sequencing', 'standing'],
-    rules: [
-      'You can only move through symmetrical postures — both the left and right sides of your body have to do the same thing.',
-      'Turn symmetrical postures into a flow. This can include a Sun Salutation, but expand past this.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'You might transition between poses in a non-symmetrical way, but make sure you land in a symmetrical posture.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'It can feel brain-relieving to move through symmetrical poses. There\'s no left and right to think about. Both sides of your body are doing the same thing. Bonnie will intentionally use a Sun A in a flow to help students\' brains relax — doing something familiar, having less to think about.\n\nThat said, Sun A\'s have been coined as "the vinyasa" and that is far from the truth. Vinyasa is the way we place ourselves, the path between, the attention to the moment. If a whole class is a flow focus, then the whole class is Vinyasa. Sun A is a single type of Vinyasa in a class.\n\nHow else can you create symmetrical flow outside of a Sun A? How does this feel challenging? Relieving? Does your body want to stay symmetrical this much? How can it feel grounding to have symmetry in postures and also constricting?',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 20,
-    title: 'Move Your Eyeballs',
-    tags: ['gaze', 'slow-somatic'],
-    rules: [
-      'Begin in a low lunge. Gaze forward.',
-      'Choose the next posture by paying attention to your eyeballs — change how high your eyeballs are from the ground or the direction you\'re looking every time you move to a new posture.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'This is nuanced work because we\'re zoning in on what the eyes are doing and where they are gazing.',
-      'Changing where you gaze in a pose changes the experience — play with this.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'If you were to separate the entire nervous system from the rest of the body, the eyeballs are attached to it. Our gaze direction, height of eyes from the floor, and how we alternate between things makes a big difference in how we feel. Flow a bit slower so you can notice where your eyeballs are and notice how that impacts the flow.\n\nWhen you create classes, put them through this experiment. If you find that your flow keeps your eyes lower to the ground and never looking up or standing up, do some editing. And vice versa.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 21,
-    title: 'What\'s Behind You',
-    tags: ['mat-orientation', 'sequencing'],
-    rules: [
-      'Turn around as often as possible. This isn\'t supposed to be fast — take the long route, but continue flipping between facing forwards and backwards.',
-      'Don\'t turn around in the same way. Every time, explore a different set of postures and transitions to get there.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'For some this is new, for some you turn around in flows often — even if this is part of what you regularly do, expand how you\'re doing it.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'One of the ways teachers can help students drop into the present, into flow state, is to offer them something new. And cue it excellently. By offering a turn-around in a flow, even if for just a couple postures before you turn to face forward, it can change the entire experience.\n\nWhen you teach a turn-around flow, get your students\' buy-in. Tell them at the beginning of the flow that there will be a turn-around. Don\'t switch the "back of the mat" to be the "front of the mat" when you turn around — the short end at the front of the room will always be the "front" and the back will be the "back," even when you turn around. If students need to see you, get off your mat. Walk to the back of the room and stand between students as you guide.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 22,
-    title: 'Fork In The Road',
-    tags: ['props', 'sequencing'],
-    rules: [
-      'Begin in Down Dog.',
-      'Travel to High Lunge at the top of the mat.',
-      'Don\'t get there using a single-leg Down Dog to step forward — choose a different path.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'This is a slower experiment and will take some brain-power.',
-      'Using blocks could give something fun to this in many ways — try them under your hands, feet, etc.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'Have you ever watched a student try to step from Down Dog to the top of the mat and their foot gets partway there, then they have to inch-worm it forward, grab it with their hand to move it, or stand all the way up and step more? If we\'re really interested in guiding people to flow, that\'s really difficult if they lack the range of motion that is often cued or expected in a typical Vinyasa class.\n\nWe want to play, prepare, and offer more. How can we sequence so flow can meet more levels in the room? We expand our sequencing toolbox. This does that.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 23,
-    title: 'Invert Your Flow',
-    tags: ['sequencing'],
-    rules: [
-      'Begin upside down in an inversion or arm balance.',
-      'Travel in and out of inversions and/or arm balances. Add other postures between — but how often can you get into and out of them? How many can you use?',
-      'Don\'t use the same pose to get into the arm balance or inversion every time. Change the poses before and after inverting.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.',
-      'If arm balances and inversions aren\'t your thing currently, cool — come back when they are.'
-    ],
-    asYouMove: [
-      'Play and practice different versions so you can guide from experience.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'Weaving inversions and arm balances into flow makes them not just a pretty pose, but something that can help move the flow forward, be a place of play for students, and a way to grow more self-awareness in the practice.\n\nWhen offering this in a class: 1) have a small workshop to play with it and explore options, but don\'t make it mandatory for the flow, or 2) call out a spot in the flow where students can add an inversion or arm balance if they know it. The goal is to not do something like Standing Pigeon and make half the class hold that while the other half figures out how to fly their pigeon.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 24,
-    title: 'Freeze Tag',
-    tags: ['sequencing'],
-    rules: [
-      'Strike a pose.',
-      'Freeze.',
-      'Ask: "Where do I usually go from this pose?"',
-      'Tag a new posture — somewhere you don\'t usually go.',
-      'Once you\'re there, ask the question again.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Use the whole mat, turn around, go off your mat, etc. Let this one get wild.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'We are creatures of habit. We do the same things often. That can be really good because repetition helps us refine our skills. Other times it makes us feel stuck, uninspired, and bored. This experiment changes that and wants new answers.\n\nIf you want something different, you have to choose something different — and it\'s truly so often just one step away.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 25,
-    title: 'Where\'s Waldo',
-    tags: ['mat-orientation', 'sequencing'],
-    rules: [
-      'Pick a spot on the mat. Choose a pose to begin in.',
-      'Flow through 4–5 postures, then pause.',
-      'Pick a new spot on the mat. Choose the SAME posture you began in.',
-      'Flow through 4–5 postures, then pause.',
-      'Again, pick a new spot on the mat. Repeat.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Experiment with the top, middle, and back of the mat. Try facing forward, sideways, and backwards.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'When you open up the possibility of flow all over the mat, there\'s a whole new world unlocked. In this pattern-breaking experiment, let it be a little uncomfortable as you stand and begin flow in places and directions you may not have ever considered. We often do the same poses in the same spots always.\n\nThis experiment demands different poses and transitions because of the defined mat space. Keep the mat — it would be a whole different experience without one. When you teach, be specific about where you want students to land and stand. They will go to the regular spot or think they are doing it wrong if you don\'t communicate with them.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 26,
-    title: 'Swimming',
-    tags: ['arms-hands', 'sequencing'],
-    rules: [
-      'Swim your arms in transition as much as possible.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Go slow enough as you flow to notice how you usually move your arms — experiment with swimming them.',
-      'Swim either forward or backwards.',
-      'Notice the feeling of using your upper body more as you swim.',
-      'If you bring your hands/arms together during this experiment, see how quickly you can set yourself back up to swim your arms.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'The transition is where the dance lives. It can be common to call out postures and cue them and completely skip the transitions. It\'s where things can either become clunky or smooth in flow. Swimming your arms is one way to explore the space between.\n\nAs you move through this experiment, pay attention to the feeling of it. Let yourself be slow or fast as you test new things.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 27,
-    title: 'Wheel It Back',
-    tags: ['sequencing', 'standing'],
-    rules: [
-      'Put as many backward bends in a flow as possible.',
-      'Option to begin in Shiva and Funky Dancer.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Get wiggly and warm up before you land in bigger backward bends.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'We want to include all the body positions in flow — this includes spinal extension. We fold forward a lot in yoga classes, often way more than we backward bend.\n\nNot all backward bends are very easy to include in a flow, especially when moving at breath-pace. Backward bends aren\'t just peak poses — they\'re shapes that can live throughout a flow and balance the other body positions. Some options to play with: Low Lunge, High Lunge, Camel, Up Dog, Standing Backward Bend, Fallen Triangle, Rockstar, Bridge, Single Leg Bridge, Locust, Dancer, Funky Dancer, Cobra, Sphinx, Tiger, Bound Half Moon.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  },
-  {
-    id: 28,
-    title: 'Lunge Your Heart Out',
-    tags: ['standing', 'sequencing'],
-    rules: [
-      'Begin in Skandasana with your heel down.',
-      'Swoosh your arms to the back of the room.',
-      'Flow through 4–5 postures.',
-      'Return to Skandasana.',
-      'Try a new arm position and transition.',
-      'Flow through 4–5 postures. Repeat.'
-    ],
-    beforeYouBegin: [
-      'Choose a song or two to move to.',
-      'Set up your phone to video yourself so you can reference it later and/or share on social media with #MovementExperiments.'
-    ],
-    asYouMove: [
-      'Feel how your arms impact where you want to go next — you\'re exploring keeping your heel down and Skandasana higher, but also how your arm position impacts the flow feeling.'
-    ],
-    whenSongEnds: [
-      'Pause and take a breath.',
-      'Reflect.'
-    ],
-    teachingInsight: 'Skandasana (if taught at all) is so often taught where you drop your ass low and balance on your back toe. This posture requires a lot of mobility, stability, and flexibility. To push out of it and stand back up, it requires a lot of strength.\n\nIt\'s a stellar pose to give us lateral movement in our flows — something that\'s really important — but it can be taught in more than one way. Keep your back heel down and only drop as low as you can keep it grounded. If you\'re someone who can drop low, don\'t go past your thigh parallel to the ground. When you stay in this higher Skandasana, there\'s more freedom to move.\n\nCueing points from Warrior 2: push your front leg straight, pop your back heel in a little, bend your back knee, point your front toes up to the ceiling, swoosh your arms toward the back of the room.',
-    reflectionPrompt: 'What\'s your takeaway?'
-  }
-];
+    let activeFilters = new Set();
+    let lastId = null;
+    let favorites = JSON.parse(localStorage.getItem('flowschool_favs') || '[]');
 
-// ─── STATE ───────────────────────────────────────────────────────────────────
+    // ─── POOL ────────────────────────────────────────────────────────────────────
 
-let activeFilters = new Set();
-let lastId = null;
-let favorites = JSON.parse(localStorage.getItem('flowschool_favs') || '[]');
+    function getPool() {
+      if (activeFilters.size === 0) return EXPERIMENTS;
+      return EXPERIMENTS.filter(e => e.tags.some(t => activeFilters.has(t)));
+    }
 
-// ─── POOL ────────────────────────────────────────────────────────────────────
+    function updatePoolCount() {
+      const n = getPool().length;
+      document.getElementById('pool-num').textContent = n;
+      document.getElementById('shuffle-btn').disabled = n === 0;
+    }
 
-function getPool() {
-  if (activeFilters.size === 0) return EXPERIMENTS;
-  return EXPERIMENTS.filter(e => e.tags.some(t => activeFilters.has(t)));
-}
+    // ─── RENDER ──────────────────────────────────────────────────────────────────
 
-function updatePoolCount() {
-  const n = getPool().length;
-  document.getElementById('pool-num').textContent = n;
-  document.getElementById('shuffle-btn').disabled = n === 0;
-}
+    function renderExperiment(exp) {
+      const card = document.getElementById('experiment-card');
 
-// ─── RENDER ──────────────────────────────────────────────────────────────────
+      // Tags
+      const tagsEl = document.getElementById('exp-tags');
+      tagsEl.innerHTML = exp.tags.map(t =>
+        `<span class="exp-tag">${TAG_LABELS[t] || t}</span>`
+      ).join('');
 
-function renderExperiment(exp) {
-  const card = document.getElementById('experiment-card');
+      // Title
+      document.getElementById('exp-title').textContent = exp.title;
 
-  // Tags
-  const tagsEl = document.getElementById('exp-tags');
-  tagsEl.innerHTML = exp.tags.map(t =>
-    `<span class="exp-tag">${TAG_LABELS[t] || t}</span>`
-  ).join('');
+      // Lists
+      const fill = (id, items, ordered) => {
+        const el = document.getElementById(id);
+        el.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+      };
+      fill('exp-rules', exp.rules);
+      fill('exp-before', exp.beforeYouBegin);
+      fill('exp-during', exp.asYouMove);
+      fill('exp-after', exp.whenSongEnds);
 
-  // Title
-  document.getElementById('exp-title').textContent = exp.title;
+      // Teaching insight (split paragraphs)
+      const insightEl = document.getElementById('exp-insight');
+      insightEl.innerHTML = exp.teachingInsight.split('\n\n')
+        .map(p => `<p>${p}</p>`).join('');
 
-  // Lists
-  const fill = (id, items, ordered) => {
-    const el = document.getElementById(id);
-    el.innerHTML = items.map(item => `<li>${item}</li>`).join('');
-  };
-  fill('exp-rules',  exp.rules);
-  fill('exp-before', exp.beforeYouBegin);
-  fill('exp-during', exp.asYouMove);
-  fill('exp-after',  exp.whenSongEnds);
+      // Reflection
+      document.getElementById('exp-reflect').textContent = exp.reflectionPrompt;
 
-  // Teaching insight (split paragraphs)
-  const insightEl = document.getElementById('exp-insight');
-  insightEl.innerHTML = exp.teachingInsight.split('\n\n')
-    .map(p => `<p>${p}</p>`).join('');
+      // Save button state
+      updateSaveBtn(exp.id);
 
-  // Reflection
-  document.getElementById('exp-reflect').textContent = exp.reflectionPrompt;
+      // Animate in
+      card.classList.remove('animate');
+      void card.offsetWidth;
+      card.classList.add('animate');
+    }
 
-  // Save button state
-  updateSaveBtn(exp.id);
+    // ─── GENERATE ────────────────────────────────────────────────────────────────
 
-  // Animate in
-  card.classList.remove('animate');
-  void card.offsetWidth;
-  card.classList.add('animate');
-}
+    function generate() {
+      const pool = getPool();
+      if (!pool.length) return;
 
-// ─── GENERATE ────────────────────────────────────────────────────────────────
+      let candidates = pool.filter(e => e.id !== lastId);
+      if (!candidates.length) candidates = pool;
 
-function generate() {
-  const pool = getPool();
-  if (!pool.length) return;
+      const exp = candidates[Math.floor(Math.random() * candidates.length)];
+      lastId = exp.id;
+      renderExperiment(exp);
+    }
 
-  let candidates = pool.filter(e => e.id !== lastId);
-  if (!candidates.length) candidates = pool;
+    // ─── FILTERS ─────────────────────────────────────────────────────────────────
 
-  const exp = candidates[Math.floor(Math.random() * candidates.length)];
-  lastId = exp.id;
-  renderExperiment(exp);
-}
+    document.getElementById('filter-chips').addEventListener('click', e => {
+      const chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      const tag = chip.dataset.tag;
+      const wasActive = activeFilters.has(tag);
 
-// ─── FILTERS ─────────────────────────────────────────────────────────────────
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      activeFilters.clear();
 
-document.getElementById('filter-chips').addEventListener('click', e => {
-  const chip = e.target.closest('.filter-chip');
-  if (!chip) return;
-  const tag = chip.dataset.tag;
-  const wasActive = activeFilters.has(tag);
+      if (!wasActive) {
+        activeFilters.add(tag);
+        chip.classList.add('active');
+      }
 
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  activeFilters.clear();
+      updatePoolCount();
 
-  if (!wasActive) {
-    activeFilters.add(tag);
-    chip.classList.add('active');
-  }
+      if (activeFilters.size > 0 && lastId !== null) {
+        const cur = EXPERIMENTS.find(e => e.id === lastId);
+        if (cur && !cur.tags.some(t => activeFilters.has(t))) generate();
+      }
+    });
 
-  updatePoolCount();
+    // ─── ACTIONS ─────────────────────────────────────────────────────────────────
 
-  if (activeFilters.size > 0 && lastId !== null) {
-    const cur = EXPERIMENTS.find(e => e.id === lastId);
-    if (cur && !cur.tags.some(t => activeFilters.has(t))) generate();
-  }
-});
+    document.getElementById('shuffle-btn').addEventListener('click', generate);
 
-// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+    document.getElementById('save-btn').addEventListener('click', () => {
+      if (!lastId) return;
+      const idx = favorites.indexOf(lastId);
+      if (idx === -1) {
+        favorites.push(lastId);
+        toast('Experiment saved.');
+      } else {
+        favorites.splice(idx, 1);
+        toast('Experiment removed.');
+      }
+      saveFavorites();
+      updateSaveBtn(lastId);
+      renderFavsList();
+    });
 
-document.getElementById('shuffle-btn').addEventListener('click', generate);
+    function updateSaveBtn(id) {
+      const btn = document.getElementById('save-btn');
+      const saved = favorites.includes(id);
+      btn.classList.toggle('saved', saved);
+      btn.title = saved ? 'Saved' : 'Save experiment';
+      btn.querySelector('.save-icon').textContent = saved ? 'bookmark' : 'bookmark_border';
+    }
 
-document.getElementById('save-btn').addEventListener('click', () => {
-  if (!lastId) return;
-  const idx = favorites.indexOf(lastId);
-  if (idx === -1) {
-    favorites.push(lastId);
-    toast('Experiment saved.');
-  } else {
-    favorites.splice(idx, 1);
-    toast('Experiment removed.');
-  }
-  saveFavorites();
-  updateSaveBtn(lastId);
-  renderFavsList();
-});
+    // ─── FAVORITES ───────────────────────────────────────────────────────────────
 
-function updateSaveBtn(id) {
-  const btn = document.getElementById('save-btn');
-  const saved = favorites.includes(id);
-  btn.classList.toggle('saved', saved);
-  btn.title = saved ? 'Saved' : 'Save experiment';
-  btn.querySelector('svg').setAttribute('fill', saved ? 'currentColor' : 'none');
-}
+    function saveFavorites() {
+      localStorage.setItem('flowschool_favs', JSON.stringify(favorites));
+      updateFavBadge();
+    }
 
-// ─── FAVORITES ───────────────────────────────────────────────────────────────
+    function updateFavBadge() {
+      const badge = document.getElementById('fav-badge');
+      badge.textContent = favorites.length;
+      badge.classList.toggle('empty', favorites.length === 0);
+    }
 
-function saveFavorites() {
-  localStorage.setItem('flowschool_favs', JSON.stringify(favorites));
-  updateFavBadge();
-}
-
-function updateFavBadge() {
-  const badge = document.getElementById('fav-badge');
-  badge.textContent = favorites.length;
-  badge.classList.toggle('empty', favorites.length === 0);
-}
-
-function renderFavsList() {
-  const body = document.getElementById('favs-body');
-  if (favorites.length === 0) {
-    body.innerHTML = '<p class="favs-empty">No saved experiments yet. Shuffle one and save it.</p>';
-    return;
-  }
-  body.innerHTML = favorites.map(id => {
-    const exp = EXPERIMENTS.find(e => e.id === id);
-    if (!exp) return '';
-    return `
+    function renderFavsList() {
+      const body = document.getElementById('favs-body');
+      if (favorites.length === 0) {
+        body.innerHTML = '<p class="favs-empty">No saved experiments yet. Shuffle one and save it.</p>';
+        return;
+      }
+      body.innerHTML = favorites.map(id => {
+        const exp = EXPERIMENTS.find(e => e.id === id);
+        if (!exp) return '';
+        return `
       <div class="fav-item">
         <span class="fav-name">${exp.title}</span>
         <div class="fav-btns">
@@ -1021,61 +1197,62 @@ function renderFavsList() {
           <button class="fav-rm-btn" data-id="${id}" title="Remove">✕</button>
         </div>
       </div>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-document.getElementById('favs-toggle').addEventListener('click', () => {
-  const body = document.getElementById('favs-body');
-  const toggle = document.getElementById('favs-toggle');
-  const open = body.classList.toggle('hidden');
-  toggle.classList.toggle('open', !open);
-  if (!open) renderFavsList();
-});
+    document.getElementById('favs-toggle').addEventListener('click', () => {
+      const body = document.getElementById('favs-body');
+      const toggle = document.getElementById('favs-toggle');
+      const open = body.classList.toggle('hidden');
+      toggle.classList.toggle('open', !open);
+      if (!open) renderFavsList();
+    });
 
-document.getElementById('favs-body').addEventListener('click', e => {
-  const viewBtn = e.target.closest('.fav-view-btn');
-  const rmBtn   = e.target.closest('.fav-rm-btn');
-  if (viewBtn) {
-    const id = parseInt(viewBtn.dataset.id);
-    const exp = EXPERIMENTS.find(e => e.id === id);
-    if (exp) { lastId = id; renderExperiment(exp); }
-  }
-  if (rmBtn) {
-    const id = parseInt(rmBtn.dataset.id);
-    favorites = favorites.filter(f => f !== id);
-    saveFavorites();
-    renderFavsList();
-    if (lastId === id) updateSaveBtn(id);
-  }
-});
+    document.getElementById('favs-body').addEventListener('click', e => {
+      const viewBtn = e.target.closest('.fav-view-btn');
+      const rmBtn = e.target.closest('.fav-rm-btn');
+      if (viewBtn) {
+        const id = parseInt(viewBtn.dataset.id);
+        const exp = EXPERIMENTS.find(e => e.id === id);
+        if (exp) { lastId = id; renderExperiment(exp); }
+      }
+      if (rmBtn) {
+        const id = parseInt(rmBtn.dataset.id);
+        favorites = favorites.filter(f => f !== id);
+        saveFavorites();
+        renderFavsList();
+        if (lastId === id) updateSaveBtn(id);
+      }
+    });
 
-document.getElementById('clear-btn').addEventListener('click', () => {
-  if (!favorites.length) return;
-  favorites = [];
-  saveFavorites();
-  renderFavsList();
-  if (lastId) updateSaveBtn(lastId);
-  toast('Saved experiments cleared.');
-});
+    document.getElementById('clear-btn').addEventListener('click', () => {
+      if (!favorites.length) return;
+      favorites = [];
+      saveFavorites();
+      renderFavsList();
+      if (lastId) updateSaveBtn(lastId);
+      toast('Saved experiments cleared.');
+    });
 
-// ─── TOAST ───────────────────────────────────────────────────────────────────
+    // ─── TOAST ───────────────────────────────────────────────────────────────────
 
-let toastTimer = null;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
-}
+    let toastTimer = null;
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+    }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
+    // ─── INIT ────────────────────────────────────────────────────────────────────
 
-updatePoolCount();
-updateFavBadge();
-generate();
-</script>
-<script src="lib/nav.js"></script>
+    updatePoolCount();
+    updateFavBadge();
+    generate();
+  </script>
+  <script src="lib/nav.js"></script>
 
 </body>
+
 </html>
