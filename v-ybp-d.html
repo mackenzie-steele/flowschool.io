@@ -30,7 +30,7 @@
       padding: 18px 22px;
       border: 1px solid var(--border);
       border-radius: 0;
-      background: rgba(22,22,18,.03);
+      background: rgba(var(--ink-rgb),.03);
       min-width: 130px;
     }
     .formula-part-label {
@@ -73,7 +73,7 @@
     }
     .f-input, .f-textarea {
       width: 100%;
-      background: rgba(22,22,18,.04);
+      background: rgba(var(--ink-rgb),.04);
       border: 1px solid var(--border);
       border-radius: 0;
       padding: 10px 14px;
@@ -82,7 +82,7 @@
       color: var(--text-1);
       transition: border-color .15s;
     }
-    .f-input:focus, .f-textarea:focus { outline: none; border-color: rgba(22,22,18,.35); }
+    .f-input:focus, .f-textarea:focus { outline: none; border-color: rgba(var(--ink-rgb),.35); }
     .f-input::placeholder, .f-textarea::placeholder { color: var(--text-3); }
     .f-textarea { resize: vertical; min-height: 72px; }
 
@@ -101,7 +101,7 @@
     }
     .cue-preview-wrap {
       padding: 16px 20px;
-      background: rgba(22,22,18,.03);
+      background: rgba(var(--ink-rgb),.03);
       border: 1px solid var(--border-light);
       border-radius: 0;
       margin-bottom: 18px;
@@ -136,20 +136,20 @@
     .verb-search-row .f-input { flex: 1; }
     .verb-cats {
       display: flex;
-      gap: 6px;
+      gap: 10px 6px;
       flex-wrap: wrap;
       margin-bottom: 18px;
     }
     .verb-grid {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px 8px;
       min-height: 40px;
     }
     .verb-chip {
       position: relative;
       background: transparent;
-      border: 1px solid rgba(22,22,18,.14);
+      border: 1px solid rgba(var(--ink-rgb),.14);
       border-radius: 0;
       padding: 6px 14px 6px 24px;
       font-family: var(--font);
@@ -168,18 +168,18 @@
       width: 5px;
       height: 5px;
       border-radius: 50%;
-      border: 1px solid rgba(22,22,18,.22);
+      border: 1px solid rgba(var(--ink-rgb),.22);
       background: transparent;
       transition: all .15s;
     }
-    .verb-chip:hover { background: rgba(22,22,18,.03); border-color: rgba(22,22,18,.28); color: var(--text-2); }
+    .verb-chip:hover { background: rgba(var(--ink-rgb),.03); border-color: rgba(var(--ink-rgb),.28); color: var(--text-2); }
     .verb-chip.selected {
-      background: rgba(22,22,18,.06);
-      border-color: rgba(22,22,18,.35);
+      background: rgba(var(--ink-rgb),.06);
+      border-color: rgba(var(--ink-rgb),.35);
       color: var(--text-1);
       font-weight: var(--weight-semibold);
     }
-    .verb-chip.selected::before { background: #161614; border-color: #161614; }
+    .verb-chip.selected::before { background: var(--ink-solid); border-color: var(--ink-solid); }
     .verb-empty { font-size: var(--text-small); color: var(--text-3); font-style: italic; }
 
     /* ── Check a Cue ── */
@@ -220,7 +220,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 16px 22px;
-      background: rgba(22,22,18,.02);
+      background: rgba(var(--ink-rgb),.02);
       border: none;
       cursor: pointer;
       font-family: var(--font);
@@ -230,7 +230,7 @@
       text-align: left;
       transition: background .15s;
     }
-    .example-trigger:hover { background: rgba(22,22,18,.04); }
+    .example-trigger:hover { background: rgba(var(--ink-rgb),.04); }
     .example-arrow { color: var(--text-3); transition: transform .2s; flex-shrink: 0; }
     .example-item.open .example-arrow { transform: rotate(180deg); }
     .example-body { display: none; padding: 0 22px 20px; }
@@ -270,7 +270,7 @@
     .ws-view-tabs {
       display: flex;
       gap: 2px;
-      background: rgba(22,22,18,.04);
+      background: rgba(var(--ink-rgb),.04);
       border-radius: 0;
       padding: 3px;
     }
@@ -286,7 +286,7 @@
       cursor: pointer;
       transition: all .15s;
     }
-    .ws-tab.active { background: rgba(22,22,18,.09); color: var(--text-1); }
+    .ws-tab.active { background: rgba(var(--ink-rgb),.09); color: var(--text-1); }
     .ws-actions { display: flex; gap: 8px; flex-wrap: wrap; }
     .ws-table-wrap { overflow-x: auto; }
     .ws-table {

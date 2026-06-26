@@ -14,7 +14,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 28px 0 24px;
+      padding: 0 0 24px;
     }
     .res-stats { display: flex; gap: 36px; }
     .stat { display: flex; flex-direction: column; gap: 4px; }
@@ -55,7 +55,7 @@
     .fc-section {
       border: 1px solid var(--border);
       border-radius: var(--r);
-      background: rgba(22, 22, 18, .02);
+      background: rgba(var(--ink-rgb), .02);
       padding: 24px;
     }
 
@@ -67,15 +67,96 @@
       margin-bottom: 14px;
     }
 
-    .fc-section-title {
-      font-size: var(--text-ui);
+    .fc-section-eyebrow-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .fc-section-eyebrow-row .card-eyebrow {
+      margin-bottom: 0;
+    }
+
+    .fc-info-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      color: rgba(var(--ink-rgb), .28);
+      position: relative;
+      line-height: 1;
+      transition: color .15s;
+      flex-shrink: 0;
+    }
+
+    .fc-info-btn .material-symbols-sharp {
+      font-size: 18px;
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+      line-height: 1;
+    }
+
+    .fc-info-btn:hover {
+      color: rgba(var(--ink-rgb), .60);
+    }
+
+    .fc-info-btn::before {
+      content: attr(data-fc-tooltip);
+      position: absolute;
+      bottom: calc(100% + 7px);
+      left: 50%;
+      transform: translateX(-50%) translateY(3px);
+      width: 210px;
+      white-space: normal;
+      font-family: var(--font);
+      font-size: 11px;
       font-weight: var(--weight-medium);
-      color: var(--text-2);
-      margin: 4px 0 0;
-      line-height: 1.35;
+      line-height: 1.5;
+      text-align: left;
+      color: var(--paper-solid);
+      background: var(--ink-solid);
+      border-radius: 1px;
+      padding: 7px 10px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .12s ease, transform .12s ease;
+      z-index: 100;
+    }
+
+    .fc-info-btn:hover::before {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      transition-delay: 250ms;
     }
 
     /* Counter */
+    .fc-section-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .fc-section-reset {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      transition: color .15s;
+    }
+
+    .fc-section-reset:hover { color: var(--text-1); }
+
+    .fc-section-reset .material-symbols-sharp {
+      font-size: 20px;
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+      line-height: 1;
+    }
+
     .fc-counter {
       display: flex;
       align-items: baseline;
@@ -159,7 +240,7 @@
     .fc-box {
       width: 18px;
       height: 18px;
-      border: 1.5px solid rgba(22, 22, 18, .22);
+      border: 1.5px solid rgba(var(--ink-rgb), .22);
       border-radius: 0;
       flex-shrink: 0;
       margin-top: 1px;
@@ -170,13 +251,13 @@
     }
 
     .fc-item.checked .fc-box {
-      background: #161614;
-      border-color: #161614;
+      background: var(--ink-solid);
+      border-color: var(--ink-solid);
     }
 
     .fc-icon {
       font-size: 12px;
-      color: #F5F4F0;
+      color: var(--paper-solid);
       opacity: 0;
       transition: opacity .15s;
       font-weight: 700;
@@ -196,10 +277,10 @@
     }
 
     .fc-sub {
-      font-size: var(--text-small);
+      font-size: var(--text-ui);
+      font-family: var(--font);
       color: var(--text-3);
-      font-family: var(--font-mono);
-      line-height: 1.4;
+      line-height: 1.35;
       display: block;
     }
 
@@ -252,11 +333,11 @@
         <div class="res-stats">
           <div class="fc-counter">
             <span class="fc-count" id="fc-total-count">0</span>
-            <span class="fc-denom">/ 30 checked</span>
+            <span class="fc-denom">/ 27 checked</span>
           </div>
         </div>
         <div class="res-actions">
-          <button class="btn-icon" id="fc-reset-all" data-tooltip="New Flow" title="New Flow">
+          <button class="btn-icon" id="fc-reset-all" data-tooltip="Reset" title="Reset">
             <span class="material-symbols-sharp">refresh</span>
           </button>
         </div>
@@ -269,12 +350,17 @@
           <div class="fc-section">
             <div class="fc-section-head">
               <div>
-                <span class="card-eyebrow">Body Positions</span>
-                <h2 class="fc-section-title">Check off each position your flow includes.<br>One pose can cover multiple positions at once.</h2>
+                <div class="fc-section-eyebrow-row">
+                  <span class="card-eyebrow">Body Positions</span>
+                  <button class="fc-info-btn" data-fc-tooltip="Check off each position your flow includes. One pose can cover multiple positions at once."><span class="material-symbols-sharp">info</span></button>
+                </div>
               </div>
-              <div class="fc-counter">
-                <span class="fc-count" id="bp-count">0</span>
-                <span class="fc-denom">/ 13</span>
+              <div class="fc-section-right">
+                <button class="fc-section-reset" data-key="bp" title="Reset body positions"><span class="material-symbols-sharp">refresh</span></button>
+                <div class="fc-counter">
+                  <span class="fc-count" id="bp-count">0</span>
+                  <span class="fc-denom">/ 13</span>
+                </div>
               </div>
             </div>
             <div class="fc-progress"><div class="fc-progress-fill" id="bp-fill"></div></div>
@@ -290,12 +376,17 @@
           <div class="fc-section">
             <div class="fc-section-head">
               <div>
-                <span class="card-eyebrow">Movement Planes</span>
-                <h2 class="fc-section-title">Does your flow move in all three planes?</h2>
+                <div class="fc-section-eyebrow-row">
+                  <span class="card-eyebrow">Movement Planes</span>
+                  <button class="fc-info-btn" data-fc-tooltip="Does your flow move in all three planes?"><span class="material-symbols-sharp">info</span></button>
+                </div>
               </div>
-              <div class="fc-counter">
-                <span class="fc-count" id="plane-count">0</span>
-                <span class="fc-denom">/ 3</span>
+              <div class="fc-section-right">
+                <button class="fc-section-reset" data-key="plane" title="Reset movement planes"><span class="material-symbols-sharp">refresh</span></button>
+                <div class="fc-counter">
+                  <span class="fc-count" id="plane-count">0</span>
+                  <span class="fc-denom">/ 3</span>
+                </div>
               </div>
             </div>
             <div class="fc-progress"><div class="fc-progress-fill" id="plane-fill"></div></div>
@@ -307,12 +398,17 @@
           <div class="fc-section">
             <div class="fc-section-head">
               <div>
-                <span class="card-eyebrow">Gait</span>
-                <h2 class="fc-section-title">Does your flow alternate naturally — like a yoga dance?</h2>
+                <div class="fc-section-eyebrow-row">
+                  <span class="card-eyebrow">Gait</span>
+                  <button class="fc-info-btn" data-fc-tooltip="Does your flow alternate naturally — like a yoga dance?"><span class="material-symbols-sharp">info</span></button>
+                </div>
               </div>
-              <div class="fc-counter">
-                <span class="fc-count" id="gait-count">0</span>
-                <span class="fc-denom">/ 6</span>
+              <div class="fc-section-right">
+                <button class="fc-section-reset" data-key="gait" title="Reset gait"><span class="material-symbols-sharp">refresh</span></button>
+                <div class="fc-counter">
+                  <span class="fc-count" id="gait-count">0</span>
+                  <span class="fc-denom">/ 6</span>
+                </div>
               </div>
             </div>
             <div class="fc-progress"><div class="fc-progress-fill" id="gait-fill"></div></div>
@@ -324,12 +420,17 @@
           <div class="fc-section">
             <div class="fc-section-head">
               <div>
-                <span class="card-eyebrow">The Big Five</span>
-                <h2 class="fc-section-title">Does your flow address each element?</h2>
+                <div class="fc-section-eyebrow-row">
+                  <span class="card-eyebrow">The Big Five</span>
+                  <button class="fc-info-btn" data-fc-tooltip="Does your flow address each element?"><span class="material-symbols-sharp">info</span></button>
+                </div>
               </div>
-              <div class="fc-counter">
-                <span class="fc-count" id="big5-count">0</span>
-                <span class="fc-denom">/ 8</span>
+              <div class="fc-section-right">
+                <button class="fc-section-reset" data-key="big5" title="Reset big five"><span class="material-symbols-sharp">refresh</span></button>
+                <div class="fc-counter">
+                  <span class="fc-count" id="big5-count">0</span>
+                  <span class="fc-denom">/ 5</span>
+                </div>
               </div>
             </div>
             <div class="fc-progress"><div class="fc-progress-fill" id="big5-fill"></div></div>
@@ -385,10 +486,6 @@
         { id: 'strength',     label: 'Strength',     sub: 'Power, endurance, and exertion of effort' },
         { id: 'conditioning', label: 'Conditioning', sub: 'Rhythmic movement of the heart and lungs' },
         { id: 'flow',         label: 'Flow',         sub: 'Transitions and postures sequenced across planes' },
-        { id: '_divider',     label: 'Supporting' },
-        { id: 'flexibility',  label: 'Flexibility',  sub: 'Joint and muscle control in passive range' },
-        { id: 'breath',       label: 'Breath',       sub: 'The rhythm that helps movement become embodied' },
-        { id: 'rest',         label: 'Rest',         sub: 'Stillness, integration, nervous system reset' },
       ];
 
       // ── Storage ───────────────────────────────────────────────────────
@@ -400,7 +497,7 @@
         big5:  'flowschool_fc_big5',
       };
 
-      var TOTALS = { bp: 13, plane: 3, gait: 6, big5: 8 };
+      var TOTALS = { bp: 13, plane: 3, gait: 6, big5: 5 };
 
       // ── State ─────────────────────────────────────────────────────────
 
@@ -498,6 +595,19 @@
         });
         Object.keys(TOTALS).forEach(function (key) { updateCounter(key); });
         updateTotalCount();
+      });
+
+      document.querySelectorAll('.fc-section-reset').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var key = btn.dataset.key;
+          state[key].clear();
+          document.querySelectorAll('#' + key + '-list .fc-item').forEach(function (el) {
+            el.classList.remove('checked');
+            el.setAttribute('aria-checked', 'false');
+          });
+          updateCounter(key);
+          updateTotalCount();
+        });
       });
 
       // ── Recent tools ──────────────────────────────────────────────────

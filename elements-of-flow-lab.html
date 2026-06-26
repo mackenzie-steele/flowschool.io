@@ -44,7 +44,7 @@
     /* Segmented control */
     .efl-seg {
       display: flex;
-      background: rgba(22, 22, 18, .04);
+      background: rgba(var(--ink-rgb), .04);
       border: 1px solid var(--border);
       border-radius: 0;
       padding: 3px;
@@ -68,7 +68,7 @@
     }
 
     .efl-seg-btn.active {
-      background: rgba(22, 22, 18, .09);
+      background: rgba(var(--ink-rgb), .09);
       color: var(--text-1);
     }
 
@@ -84,7 +84,7 @@
       padding: 11px 14px;
       border: 1px solid var(--border);
       border-radius: 0;
-      background: rgba(22, 22, 18, .02);
+      background: rgba(var(--ink-rgb), .02);
       color: var(--text-2);
       font-family: var(--font);
       font-size: var(--text-ui);
@@ -127,15 +127,15 @@
     }
 
     .efl-plane-btn:hover {
-      border-color: rgba(22, 22, 18, .20);
-      background: rgba(22, 22, 18, .04);
+      border-color: rgba(var(--ink-rgb), .20);
+      background: rgba(var(--ink-rgb), .04);
       color: var(--text-1);
     }
 
     .efl-plane-btn.active {
-      background: rgba(22, 22, 18, .05);
-      border-color: rgba(22, 22, 18, .18);
-      border-bottom-color: rgba(22, 22, 18, .06);
+      background: rgba(var(--ink-rgb), .05);
+      border-color: rgba(var(--ink-rgb), .18);
+      border-bottom-color: rgba(var(--ink-rgb), .06);
       color: var(--text-1);
       border-radius: 0;
     }
@@ -153,7 +153,7 @@
       border: 1px solid transparent;
       border-top-color: transparent;
       border-radius: 0;
-      background: rgba(22, 22, 18, .03);
+      background: rgba(var(--ink-rgb), .03);
       transition: max-height 0.28s ease, opacity 0.22s ease, padding 0.28s ease, border-color 0.2s ease;
     }
 
@@ -161,8 +161,8 @@
       max-height: 400px;
       opacity: 1;
       padding: 14px 16px 16px;
-      border-color: rgba(22, 22, 18, .10);
-      border-top-color: rgba(22, 22, 18, .04);
+      border-color: rgba(var(--ink-rgb), .10);
+      border-top-color: rgba(var(--ink-rgb), .04);
     }
 
     /* Explanation card */
@@ -171,7 +171,7 @@
       padding: 16px;
       border: 1px solid var(--border-light);
       border-radius: 0;
-      background: rgba(22, 22, 18, .015);
+      background: rgba(var(--ink-rgb), .015);
       animation: fadeUp .22s ease both;
     }
 
@@ -230,6 +230,10 @@
       padding-top: 64px;
     }
 
+    .efl-section:first-child {
+      padding-top: 0;
+    }
+
     .efl-section-head {
       margin-bottom: 24px;
     }
@@ -282,7 +286,7 @@
       padding: 18px 14px 16px;
       border: 1px solid var(--border);
       border-radius: 0;
-      background: rgba(22, 22, 18, .018);
+      background: rgba(var(--ink-rgb), .018);
       cursor: pointer;
       transition: all .2s;
       -webkit-user-select: none;
@@ -290,13 +294,13 @@
     }
 
     .efl-b5-card:hover {
-      border-color: rgba(22, 22, 18, .22);
-      background: rgba(22, 22, 18, .04);
+      border-color: rgba(var(--ink-rgb), .22);
+      background: rgba(var(--ink-rgb), .04);
     }
 
     .efl-b5-card.active {
-      border-color: rgba(22, 22, 18, .30);
-      background: rgba(22, 22, 18, .07);
+      border-color: rgba(var(--ink-rgb), .30);
+      background: rgba(var(--ink-rgb), .07);
     }
 
     .efl-b5-name {
@@ -327,7 +331,7 @@
       padding: 18px 20px;
       border: 1px solid var(--border-light);
       border-radius: 0;
-      background: rgba(22, 22, 18, .015);
+      background: rgba(var(--ink-rgb), .015);
       display: none;
       animation: fadeUp .22s ease both;
     }
@@ -362,7 +366,7 @@
       padding: 16px;
       border: 1px solid var(--border-light);
       border-radius: 0;
-      background: rgba(22, 22, 18, .01);
+      background: rgba(var(--ink-rgb), .01);
       cursor: pointer;
       transition: all .15s;
       -webkit-user-select: none;
@@ -370,13 +374,13 @@
     }
 
     .efl-support-card:hover {
-      border-color: rgba(22, 22, 18, .16);
-      background: rgba(22, 22, 18, .03);
+      border-color: rgba(var(--ink-rgb), .16);
+      background: rgba(var(--ink-rgb), .03);
     }
 
     .efl-support-card.active {
       border-color: var(--border);
-      background: rgba(22, 22, 18, .05);
+      background: rgba(var(--ink-rgb), .05);
     }
 
     .efl-support-name {
@@ -453,35 +457,35 @@
     .b5-group:focus, .b5-group:active { outline: none; }
 
     .b5-wedge {
-      fill: rgba(22, 22, 18, 0.06);
-      stroke: rgba(22, 22, 18, 0.45);
+      fill: rgba(var(--ink-rgb), 0.06);
+      stroke: rgba(var(--ink-rgb), 0.45);
       stroke-width: 1;
       vector-effect: non-scaling-stroke;
       transition: fill 0.18s ease;
     }
 
     .b5-group:hover .b5-wedge {
-      fill: rgba(22, 22, 18, 0.11);
+      fill: rgba(var(--ink-rgb), 0.11);
     }
 
     .b5-group.active .b5-wedge {
-      fill: rgba(22, 22, 18, 0.18);
+      fill: rgba(var(--ink-rgb), 0.18);
     }
 
     .b5-sat-circle {
-      fill: rgba(22, 22, 18, 0.06);
-      stroke: rgba(22, 22, 18, 0.20);
+      fill: rgba(var(--ink-rgb), 0.06);
+      stroke: rgba(var(--ink-rgb), 0.20);
       stroke-width: 1;
       vector-effect: non-scaling-stroke;
       transition: fill 0.18s ease;
     }
 
     .b5-group:hover .b5-sat-circle {
-      fill: rgba(22, 22, 18, 0.11);
+      fill: rgba(var(--ink-rgb), 0.11);
     }
 
     .b5-group.active .b5-sat-circle {
-      fill: rgba(22, 22, 18, 0.18);
+      fill: rgba(var(--ink-rgb), 0.18);
     }
 
     .b5-label {
@@ -490,12 +494,12 @@
       font-weight: var(--weight-regular);
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      fill: rgba(22, 22, 18, 0.40);
+      fill: rgba(var(--ink-rgb), 0.40);
       pointer-events: none;
     }
 
     .b5-group.active .b5-label {
-      fill: rgba(22, 22, 18, 0.85);
+      fill: rgba(var(--ink-rgb), 0.85);
     }
 
     .efl-b5-canvas {}
@@ -561,7 +565,7 @@
     .efl-check-box {
       width: 20px;
       height: 20px;
-      border: 1.5px solid rgba(22, 22, 18, .22);
+      border: 1.5px solid rgba(var(--ink-rgb), .22);
       border-radius: 0;
       flex-shrink: 0;
       margin-top: 1px;
@@ -572,13 +576,13 @@
     }
 
     .efl-check-item.checked .efl-check-box {
-      background: #161614;
-      border-color: #161614;
+      background: var(--ink-solid);
+      border-color: var(--ink-solid);
     }
 
     .efl-check-icon {
       font-size: 13px;
-      color: #F5F4F0;
+      color: var(--paper-solid);
       opacity: 0;
       transition: opacity .15s;
       font-weight: 700;
@@ -664,7 +668,7 @@
     .efl-gait-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px 8px;
       margin-bottom: 14px;
     }
 
@@ -672,7 +676,7 @@
       padding: 16px 18px;
       border: 1px solid var(--border-light);
       border-radius: 0;
-      background: rgba(22, 22, 18, .015);
+      background: rgba(var(--ink-rgb), .015);
       font-size: var(--text-body-sm);
       color: var(--text-2);
       line-height: 1.65;
@@ -688,13 +692,13 @@
     .efl-map-btns {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px 8px;
       margin-bottom: 16px;
     }
 
     .efl-map-path {
       min-height: 54px;
-      border: 1px dashed rgba(22, 22, 18, .14);
+      border: 1px dashed rgba(var(--ink-rgb), .14);
       border-radius: 0;
       padding: 12px 16px;
       display: flex;
@@ -707,7 +711,7 @@
     .efl-map-step {
       font-size: var(--text-ui);
       color: var(--text-1);
-      background: rgba(22, 22, 18, .06);
+      background: rgba(var(--ink-rgb), .06);
       border: 1px solid var(--border);
       border-radius: 0;
       padding: 5px 12px;
@@ -750,7 +754,7 @@
       padding: 44px 28px;
       border: 1px solid var(--border-light);
       border-radius: 0;
-      background: rgba(22, 22, 18, .01);
+      background: rgba(var(--ink-rgb), .01);
     }
 
     .efl-dots-line {
@@ -828,7 +832,7 @@
 
     .efl-textarea {
       width: 100%;
-      background: rgba(22, 22, 18, .04);
+      background: rgba(var(--ink-rgb), .04);
       border: 1px solid var(--border);
       border-radius: 0;
       padding: 16px;
@@ -845,7 +849,7 @@
     }
 
     .efl-textarea:focus {
-      border-color: rgba(22, 22, 18, .35);
+      border-color: rgba(var(--ink-rgb), .35);
     }
 
     .efl-textarea::placeholder {
@@ -933,46 +937,46 @@
               aria-label="Top-down view of yoga mat with movement direction indicators">
               <defs>
                 <marker id="arr" markerWidth="6.4" markerHeight="6.4" refX="4.8" refY="3.2" orient="auto">
-                  <path d="M0,0.8 L4.8,3.2 L0,5.6" fill="none" stroke="rgba(22,22,18,0.75)" stroke-width="1" stroke-linecap="round"
+                  <path d="M0,0.8 L4.8,3.2 L0,5.6" fill="none" stroke="rgba(var(--ink-rgb),0.75)" stroke-width="1" stroke-linecap="round"
                     stroke-linejoin="round" />
                 </marker>
               </defs>
 
               <!-- ── Mat ── -->
-              <rect x="82" y="43" width="100" height="220" rx="0" fill="rgba(22,22,18,0.06)" />
-              <rect x="80" y="40" width="100" height="220" rx="0" fill="rgba(22,22,18,0.03)"
-                stroke="rgba(22,22,18,0.45)" stroke-width="1" />
-              <line x1="130" y1="40" x2="130" y2="260" stroke="rgba(22,22,18,0.18)" stroke-width=".75"
+              <rect x="82" y="43" width="100" height="220" rx="0" fill="rgba(var(--ink-rgb),0.06)" />
+              <rect x="80" y="40" width="100" height="220" rx="0" fill="rgba(var(--ink-rgb),0.03)"
+                stroke="rgba(var(--ink-rgb),0.45)" stroke-width="1" />
+              <line x1="130" y1="40" x2="130" y2="260" stroke="rgba(var(--ink-rgb),0.18)" stroke-width=".75"
                 stroke-dasharray="3,6" stroke-dashoffset="8.5" />
-              <line x1="80" y1="150" x2="180" y2="150" stroke="rgba(22,22,18,0.18)" stroke-width=".75"
+              <line x1="80" y1="150" x2="180" y2="150" stroke="rgba(var(--ink-rgb),0.18)" stroke-width=".75"
                 stroke-dasharray="3,6" stroke-dashoffset="5.5" />
-              <circle cx="130" cy="150" r="1.5" fill="rgba(22,22,18,0.7)" />
-              <text x="130" y="33" text-anchor="middle" font-size="7" fill="rgba(22,22,18,0.55)"
+              <circle cx="130" cy="150" r="1.5" fill="rgba(var(--ink-rgb),0.7)" />
+              <text x="130" y="33" text-anchor="middle" font-size="7" fill="rgba(var(--ink-rgb),0.55)"
                 font-family="inherit" letter-spacing="0.09em">FOM</text>
-              <text x="130" y="275" text-anchor="middle" font-size="7" fill="rgba(22,22,18,0.38)"
+              <text x="130" y="275" text-anchor="middle" font-size="7" fill="rgba(var(--ink-rgb),0.38)"
                 font-family="inherit" letter-spacing="0.09em">BOM</text>
 
               <!-- ── Sagittal ── -->
               <g id="indicator-sagittal" class="plane-indicator">
-                <line x1="130" y1="140" x2="130" y2="52" stroke="rgba(22,22,18,0.75)" stroke-width="1" marker-end="url(#arr)" />
-                <line x1="130" y1="160" x2="130" y2="248" stroke="rgba(22,22,18,0.75)" stroke-width="1" marker-end="url(#arr)" />
-                <circle cx="130" cy="150" r="1.5" fill="rgba(22,22,18,0.75)" />
+                <line x1="130" y1="140" x2="130" y2="52" stroke="rgba(var(--ink-rgb),0.75)" stroke-width="1" marker-end="url(#arr)" />
+                <line x1="130" y1="160" x2="130" y2="248" stroke="rgba(var(--ink-rgb),0.75)" stroke-width="1" marker-end="url(#arr)" />
+                <circle cx="130" cy="150" r="1.5" fill="rgba(var(--ink-rgb),0.75)" />
               </g>
 
               <!-- ── Frontal ── -->
               <g id="indicator-frontal" class="plane-indicator">
-                <line x1="120" y1="150" x2="92" y2="150" stroke="rgba(22,22,18,0.75)" stroke-width="1" marker-end="url(#arr)" />
-                <line x1="140" y1="150" x2="168" y2="150" stroke="rgba(22,22,18,0.75)" stroke-width="1" marker-end="url(#arr)" />
-                <circle cx="130" cy="150" r="1.5" fill="rgba(22,22,18,0.75)" />
+                <line x1="120" y1="150" x2="92" y2="150" stroke="rgba(var(--ink-rgb),0.75)" stroke-width="1" marker-end="url(#arr)" />
+                <line x1="140" y1="150" x2="168" y2="150" stroke="rgba(var(--ink-rgb),0.75)" stroke-width="1" marker-end="url(#arr)" />
+                <circle cx="130" cy="150" r="1.5" fill="rgba(var(--ink-rgb),0.75)" />
               </g>
 
               <!-- ── Transverse ── -->
               <g id="indicator-transverse" class="plane-indicator">
-                <path d="M 103,143 A 28,28 0 0,1 157,143" fill="none" stroke="rgba(22,22,18,0.75)" stroke-width="1"
+                <path d="M 103,143 A 28,28 0 0,1 157,143" fill="none" stroke="rgba(var(--ink-rgb),0.75)" stroke-width="1"
                   marker-end="url(#arr)" />
-                <path d="M 157,157 A 28,28 0 0,1 103,157" fill="none" stroke="rgba(22,22,18,0.75)" stroke-width="1"
+                <path d="M 157,157 A 28,28 0 0,1 103,157" fill="none" stroke="rgba(var(--ink-rgb),0.75)" stroke-width="1"
                   marker-end="url(#arr)" />
-                <circle cx="130" cy="150" r="1.5" fill="rgba(22,22,18,0.75)" />
+                <circle cx="130" cy="150" r="1.5" fill="rgba(var(--ink-rgb),0.75)" />
               </g>
 
             </svg>

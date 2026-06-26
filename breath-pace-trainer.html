@@ -12,7 +12,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 56px 0 44px;
+      padding: 0 0 44px;
       position: relative;
     }
 
@@ -27,14 +27,14 @@
       font-size: var(--fs-h3);
       font-weight: var(--weight-regular) !important;
       letter-spacing: -.01em;
-      fill: #161614;
+      fill: var(--ink-solid);
       text-anchor: middle;
       dominant-baseline: central;
       font-variant-numeric: tabular-nums;
     }
 
     #svg-label {
-      fill: rgba(22, 22, 18, .40);
+      fill: rgba(var(--ink-rgb), .40);
       text-anchor: middle;
     }
 
@@ -66,10 +66,6 @@
       align-items: center;
       gap: 10px;
       margin-bottom: 12px;
-    }
-
-    .start-btn {
-      padding: 12px 28px;
     }
 
     .start-btn:hover {
@@ -107,7 +103,7 @@
       align-items: center;
       justify-content: center;
       background: none;
-      border: 1px solid rgba(22, 22, 18, .14);
+      border: 1px solid rgba(var(--ink-rgb), .14);
       color: var(--text-3);
       padding: 10px;
       border-radius: 0;
@@ -117,12 +113,12 @@
 
     .audio-btn:hover {
       color: var(--text-2);
-      border-color: rgba(22, 22, 18, .28);
+      border-color: rgba(var(--ink-rgb), .28);
     }
 
     .audio-btn.on {
       color: var(--text-2);
-      border-color: rgba(22, 22, 18, .22);
+      border-color: rgba(var(--ink-rgb), .22);
     }
 
     .audio-btn.off {
@@ -153,6 +149,19 @@
         width: 100%;
         justify-content: center;
       }
+    }
+
+    .range-val {
+      font-family: var(--font-mono);
+      font-size: var(--fs-h5);
+      font-weight: var(--weight-regular);
+      letter-spacing: .02em;
+    }
+    .range-ticks span { background: rgba(var(--ink-rgb), .16); height: 5px; }
+    .range-ticks span:nth-child(1),
+    .range-ticks span:nth-child(7) {
+      background: rgba(var(--ink-rgb), .38);
+      height: 10px;
     }
   </style>
 </head>
@@ -197,10 +206,9 @@
           <span class="ctl-label label-1">Inhale</span>
           <div class="range-slider-wrap">
             <span class="range-val" id="inhale-val">4s</span>
-            <input type="range" class="range-slider" id="inhale-slider" min="3" max="8" step="1" value="4">
-            <div class="range-ticks"><span></span><span></span><span></span><span></span><span></span><span></span>
-            </div>
-            <div class="range-ends label-2"><span>3s</span><span>8s</span></div>
+            <input type="range" class="range-slider" id="inhale-slider" min="2" max="8" step="1" value="4">
+            <div class="range-ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="range-ends label-2"><span>2s</span><span>8s</span></div>
           </div>
         </div>
 
@@ -208,10 +216,9 @@
           <span class="ctl-label label-1">Exhale</span>
           <div class="range-slider-wrap">
             <span class="range-val" id="exhale-val">4s</span>
-            <input type="range" class="range-slider" id="exhale-slider" min="3" max="8" step="1" value="4">
-            <div class="range-ticks"><span></span><span></span><span></span><span></span><span></span><span></span>
-            </div>
-            <div class="range-ends label-2"><span>3s</span><span>8s</span></div>
+            <input type="range" class="range-slider" id="exhale-slider" min="2" max="8" step="1" value="4">
+            <div class="range-ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="range-ends label-2"><span>2s</span><span>8s</span></div>
           </div>
         </div>
 
@@ -323,7 +330,7 @@
         line.setAttribute('y1', (CY + R_IN * Math.sin(angle)).toFixed(2));
         line.setAttribute('x2', (CX + R_OUT * Math.cos(angle)).toFixed(2));
         line.setAttribute('y2', (CY + R_OUT * Math.sin(angle)).toFixed(2));
-        line.setAttribute('stroke', 'rgba(22,22,18,.85)');
+        line.setAttribute('stroke', 'rgba(var(--ink-rgb),.85)');
         line.setAttribute('stroke-width', '2');
         line.setAttribute('stroke-linecap', 'round');
         line.setAttribute('opacity', '0.2');
@@ -346,7 +353,7 @@
       const labelEl = document.getElementById('svg-label');
       countEl.textContent = count;
       labelEl.textContent = phase.label.toUpperCase();
-      labelEl.style.fill = phase.id === 'inhale' ? '#161614' : 'rgba(22,22,18,.38)';
+      labelEl.style.fill = phase.id === 'inhale' ? 'var(--ink-solid)' : 'rgba(var(--ink-rgb),.38)';
     }
 
     function resetDisplay() {
@@ -354,7 +361,7 @@
       const labelEl = document.getElementById('svg-label');
       countEl.textContent = '—';
       labelEl.textContent = 'READY';
-      labelEl.style.fill = 'rgba(22,22,18,.38)';
+      labelEl.style.fill = 'rgba(var(--ink-rgb),.38)';
       breathProgress = 0;
       setTickOpacity(0);
     }
@@ -466,7 +473,7 @@
 
     function updateSliderFill(slider) {
       const pct = (slider.value - slider.min) / (slider.max - slider.min) * 100;
-      slider.style.background = `linear-gradient(to right,rgba(22,22,18,.68) ${pct}%,rgba(22,22,18,.12) ${pct}%)`;
+      slider.style.background = `linear-gradient(to right,rgba(var(--ink-rgb),.68) ${pct}%,rgba(var(--ink-rgb),.12) ${pct}%)`;
     }
 
     ['inhale', 'exhale'].forEach(type => {

@@ -23,7 +23,7 @@
     .filter-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px 8px;
       flex: 1;
     }
 
@@ -39,7 +39,6 @@
     }
 
     .shuffle-btn {
-      padding: 12px 24px;
       flex-shrink: 0;
     }
 
@@ -149,8 +148,8 @@
 
     .reflect-block {
       margin-top: 28px;
-      background: rgba(22, 22, 18, .04);
-      border: 1px solid rgba(22, 22, 18, .14);
+      background: rgba(var(--ink-rgb), .04);
+      border: 1px solid rgba(var(--ink-rgb), .14);
       border-radius: 0;
       padding: 22px 26px;
     }
@@ -188,9 +187,9 @@
     }
 
     #regen-btn {
-      background: #161614;
-      color: #F5F4F0;
-      border-color: #161614;
+      background: var(--ink-solid);
+      color: var(--paper-solid);
+      border-color: var(--ink-solid);
     }
 
     #regen-btn:hover {
@@ -201,18 +200,18 @@
     #copy-btn {
       background: transparent;
       color: var(--text-2);
-      border-color: rgba(22, 22, 18, .18);
+      border-color: rgba(var(--ink-rgb), .18);
     }
 
     #copy-btn:hover {
-      background: rgba(22, 22, 18, .05);
+      background: rgba(var(--ink-rgb), .05);
       color: var(--text-1);
-      border-color: rgba(22, 22, 18, .32);
+      border-color: rgba(var(--ink-rgb), .32);
     }
 
     #copy-btn.copied {
       color: var(--text-2);
-      border-color: rgba(22, 22, 18, .28);
+      border-color: rgba(var(--ink-rgb), .28);
     }
 
     /* ── Favorites content ── */

@@ -20,7 +20,7 @@
     .db-card {
       border: 1px solid var(--border-light);
       border-radius: 0;
-      background: rgba(22,22,18,.018);
+      background: rgba(var(--ink-rgb),.018);
       padding: 22px 24px;
     }
 
@@ -101,7 +101,7 @@
     .db-prompt {
       display: flex;
       flex-direction: column;
-      background: rgba(22,22,18,.025) !important;
+      background: rgba(var(--ink-rgb),.025) !important;
       min-height: 180px;
     }
 
@@ -158,7 +158,7 @@
     }
 
     .db-quick-link:hover {
-      background: rgba(22,22,18,.05);
+      background: rgba(var(--ink-rgb),.05);
       color: var(--text-1);
     }
 
@@ -192,7 +192,7 @@
       padding: 18px;
       text-decoration: none;
       color: inherit;
-      background: rgba(22,22,18,.022);
+      background: rgba(var(--ink-rgb),.022);
       transition: border-color .15s, background .15s;
       display: flex;
       flex-direction: column;
@@ -200,15 +200,15 @@
     }
 
     .db-continue-card:hover {
-      border-color: rgba(22,22,18,.22);
-      background: rgba(22,22,18,.038);
+      border-color: rgba(var(--ink-rgb),.22);
+      background: rgba(var(--ink-rgb),.038);
     }
 
     .db-cc-icon {
       width: 34px;
       height: 34px;
       border-radius: 0;
-      background: rgba(22,22,18,.07);
+      background: rgba(var(--ink-rgb),.07);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -326,12 +326,12 @@
     .db-contrib-day {
       aspect-ratio: 1;
       border-radius: 0;
-      background: rgba(22,22,18,.08);
+      background: rgba(var(--ink-rgb),.08);
     }
 
-    .db-contrib-day.active   { background: rgba(22,22,18,.45); }
-    .db-contrib-day.is-today { box-shadow: 0 0 0 1.5px rgba(22,22,18,.35); }
-    .db-contrib-day.future   { background: rgba(22,22,18,.03); }
+    .db-contrib-day.active   { background: rgba(var(--ink-rgb),.45); }
+    .db-contrib-day.is-today { box-shadow: 0 0 0 1.5px rgba(var(--ink-rgb),.35); }
+    .db-contrib-day.future   { background: rgba(var(--ink-rgb),.03); }
 
     /* ── Score ───────────────────────────────────────────── */
     /* ── Skill Map ───────────────────────────────────────── */
@@ -371,11 +371,11 @@
       color: var(--text-1);
       text-decoration: underline;
       text-underline-offset: 2px;
-      text-decoration-color: rgba(22,22,18,.25);
+      text-decoration-color: rgba(var(--ink-rgb),.25);
     }
 
     .db-skillmap-suggest a:hover {
-      text-decoration-color: rgba(22,22,18,.65);
+      text-decoration-color: rgba(var(--ink-rgb),.65);
     }
 
     /* ── Saved items ─────────────────────────────────────── */
@@ -397,7 +397,7 @@
       width: 32px;
       height: 32px;
       border-radius: 0;
-      background: rgba(22,22,18,.06);
+      background: rgba(var(--ink-rgb),.06);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -899,20 +899,20 @@
 
       var gridSVG = [25, 50, 75, 100].map(function (pct, gi) {
         var pts = data.map(function (_, i) { var p = pt(pct, i); return p[0] + ',' + p[1]; }).join(' ');
-        return '<polygon points="' + pts + '" fill="none" stroke="rgba(22,22,18,' + (0.06 + gi * 0.03).toFixed(3) + ')" stroke-width="0.75"/>';
+        return '<polygon points="' + pts + '" fill="none" stroke="rgba(var(--ink-rgb),' + (0.06 + gi * 0.03).toFixed(3) + ')" stroke-width="0.75"/>';
       }).join('');
 
       var axisSVG = data.map(function (_, i) {
         var p = pt(100, i);
-        return '<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="rgba(22,22,18,.12)" stroke-width="0.75"/>';
+        return '<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="rgba(var(--ink-rgb),.12)" stroke-width="0.75"/>';
       }).join('');
 
       var dataPts = data.map(function (d, i) { var p = pt(d.score, i); return p[0] + ',' + p[1]; }).join(' ');
-      var dataSVG = '<polygon points="' + dataPts + '" fill="rgba(22,22,18,.10)" stroke="rgba(22,22,18,.55)" stroke-width="1.5" stroke-linejoin="round"/>';
+      var dataSVG = '<polygon points="' + dataPts + '" fill="rgba(var(--ink-rgb),.10)" stroke="rgba(var(--ink-rgb),.55)" stroke-width="1.5" stroke-linejoin="round"/>';
 
       var dotsSVG = data.map(function (d, i) {
         var p = pt(d.score, i);
-        return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.5" fill="rgba(22,22,18,.80)"/>';
+        return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.5" fill="rgba(var(--ink-rgb),.80)"/>';
       }).join('');
 
       var LABEL_OFFSET = 20;
@@ -924,9 +924,9 @@
         var anchor = i === 1 ? 'start' : i === 3 ? 'end' : 'middle';
         var dyAdj  = (i === 1 || i === 3) ? 3 : 0;
         if (words.length === 1) {
-          return '<text x="' + lx + '" y="' + (ly + dyAdj) + '" text-anchor="' + anchor + '" fill="rgba(22,22,18,.45)" font-size="9" font-family="inherit" letter-spacing=".04em">' + d.skill + '</text>';
+          return '<text x="' + lx + '" y="' + (ly + dyAdj) + '" text-anchor="' + anchor + '" fill="rgba(var(--ink-rgb),.45)" font-size="9" font-family="inherit" letter-spacing=".04em">' + d.skill + '</text>';
         }
-        return '<text x="' + lx + '" text-anchor="' + anchor + '" fill="rgba(22,22,18,.45)" font-size="9" font-family="inherit" letter-spacing=".04em">' +
+        return '<text x="' + lx + '" text-anchor="' + anchor + '" fill="rgba(var(--ink-rgb),.45)" font-size="9" font-family="inherit" letter-spacing=".04em">' +
           '<tspan x="' + lx + '" y="' + (ly - 4) + '">' + words[0] + '</tspan>' +
           '<tspan x="' + lx + '" y="' + (ly + 8) + '">' + words.slice(1).join(' ') + '</tspan>' +
           '</text>';
