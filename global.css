@@ -1253,7 +1253,7 @@ input[type=range].range-slider:disabled {
   }
 
   .wrap {
-    padding: 0 20px 72px;
+    padding: 24px 20px 72px;
   }
 
   .hero {
@@ -1685,7 +1685,7 @@ input[type=range].range-slider:disabled {
   justify-content: center;
   cursor: pointer;
   color: var(--text-2);
-  transition: color .15s, border-color .15s;
+  transition: color .15s, border-color .15s, left .25s cubic-bezier(.4,0,.2,1);
 }
 
 .sidebar-toggle:hover {
@@ -1715,10 +1715,6 @@ body.has-sidebar {
     padding-top: 64px;
   }
 
-  .sidebar-logo-wrap {
-    padding-left: 60px;
-  }
-
   body.has-sidebar .cta-bar {
     left: 0;
   }
@@ -1739,6 +1735,14 @@ body.has-sidebar {
 
   .sidebar-toggle {
     display: flex;
+  }
+
+  body.sidebar-open .sidebar-toggle {
+    left: 232px;
+  }
+
+  .wrap {
+    padding-top: 24px;
   }
 }
 
