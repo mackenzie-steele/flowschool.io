@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cue Worksheet — Flow School</title>
+  <link rel="stylesheet" href="global.css">
+  <style>
+
+    /* ── Top bar: name input + save ── */
+    /* ── Save modal ── */
+    .pl-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(245, 244, 240, .65);
+      backdrop-filter: blur(14px) saturate(120%);
+      -webkit-backdrop-filter: blur(14px) saturate(120%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+    }
+    .pl-modal-backdrop[hidden] { display: none; }
+    .pl-modal-card {
+      position: relative;
+      background: var(--paper-solid);
+      border: 1px solid rgba(var(--ink-rgb), .16);
+      border-top-color: rgba(var(--ink-rgb), .30);
+      border-radius: 0;
+      box-shadow: 0 4px 32px rgba(var(--ink-rgb), .12), 0 20px 60px rgba(var(--ink-rgb), .08);
+      padding: 32px;
+      width: min(400px, calc(100vw - 40px));
+      display: flex;
+      flex-direction: column;
+    }
+    .pl-modal-card h3  { margin: 0 0 6px; font-size: var(--fs-h6); font-weight: var(--weight-medium); color: var(--text-1); }
+    .pl-modal-hint     { font-size: var(--fs-body); color: var(--text-3); margin: 0 0 20px; }
+    .pl-modal-input {
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(var(--ink-rgb), .04);
+      border: 1px solid rgba(var(--ink-rgb), .14);
+      border-radius: 0;
+      color: var(--text-1);
+      font-family: var(--font);
+      font-size: var(--fs-h7);
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color .18s, background .18s;
+    }
+    .pl-modal-input::placeholder { color: rgba(var(--ink-rgb), .28); }
+    .pl-modal-input:focus {
+      border-color: rgba(var(--ink-rgb), .38);
+      background: rgba(var(--ink-rgb), .06);
+    }
+    .pl-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+    /* ── Worksheet toolbar ── */
+    .ws-toolbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px; }
+
+    /* ── Load modal flow list ── */
+    .flow-list {
+      border: 1px solid rgba(var(--ink-rgb), .10);
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .flow-list-empty {
+      padding: 28px 16px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: var(--fs-body);
+    }
+    .flow-list-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(var(--ink-rgb), .07);
+      transition: background .12s;
+    }
+    .flow-list-item:last-child { border-bottom: none; }
+    .flow-list-item:hover { background: rgba(var(--ink-rgb), .04); }
+    .flow-list-info { flex: 1; min-width: 0; }
+    .flow-list-name {
+      font-size: var(--fs-body);
+      color: var(--text-1);
+      font-weight: var(--weight-medium);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .flow-list-date { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+    .flow-list-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(var(--ink-rgb), .22);
+      padding: 4px 6px;
+      font-size: 16px;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: color .12s;
+    }
+    .flow-list-del:hover { color: var(--text-1); }
+
+    /* ── Worksheet container ── */
+    .ws-card {
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top-color: rgba(var(--ink-rgb), .22);
+      background: rgba(var(--ink-rgb), .01);
+      margin-bottom: 8px;
+    }
+    .ws-scroll { overflow-x: auto; }
+
+    /*
+      Columns: # | In/Ex | Verb | Body Part | Direction | Pose Name | Preview | ×
+      min-width on both header and rows ensures fr units resolve identically.
+    */
+    .cue-hdr,
+    .cue-row {
+      display: grid;
+      grid-template-columns: 40px 60px 1fr 1.3fr 1.5fr 1.4fr 40px;
+      min-width: 600px;
+    }
+
+    /* ── Column header row ── */
+    .cue-hdr {
+      border-bottom: 1px solid rgba(var(--ink-rgb), .12);
+      background: rgba(var(--ink-rgb), .025);
+    }
+    .col-lbl {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .10em;
+      color: var(--text-3);
+      font-weight: var(--weight-regular);
+      padding: 10px 12px;
+      border-right: 1px solid rgba(var(--ink-rgb), .07);
+    }
+    .col-lbl:last-child { border-right: none; }
+    .col-lbl.accent { color: var(--text-2); }
+
+    /* ── Cue rows ── */
+    .cue-row {
+      border-bottom: 1px solid rgba(var(--ink-rgb), .07);
+      position: relative;
+      transition: background .12s;
+    }
+    .cue-row:last-child { border-bottom: none; }
+    .cue-row:focus-within { background: rgba(var(--ink-rgb), .025); }
+
+    /* Row number */
+    .row-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: rgba(var(--ink-rgb), .28);
+      border-right: 1px solid rgba(var(--ink-rgb), .07);
+      user-select: none;
+      padding: 0 6px;
+    }
+
+    /* Cell wrapper */
+    .row-cell {
+      border-right: 1px solid rgba(var(--ink-rgb), .07);
+      position: relative;
+    }
+
+    /* Inputs */
+    .cue-input {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 52px;
+      background: transparent;
+      border: none;
+      padding: 14px 12px;
+      font-family: var(--font);
+      font-size: var(--text-body-sm);
+      color: var(--text-1);
+      outline: none;
+      transition: background .12s;
+    }
+    .cue-input::placeholder {
+      color: rgba(var(--ink-rgb), .22);
+      font-style: italic;
+    }
+    .cue-input:focus { background: rgba(var(--ink-rgb), .03); }
+    .cue-input.verb-input { font-weight: var(--weight-regular); }
+    .cue-input.pose-input {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .06em;
+      color: var(--text-3);
+    }
+
+    /* IN/EX select */
+    .inex-select {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 52px;
+      background: transparent;
+      border: none;
+      padding: 14px 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .06em;
+      color: var(--text-3);
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      text-align: center;
+    }
+
+    /* Remove button */
+    .row-rm-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .row-rm {
+      background: none;
+      border: none;
+      color: rgba(var(--ink-rgb), .20);
+      cursor: pointer;
+      padding: 6px;
+      line-height: 1;
+      font-size: 16px;
+      transition: color .12s;
+    }
+    .row-rm:hover { color: var(--text-1); }
+
+    /* ── Row actions bar ── */
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      padding: 14px 16px;
+      border-top: 1px solid rgba(var(--ink-rgb), .08);
+      background: rgba(var(--ink-rgb), .015);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .row-actions-spacer { flex: 1; }
+
+    /* ── Cue actions ── */
+    .cue-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 28px; }
+
+    /* ── Practice Out Loud overlay ── */
+    .pol-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 32px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s;
+    }
+    .pol-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .pol-close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      background: none;
+      border: none;
+      color: var(--text-3);
+      cursor: pointer;
+      padding: 8px;
+      transition: color .15s;
+      display: flex;
+      align-items: center;
+    }
+    .pol-close:hover { color: var(--text-1); }
+    .pol-close .material-symbols-sharp { font-size: 22px; }
+
+    .pol-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: var(--text-3);
+      margin-bottom: 52px;
+      text-align: center;
+    }
+    .pol-progress {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: rgba(var(--ink-rgb), .30);
+      letter-spacing: .06em;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .pol-cue-text {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: var(--weight-regular);
+      color: var(--text-1);
+      line-height: 1.35;
+      text-align: center;
+      max-width: 680px;
+      margin-bottom: 60px;
+      letter-spacing: -.01em;
+    }
+    .pol-cue-text.no-cues {
+      font-size: var(--fs-h5);
+      color: var(--text-3);
+    }
+    .pol-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .pol-util {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* Full script view inside POL */
+    .pol-script-wrap {
+      display: none;
+      width: 100%;
+      max-width: 580px;
+      margin-top: 40px;
+      border-top: 1px solid rgba(var(--ink-rgb), .08);
+    }
+    .pol-script-wrap.show { display: block; }
+    .pol-script-line {
+      display: flex;
+      gap: 16px;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(var(--ink-rgb), .06);
+      font-size: var(--text-body-sm);
+      color: var(--text-3);
+      line-height: 1.5;
+      transition: color .15s;
+    }
+    .pol-script-line:last-child { border-bottom: none; }
+    .pol-script-line.active { color: var(--text-1); font-weight: var(--weight-medium); }
+    .pol-line-num {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: rgba(var(--ink-rgb), .28);
+      flex-shrink: 0;
+      padding-top: 2px;
+      min-width: 20px;
+    }
+
+    /* ── POL end screen ── */
+    .pol-end {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      animation: pol-fade-in .4s ease;
+    }
+    .pol-overlay.ended .pol-end { display: flex; }
+    .pol-overlay.ended .pol-meta,
+    .pol-overlay.ended .pol-progress,
+    .pol-overlay.ended #pol-cue,
+    .pol-overlay.ended .pol-nav,
+    .pol-overlay.ended .pol-util,
+    .pol-overlay.ended .pol-script-wrap { display: none; }
+    .pol-end-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: var(--weight-medium);
+      color: var(--text-1);
+      letter-spacing: -.02em;
+    }
+    .pol-end-sub {
+      font-size: var(--fs-body);
+      color: var(--text-3);
+      margin: 0;
+    }
+    .pol-end-actions { display: flex; gap: 10px; margin-top: 16px; }
+    @keyframes pol-fade-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Word bank drawer (fixed bottom) ── */
+    .wb-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 224px;
+      right: 0;
+      z-index: 300;
+      background: var(--bg);
+      border-top: 1px solid rgba(var(--ink-rgb), .14);
+      box-shadow: 0 -6px 32px rgba(var(--ink-rgb), .07);
+      transform: translateY(calc(100% - 48px));
+      transition: transform .28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .wb-drawer.open { transform: translateY(0); }
+
+    .wb-handle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      height: 48px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .wb-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--text-3);
+    }
+    .wb-title .material-symbols-sharp { font-size: 14px; }
+    .wb-chevron {
+      font-size: 18px;
+      color: var(--text-3);
+      transition: transform .25s;
+    }
+    .wb-drawer.open .wb-chevron { transform: rotate(180deg); }
+
+    .wb-body {
+      padding: 4px 22px 20px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .wb-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(var(--ink-rgb), .08);
+    }
+    .wb-tab {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      font-family: var(--font);
+      font-size: var(--text-small);
+      font-weight: var(--weight-medium);
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .wb-tab.active {
+      color: var(--text-1);
+      border-bottom-color: var(--ink-solid);
+    }
+
+    .wb-hint {
+      font-size: 10px;
+      color: rgba(var(--ink-rgb), .30);
+      margin-bottom: 12px;
+      font-style: italic;
+    }
+
+    .wb-words {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 6px;
+    }
+    .wb-word {
+      padding: 5px 12px;
+      background: transparent;
+      border: 1px solid rgba(var(--ink-rgb), .13);
+      border-radius: 0;
+      font-family: var(--font);
+      font-size: var(--text-small);
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .wb-word:hover {
+      background: rgba(var(--ink-rgb), .05);
+      border-color: rgba(var(--ink-rgb), .28);
+      color: var(--text-1);
+    }
+    .wb-word:active { background: rgba(var(--ink-rgb), .10); }
+
+    /* Extra bottom padding so drawer collapsed bar doesn't cover content */
+    .wrap { padding-bottom: 72px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .wb-drawer { left: 0; }
+    }
+    @media (max-width: 600px) {
+    }
+
+  </style>
+</head>
+
+<body class="has-sidebar">
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ── HERO ────────────────────────────────────────────────────── -->
+
+<section class="hero">
+  <div class="inner">
+    <p class="label-1">Cue Worksheet</p>
+    <h3>Verb / Your Body Part / Direction</h3>
+    <p>Break your cueing down into its clearest pieces. Write the action, name the body part, and give the direction.</p>
+  </div>
+</section>
+
+<div class="wrap" id="main-wrap">
+
+  <!-- ── WORKSHEET TOOLBAR ────────────────────────────────────── -->
+
+  <div class="ws-toolbar">
+    <button class="btn-icon" id="ws-load-btn" data-tooltip="Load saved flow">
+      <span class="material-symbols-sharp">history</span>
+    </button>
+    <button class="btn-icon" id="ws-save-btn" data-tooltip="Save">
+      <span class="material-symbols-sharp" id="ws-save-icon">bookmark</span>
+    </button>
+  </div>
+
+  <!-- ── WORKSHEET CARD ─────────────────────────────────────────── -->
+
+  <div class="ws-card" id="ws-card">
+    <div class="ws-scroll" id="ws-scroll">
+
+      <!-- Column headers — injected by JS -->
+      <div class="cue-hdr" id="cue-hdr"></div>
+
+      <!-- Rows — injected by JS -->
+      <div id="cue-rows"></div>
+
+    </div>
+
+    <!-- Row action buttons -->
+    <div class="row-actions">
+      <button class="btn-ghost sm" id="btn-add-row">
+        <span class="material-symbols-sharp" style="font-size:15px;margin-right:4px">add</span>
+        Add Row
+      </button>
+      <button class="btn-ghost sm" id="btn-remove-row">Remove Last</button>
+      <div class="row-actions-spacer"></div>
+      <button class="btn-ghost sm" id="btn-clear">Clear Worksheet</button>
+    </div>
+  </div>
+
+  <!-- ── CUE ACTIONS ───────────────────────────────────────────── -->
+
+  <div class="cue-actions">
+    <button class="btn-primary" id="btn-pdf">
+      <span class="material-symbols-sharp">content_copy</span>
+      Copy Script
+    </button>
+    <button class="btn-ghost" id="btn-pol">
+      <span class="material-symbols-sharp" style="font-size:17px;margin-right:4px">record_voice_over</span>
+      Practice Out Loud
+    </button>
+  </div>
+
+
+</div><!-- /wrap -->
+
+<!-- ── SAVE MODAL ────────────────────────────────────────────── -->
+
+<div class="pl-modal-backdrop" id="ws-modal" hidden>
+  <div class="pl-modal-card" role="dialog" aria-modal="true" aria-labelledby="ws-modal-heading">
+    <h3 id="ws-modal-heading">Name your flow</h3>
+    <p class="pl-modal-hint">Give it a name so you can find it later.</p>
+    <input type="text" class="pl-modal-input" id="ws-modal-input" placeholder="Flow name" maxlength="80" autocomplete="off">
+    <div class="pl-modal-actions">
+      <button class="btn-ghost" id="ws-modal-cancel">Cancel</button>
+      <button class="btn-primary" id="ws-modal-confirm">Save flow</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── LOAD MODAL ────────────────────────────────────────────── -->
+
+<div class="pl-modal-backdrop" id="ws-load-modal" hidden>
+  <div class="pl-modal-card" role="dialog" aria-modal="true" aria-labelledby="ws-load-modal-heading">
+    <h3 id="ws-load-modal-heading">Load a flow</h3>
+    <p class="pl-modal-hint">Select a previously saved flow to load it into the worksheet.</p>
+    <div class="flow-list" id="ws-flow-list"></div>
+    <div class="pl-modal-actions">
+      <button class="btn-ghost" id="ws-load-modal-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── WORD BANK DRAWER ───────────────────────────────────────── -->
+
+<div class="wb-drawer" id="wb-drawer">
+  <div class="wb-handle" id="wb-handle">
+    <div class="wb-title">
+      <span class="material-symbols-sharp">library_books</span>
+      Word Bank
+    </div>
+    <span class="material-symbols-sharp wb-chevron">expand_less</span>
+  </div>
+  <div class="wb-body">
+    <div class="wb-tabs">
+      <button class="wb-tab active" data-wb="verbs">Verbs</button>
+      <button class="wb-tab" data-wb="body">Body Parts</button>
+      <button class="wb-tab" data-wb="dirs">Directions</button>
+    </div>
+    <p class="wb-hint">Click a word to insert it into the active field.</p>
+    <div class="wb-words" id="wb-words"></div>
+  </div>
+</div>
+
+
+<!-- ── PRACTICE OUT LOUD OVERLAY ─────────────────────────────── -->
+
+<div class="pol-overlay" id="pol-overlay" aria-modal="true" role="dialog">
+  <button class="pol-close" id="pol-close">
+    <span class="material-symbols-sharp">close</span>
+  </button>
+
+  <div class="pol-meta" id="pol-meta">Pose Practice</div>
+  <div class="pol-progress" id="pol-progress">1 of 8</div>
+  <div class="pol-cue-text" id="pol-cue"></div>
+
+  <div class="pol-nav">
+    <button class="btn-ghost" id="pol-prev">
+      <span class="material-symbols-sharp" style="font-size:18px;margin-right:2px">arrow_back</span>
+      Previous
+    </button>
+    <button class="btn-primary" id="pol-next">
+      Next
+      <span class="material-symbols-sharp" style="font-size:18px;margin-left:2px">arrow_forward</span>
+    </button>
+  </div>
+
+  <div class="pol-util">
+    <button class="btn-ghost sm" id="pol-show-script">Show Full Script</button>
+    <button class="btn-ghost sm" id="pol-restart">Start Over</button>
+  </div>
+
+  <div class="pol-script-wrap" id="pol-script-wrap">
+    <div id="pol-script-lines"></div>
+  </div>
+
+  <div class="pol-end" id="pol-end">
+    <div class="pol-end-title">Nice work.</div>
+    <p class="pol-end-sub">You made it through all your cues.</p>
+    <div class="pol-end-actions">
+      <button class="btn-ghost" id="pol-end-restart">Start Over</button>
+      <button class="btn-primary" id="pol-end-close">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+
+// ─── WORD BANK DATA ──────────────────────────────────────────────────────────
+
+const WB = {
+  verbs: [
+    'Sweep','Lift','Step','Reach','Bend','Press','Pull','Push','Circle','Twist',
+    'Pivot','Hover','Land','Tap','Drag','Slide','Open','Soften','Squeeze',
+    'Rainbow','Thread','Cactus','Melt','Float','Kick','Point','Flex','Root',
+    'Spin','Lean','Bow','Stack','Hug','Roll','Drop','Rise','Shift','Plant',
+    'Ground','Anchor','Send','Draw','Spread','Fan','Bloom','Engage','Firm',
+    'Release','Ease','Relax','Yield',
+    'Lie','Extend','Keep','Cross','Grab','Turn','Look','Crawl','Lower','Rock',
+    'Place','Sit','Wrap','Bring','Unwind','Connect','Fold','Guide','Swing',
+    'Wiggle','Stay','Straighten','Stand','Lay','Take','Pick','Imagine','Pretend',
+  ],
+  body: [
+    'your right foot','your left foot','your right knee','your left knee',
+    'your hips','your ribs','your low ribs','your chest','your spine',
+    'your shoulders','your shoulder blades','your arms','your right arm',
+    'your left arm','your fingertips','your palms','your hands',
+    'your heels','your toes','your back toes','your belly','your low belly',
+    'the crown of your head','your gaze','your chin','your tailbone',
+    'your sit bones','your pelvis','your heart',
+    'your head','your back','your right hand','your left hand',
+    'your right leg','your left leg','your front leg','your back leg',
+    'your right ankle','your left ankle','your right wrist','your left wrist',
+    'your elbows','your shin','your knees','your bottom knee',
+    'your inner right thigh','your left shoulder','your right shoulder',
+    'your armpits','both of your knees',
+  ],
+  dirs: [
+    'to the top of the mat','to the back of the mat','between your hands',
+    'toward the ceiling','toward the floor','over your head','beside your ribs',
+    'toward your seat','forward','backward','side to side',
+    'away from the ground','into the center of the room',
+    'to the long edge of your mat','up and over your head',
+    'out to the side','down toward the ground','to the front of the room',
+    'behind you','away from each other','toward each other',
+    'up and out','in line with your shoulders','level with your hip',
+    'on your back','into your chest','toward your chest',
+    'to the right','to the left','to the right side','to the left side',
+    'out to the sides','straight','high','through',
+    'alongside your chest','back toward your heels',
+    'toward the mat','to the back of the room','off the mat',
+    'down to the ground','at a 90 degree angle',
+  ],
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+const INITIAL_ROWS = 8;
+const LS_KEY = 'fs-cue-flows';
+let flowName = '';
+
+function getFlowStore() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch(e) { return {}; }
+}
+function setFlowStore(store) {
+  localStorage.setItem(LS_KEY, JSON.stringify(store));
+}
+
+let rows = [];
+let activeInput = null; // last focused .cue-input
+let polIndex = 0;
+let polScriptVisible = false;
+let wbTab = 'verbs';
+let wbOpen = false;
+
+// ─── UTILITIES ───────────────────────────────────────────────────────────────
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+let _toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+function buildCue(row) {
+  const verb = (row.verb || '').trim();
+  const body = (row.body || '').trim();
+  const dir  = (row.dir  || '').trim();
+  if (!verb && !body && !dir) return '';
+  const bodyNorm = body && !body.toLowerCase().startsWith('your ')
+    ? 'your ' + body : body;
+  const parts = [verb, bodyNorm, dir].filter(Boolean);
+  let cue = parts.join(' ');
+  if (!cue.endsWith('.')) cue += '.';
+  return cue.charAt(0).toUpperCase() + cue.slice(1);
+}
+
+// ─── ROW MANAGEMENT ──────────────────────────────────────────────────────────
+
+function makeRow() {
+  return { inex: '—', pose: '', verb: '', body: '', dir: '' };
+}
+
+function initRows(n) {
+  rows = Array.from({ length: n }, makeRow);
+}
+
+function addRow() {
+  rows.push(makeRow());
+  renderRows();
+  // Focus verb input of new row
+  const allRows = document.querySelectorAll('.cue-row');
+  const last = allRows[allRows.length - 1];
+  if (last) {
+    const inp = last.querySelector('.verb-input');
+    if (inp) inp.focus();
+  }
+}
+
+function removeLastRow() {
+  if (rows.length <= 1) { showToast('Keep at least one row.'); return; }
+  rows.pop();
+  renderRows();
+}
+
+function removeRow(i) {
+  if (rows.length <= 1) { showToast('Keep at least one row.'); return; }
+  rows.splice(i, 1);
+  renderRows();
+}
+
+function clearWorksheet() {
+  if (!confirm('Clear all rows and start fresh?')) return;
+  initRows(INITIAL_ROWS);
+  renderRows();
+  flowName = '';
+  showToast('Worksheet cleared.');
+}
+
+// ─── RENDERING ───────────────────────────────────────────────────────────────
+
+function renderHeader() {
+  const hdr = document.getElementById('cue-hdr');
+  const cols = ['#', 'In / Ex', 'Verb', 'Your Body Part', 'Direction', 'Pose Name', ''];
+  hdr.innerHTML = cols.map(c =>
+    `<div class="col-lbl">${esc(c)}</div>`
+  ).join('');
+}
+
+function renderRows() {
+  const container = document.getElementById('cue-rows');
+
+  container.innerHTML = rows.map((row, i) => buildRowHTML(row, i)).join('');
+
+  // Wire up inputs
+  container.querySelectorAll('.cue-input, .inex-select').forEach(el => {
+    el.addEventListener('focus', () => {
+      if (el.classList.contains('cue-input')) {
+        activeInput = el;
+        const fieldToTab = { verb: 'verbs', body: 'body', dir: 'dirs' };
+        const tab = fieldToTab[el.dataset.field];
+        if (tab && wbOpen) switchWBTab(tab);
+      }
+    });
+    el.addEventListener('input', () => {
+      const rowEl = el.closest('.cue-row');
+      const idx = parseInt(rowEl.dataset.idx, 10);
+      const field = el.dataset.field;
+      rows[idx][field] = el.value;
+    });
+    el.addEventListener('change', () => {
+      const rowEl = el.closest('.cue-row');
+      const idx = parseInt(rowEl.dataset.idx, 10);
+      const field = el.dataset.field;
+      rows[idx][field] = el.value;
+    });
+  });
+
+  // Wire remove buttons
+  container.querySelectorAll('.row-rm').forEach(btn => {
+    btn.addEventListener('click', () => removeRow(parseInt(btn.dataset.idx, 10)));
+  });
+}
+
+function buildRowHTML(row, i) {
+  const cue = buildCue(row);
+  const previewClass = cue ? '' : ' empty';
+  const previewText = cue || '—';
+
+  const numCell  = `<div class="row-num">${i + 1}</div>`;
+  const inexCell = `<div class="row-cell"><select class="inex-select" data-field="inex"><option${row.inex==='—'?' selected':''}>—</option><option${row.inex==='IN'?' selected':''}>IN</option><option${row.inex==='EX'?' selected':''}>EX</option></select></div>`;
+  const verbCell = `<div class="row-cell"><input class="cue-input verb-input" data-field="verb" value="${esc(row.verb)}" placeholder="Verb" autocomplete="off" spellcheck="false"></div>`;
+  const bodyCell = `<div class="row-cell"><input class="cue-input" data-field="body" value="${esc(row.body)}" placeholder="Your body part" autocomplete="off" spellcheck="false"></div>`;
+  const dirCell  = `<div class="row-cell"><input class="cue-input" data-field="dir" value="${esc(row.dir)}" placeholder="Direction" autocomplete="off" spellcheck="false"></div>`;
+  const poseCell = `<div class="row-cell"><input class="cue-input pose-input" data-field="pose" value="${esc(row.pose)}" placeholder="Pose name" autocomplete="off" spellcheck="false"></div>`;
+  const rmCell   = `<div class="row-rm-cell"><button class="row-rm" data-idx="${i}" title="Remove row">×</button></div>`;
+
+  return `<div class="cue-row" data-idx="${i}">${numCell}${inexCell}${verbCell}${bodyCell}${dirCell}${poseCell}${rmCell}</div>`;
+}
+
+
+// ─── CHECK MY CUES ───────────────────────────────────────────────────────────
+
+function downloadPDF() {
+  const filled = rows.filter(r => r.verb || r.body || r.dir);
+  if (!filled.length) { showToast('Write some cues first.'); return; }
+
+  const title = flowName || 'Flow';
+  const lines = filled.map(r => {
+    const cue  = buildCue(r);
+    const pose = r.pose ? `<div class="pose-label">${esc(r.pose)}</div>` : '';
+    return `${pose}<div class="cue-line">${esc(cue)}</div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>${esc(title)}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; color: #1a1a1a; padding: 72px 80px; max-width: 680px; }
+  h1 { font-size: 22px; font-weight: 500; letter-spacing: -.01em; margin-bottom: 40px; }
+  .cue-line { font-size: 17px; font-weight: 300; line-height: 1.6; margin-bottom: 10px; }
+  .pose-label { font-size: 10px; font-weight: 500; letter-spacing: .10em; text-transform: uppercase; color: #888; margin-top: 24px; margin-bottom: 4px; }
+  @media print {
+    body { padding: 56px 64px; }
+    @page { margin: 0; }
+  }
+</style>
+</head>
+<body>
+<h1>${esc(title)}</h1>
+${lines}
+<script>window.onload = () => window.print();<\/script>
+</body>
+</html>`;
+
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); }
+}
+
+// ─── EXPORT / SAVE ───────────────────────────────────────────────────────────
+
+function buildScript() {
+  const filled = rows.filter(r => r.verb || r.body || r.dir);
+  if (!filled.length) return null;
+  const header = flowName ? `${flowName}\n\n` : '';
+  const lines = filled.map(r => {
+    const inex  = r.inex && r.inex !== '—' ? `[${r.inex}] ` : '';
+    const cue   = buildCue(r);
+    const pose  = r.pose ? ` ${r.pose.toUpperCase()}` : '';
+    return `${inex}${cue}${pose}`;
+  });
+  return header + lines.join('\n');
+}
+
+function copyScript() {
+  const script = buildScript();
+  if (!script) { showToast('No cues to copy.'); return; }
+  navigator.clipboard.writeText(script)
+    .then(() => showToast('Script copied to clipboard.'))
+    .catch(() => showToast('Copy failed — try Export .txt.'));
+}
+
+function openSaveModal() {
+  const modal = document.getElementById('ws-modal');
+  const input = document.getElementById('ws-modal-input');
+  input.value = flowName;
+  modal.removeAttribute('hidden');
+  input.focus();
+  input.select();
+}
+
+function closeSaveModal() {
+  document.getElementById('ws-modal').setAttribute('hidden', '');
+}
+
+function openLoadModal() {
+  renderFlowList();
+  document.getElementById('ws-load-modal').removeAttribute('hidden');
+}
+
+function closeLoadModal() {
+  document.getElementById('ws-load-modal').setAttribute('hidden', '');
+}
+
+function renderFlowList() {
+  const store = getFlowStore();
+  const entries = Object.values(store).sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+  const list = document.getElementById('ws-flow-list');
+
+  if (!entries.length) {
+    list.innerHTML = '<div class="flow-list-empty">No saved flows yet.</div>';
+    return;
+  }
+
+  list.innerHTML = entries.map(entry => {
+    const d = new Date(entry.savedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    return `<div class="flow-list-item" data-name="${esc(entry.name)}">
+      <div class="flow-list-info">
+        <div class="flow-list-name">${esc(entry.name)}</div>
+        <div class="flow-list-date">${d}</div>
+      </div>
+      <button class="flow-list-del" data-del="${esc(entry.name)}" title="Delete">×</button>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.flow-list-item').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.target.closest('.flow-list-del')) return;
+      const name = el.dataset.name;
+      const store = getFlowStore();
+      const entry = store[name];
+      if (!entry) return;
+      flowName = entry.name;
+      rows = (entry.rows || []).map(r => Object.assign(makeRow(), r));
+      renderRows();
+      closeLoadModal();
+      showToast(`"${flowName}" loaded.`);
+    });
+  });
+
+  list.querySelectorAll('.flow-list-del').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const name = btn.dataset.del;
+      const store = getFlowStore();
+      delete store[name];
+      setFlowStore(store);
+      renderFlowList();
+    });
+  });
+}
+
+function saveToLocal(name) {
+  flowName = name;
+  try {
+    const store = getFlowStore();
+    store[name] = { name, rows, savedAt: new Date().toISOString() };
+    setFlowStore(store);
+    showToast('Flow saved.');
+    const icon = document.getElementById('ws-save-icon');
+    const btn  = document.getElementById('ws-save-btn');
+    icon.style.fontVariationSettings = "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20";
+    btn.classList.add('saved');
+    setTimeout(() => {
+      icon.style.fontVariationSettings = '';
+      btn.classList.remove('saved');
+    }, 2000);
+  } catch(e) {
+    showToast('Could not save — storage may be full.');
+  }
+}
+
+// ─── PRACTICE OUT LOUD ───────────────────────────────────────────────────────
+
+function getCuedRows() {
+  return rows.filter(r => buildCue(r));
+}
+
+function openPOL() {
+  const cues = getCuedRows();
+  if (!cues.length) { showToast('Write some cues first.'); return; }
+  polIndex = 0;
+  polScriptVisible = false;
+  document.getElementById('pol-script-wrap').classList.remove('show');
+  document.getElementById('pol-show-script').textContent = 'Show Full Script';
+  updatePOL();
+  document.getElementById('pol-overlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePOL() {
+  const overlay = document.getElementById('pol-overlay');
+  overlay.classList.remove('active', 'ended');
+  document.body.style.overflow = '';
+}
+
+function updatePOL() {
+  const cues = getCuedRows();
+  const total = cues.length;
+
+  document.getElementById('pol-meta').textContent = flowName || 'Flow Practice';
+  document.getElementById('pol-progress').textContent =
+    `${polIndex + 1} of ${total}`;
+
+  const row = cues[polIndex];
+  const inexMap = { 'IN': 'Inhale', 'EX': 'Exhale' };
+  const inex = row.inex && inexMap[row.inex] ? `${inexMap[row.inex]}. ` : '';
+  const cue  = buildCue(row);
+  const pose = row.pose ? ` ${row.pose.toUpperCase()}` : '';
+  const polCueEl = document.getElementById('pol-cue');
+  polCueEl.textContent = inex + cue + pose;
+  polCueEl.className = 'pol-cue-text';
+
+  // Prev / Next
+  document.getElementById('pol-prev').disabled = polIndex === 0;
+  const nextBtn = document.getElementById('pol-next');
+  if (polIndex === total - 1) {
+    nextBtn.querySelector ? null : null;
+    nextBtn.innerHTML = 'Done <span class="material-symbols-sharp" style="font-size:18px;margin-left:2px">check</span>';
+  } else {
+    nextBtn.innerHTML = 'Next <span class="material-symbols-sharp" style="font-size:18px;margin-left:2px">arrow_forward</span>';
+  }
+
+  // Update script if visible
+  if (polScriptVisible) renderPOLScript(cues);
+}
+
+function renderPOLScript(cues) {
+  const wrap = document.getElementById('pol-script-lines');
+  wrap.innerHTML = cues.map((row, i) => {
+    const inex   = row.inex && row.inex !== '—' ? `[${row.inex}] ` : '';
+    const cue    = buildCue(row);
+    const pose   = row.pose ? ` ${row.pose.toUpperCase()}` : '';
+    const active = i === polIndex ? ' active' : '';
+    return `<div class="pol-script-line${active}"><span class="pol-line-num">${i + 1}</span><span>${esc(inex + cue + pose)}</span></div>`;
+  }).join('');
+}
+
+// ─── WORD BANK ───────────────────────────────────────────────────────────────
+
+function switchWBTab(tab) {
+  wbTab = tab;
+  document.querySelectorAll('.wb-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.wb === tab);
+  });
+  renderWBWords();
+}
+
+function renderWBWords() {
+  const words = WB[wbTab] || [];
+  const el = document.getElementById('wb-words');
+  el.innerHTML = words.map(w =>
+    `<button class="wb-word" data-word="${esc(w)}">${esc(w)}</button>`
+  ).join('');
+  el.querySelectorAll('.wb-word').forEach(btn => {
+    btn.addEventListener('click', () => insertWord(btn.dataset.word));
+  });
+}
+
+function insertWord(word) {
+  if (!activeInput) { showToast('Click into a field first, then choose a word.'); return; }
+  const el = activeInput;
+  const start = el.selectionStart;
+  const end   = el.selectionEnd;
+  const val   = el.value;
+  const sep   = (start > 0 && val[start - 1] !== ' ') ? ' ' : '';
+  el.value = val.slice(0, start) + sep + word + val.slice(end);
+  const pos = start + sep.length + word.length;
+  el.setSelectionRange(pos, pos);
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  el.focus();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+function init() {
+  // Init rows
+  initRows(INITIAL_ROWS);
+  renderHeader();
+  renderRows();
+
+  // Row actions
+  document.getElementById('btn-add-row').addEventListener('click', addRow);
+  document.getElementById('btn-remove-row').addEventListener('click', removeLastRow);
+  document.getElementById('btn-clear').addEventListener('click', clearWorksheet);
+
+  // Check my cues
+  document.getElementById('btn-pdf').addEventListener('click', copyScript);
+
+  // Export / save
+  document.getElementById('ws-load-btn').addEventListener('click', openLoadModal);
+  document.getElementById('ws-load-modal-cancel').addEventListener('click', closeLoadModal);
+  document.getElementById('ws-load-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeLoadModal();
+  });
+  document.getElementById('ws-save-btn').addEventListener('click', openSaveModal);
+  document.getElementById('ws-modal-cancel').addEventListener('click', closeSaveModal);
+  document.getElementById('ws-modal-confirm').addEventListener('click', () => {
+    const name = document.getElementById('ws-modal-input').value.trim();
+    if (!name) { document.getElementById('ws-modal-input').focus(); return; }
+    closeSaveModal();
+    saveToLocal(name);
+  });
+  document.getElementById('ws-modal-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('ws-modal-confirm').click();
+    if (e.key === 'Escape') closeSaveModal();
+  });
+  document.getElementById('ws-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeSaveModal();
+  });
+
+  // Practice Out Loud
+  document.getElementById('btn-pol').addEventListener('click', openPOL);
+  document.getElementById('pol-close').addEventListener('click', closePOL);
+
+  document.getElementById('pol-prev').addEventListener('click', () => {
+    if (polIndex > 0) { polIndex--; updatePOL(); }
+  });
+  document.getElementById('pol-next').addEventListener('click', () => {
+    const cues = getCuedRows();
+    if (polIndex < cues.length - 1) {
+      polIndex++;
+      updatePOL();
+    } else {
+      document.getElementById('pol-overlay').classList.add('ended');
+    }
+  });
+  document.getElementById('pol-restart').addEventListener('click', () => {
+    polIndex = 0;
+    updatePOL();
+  });
+  document.getElementById('pol-end-restart').addEventListener('click', () => {
+    document.getElementById('pol-overlay').classList.remove('ended');
+    polIndex = 0;
+    updatePOL();
+  });
+  document.getElementById('pol-end-close').addEventListener('click', closePOL);
+  document.getElementById('pol-show-script').addEventListener('click', () => {
+    polScriptVisible = !polScriptVisible;
+    const wrap = document.getElementById('pol-script-wrap');
+    wrap.classList.toggle('show', polScriptVisible);
+    document.getElementById('pol-show-script').textContent =
+      polScriptVisible ? 'Hide Script' : 'Show Full Script';
+    if (polScriptVisible) renderPOLScript(getCuedRows());
+  });
+
+  // Keyboard nav in POL overlay
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('pol-overlay').classList.contains('active')) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      document.getElementById('pol-next').click();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      document.getElementById('pol-prev').click();
+    } else if (e.key === 'Escape') {
+      closePOL();
+    }
+  });
+
+  // Word bank
+  document.getElementById('wb-handle').addEventListener('click', () => {
+    wbOpen = !wbOpen;
+    document.getElementById('wb-drawer').classList.toggle('open', wbOpen);
+  });
+  document.querySelectorAll('.wb-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchWBTab(tab.dataset.wb));
+  });
+  renderWBWords();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+
+<script src="lib/nav.js"></script>
+<script src="lib/tracker.js"></script>
+</body>
+</html>
