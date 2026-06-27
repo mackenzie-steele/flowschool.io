@@ -126,29 +126,29 @@
 
     /* ── Column header row ── */
     .cue-hdr {
-      border-bottom: 1px solid rgba(var(--ink-rgb), .12);
-      background: rgba(var(--ink-rgb), .025);
+      border-bottom: 1px solid rgba(var(--ink-rgb), .18);
+      background: rgba(var(--ink-rgb), .04);
     }
     .col-lbl {
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: .10em;
-      color: var(--text-3);
-      font-weight: var(--weight-regular);
+      color: var(--text-2);
+      font-weight: var(--weight-medium);
       padding: 10px 12px;
-      border-right: 1px solid rgba(var(--ink-rgb), .07);
+      border-right: 1px solid rgba(var(--ink-rgb), .10);
     }
     .col-lbl:last-child { border-right: none; }
-    .col-lbl.accent { color: var(--text-2); }
+    .col-lbl.accent { color: var(--text-1); }
 
     /* ── Cue rows ── */
     .cue-row {
-      border-bottom: 1px solid rgba(var(--ink-rgb), .07);
+      border-bottom: 1px solid rgba(var(--ink-rgb), .10);
       position: relative;
       transition: background .12s;
     }
     .cue-row:last-child { border-bottom: none; }
-    .cue-row:focus-within { background: rgba(var(--ink-rgb), .025); }
+    .cue-row:focus-within { background: rgba(var(--ink-rgb), .03); }
 
     /* Row number */
     .row-num {
@@ -157,15 +157,15 @@
       justify-content: center;
       font-family: var(--font-mono);
       font-size: 10px;
-      color: rgba(var(--ink-rgb), .28);
-      border-right: 1px solid rgba(var(--ink-rgb), .07);
+      color: rgba(var(--ink-rgb), .40);
+      border-right: 1px solid rgba(var(--ink-rgb), .10);
       user-select: none;
       padding: 0 6px;
     }
 
     /* Cell wrapper */
     .row-cell {
-      border-right: 1px solid rgba(var(--ink-rgb), .07);
+      border-right: 1px solid rgba(var(--ink-rgb), .10);
       position: relative;
     }
 
@@ -185,7 +185,7 @@
       transition: background .12s;
     }
     .cue-input::placeholder {
-      color: rgba(var(--ink-rgb), .22);
+      color: rgba(var(--ink-rgb), .38);
       font-style: italic;
     }
     .cue-input:focus { background: rgba(var(--ink-rgb), .03); }
@@ -209,7 +209,7 @@
       font-family: var(--font-mono);
       font-size: 10px;
       letter-spacing: .06em;
-      color: var(--text-3);
+      color: var(--text-2);
       outline: none;
       cursor: pointer;
       appearance: none;
@@ -500,9 +500,8 @@
 
     /* ── Responsive ── */
     @media (max-width: 768px) {
-      .wb-drawer { left: 0; }
-    }
-    @media (max-width: 600px) {
+      .wb-drawer { display: none; }
+      .wrap { padding-bottom: 0; }
     }
 
   </style>
@@ -941,6 +940,7 @@ function copyScript() {
 }
 
 function openSaveModal() {
+  if (!rows.some(r => buildCue(r))) { showToast('Add some cues before saving.'); return; }
   const modal = document.getElementById('ws-modal');
   const input = document.getElementById('ws-modal-input');
   input.value = flowName;
@@ -1229,7 +1229,19 @@ function init() {
   renderWBWords();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  const _urlFlow = new URLSearchParams(window.location.search).get('flow');
+  if (_urlFlow) {
+    const store = getFlowStore();
+    const flow = store[_urlFlow];
+    if (flow) {
+      flowName = flow.name;
+      rows = JSON.parse(JSON.stringify(flow.rows));
+      renderRows();
+    }
+  }
+});
 
 </script>
 

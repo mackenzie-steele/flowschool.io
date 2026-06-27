@@ -67,35 +67,50 @@
       margin: 0;
     }
 
-    .db-streak-pill {
+    .db-moon {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border: 1px solid var(--accent-border);
-      border-radius: var(--rf);
-      background: var(--accent-dim);
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
       flex-shrink: 0;
+      user-select: none;
     }
-
-    .db-streak-icon {
-      font-size: 18px;
-      color: var(--accent);
-    }
-
-    .db-streak-num {
-      font-size: var(--fs-h5);
-      font-weight: var(--weight-regular);
-      color: var(--accent);
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .db-streak-lbl {
-      font-size: var(--text-small);
+    .db-moon-svg { display: block; }
+    .db-moon-phase {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
       color: var(--text-3);
-      white-space: nowrap;
+      line-height: 1;
     }
+    .db-moon-datetime {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .06em;
+      color: var(--text-2);
+      line-height: 1;
+    }
+
+    /* ── Pose Spotlight ──────────────────────────────────── */
+    .pose-spotlight { display: flex; flex-direction: column; gap: 14px; }
+    .pose-spotlight-name { font-size: var(--fs-h5); font-weight: var(--weight-medium); color: var(--text-1); margin: 0; }
+    .pose-spotlight-sub { font-size: var(--text-small); color: var(--text-3); margin: 2px 0 0; line-height: 1.4; }
+    .pose-mods { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+    .pose-mod {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 76px;
+      padding: 12px 6px 10px;
+      border-radius: var(--r);
+      background: rgba(var(--ink-rgb), .03);
+    }
+    .pose-figure { display: block; width: 64px; color: var(--text-1); }
+    .pose-mod-name { font-size: 10px; font-weight: var(--weight-medium); color: var(--text-2); text-align: center; line-height: 1.3; }
+    .pose-mod-hint { font-size: 9px; color: var(--text-3); text-align: center; line-height: 1.4; }
 
     /* ── Weekly Play Prompt ──────────────────────────────── */
     .db-prompt {
@@ -541,6 +556,51 @@
       flex-shrink: 0;
     }
 
+    /* ── New Drop module ─────────────────────────────────── */
+    .db-new-drop {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+    .db-drop-thumb {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: rgba(var(--ink-rgb), .06);
+      margin-bottom: 14px;
+    }
+    .db-drop-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .3s ease;
+    }
+    .db-new-drop:hover .db-drop-thumb img {
+      transform: scale(1.025);
+    }
+    .db-drop-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 8px;
+    }
+    .db-drop-title {
+      font-size: var(--fs-h5);
+      font-weight: var(--weight-regular);
+      color: var(--text-1);
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+    .db-drop-desc {
+      font-size: var(--text-body-sm);
+      color: var(--text-2);
+      line-height: 1.65;
+    }
+
     /* ── Bonnie's Corner ─────────────────────────────────── */
     .db-bonnie-inner {
       display: flex;
@@ -612,14 +672,14 @@
             <h2 class="db-greeting" id="db-greeting">Good morning.</h2>
             <p class="db-subline" id="db-subline"></p>
           </div>
-          <div class="db-streak-pill" id="db-streak-pill">
-            <span class="material-symbols-sharp db-streak-icon">local_fire_department</span>
-            <span class="db-streak-num" id="db-streak-num">0</span>
-            <span class="db-streak-lbl">day streak</span>
+          <div class="db-moon" id="db-moon">
+            <div class="db-moon-svg" id="db-moon-svg"></div>
+            <div class="db-moon-phase" id="db-moon-phase"></div>
+            <div class="db-moon-datetime" id="db-moon-datetime"></div>
           </div>
         </div>
 
-        <!-- 2. Weekly Play Prompt + Quick Start -->
+        <!-- 2. Weekly Play Prompt + Upcoming Events -->
         <div class="db-row db-row-3-2">
 
           <div class="db-card db-prompt">
@@ -632,29 +692,8 @@
           </div>
 
           <div class="db-card">
-            <span class="db-eyebrow">Quick Start</span>
-            <div class="db-quick-links">
-              <a href="movement-experiment-generator.html" class="db-quick-link">
-                <span class="material-symbols-sharp">experiment</span>
-                Movement Experiment
-              </a>
-              <a href="arbitrary-rule-generator.html" class="db-quick-link">
-                <span class="material-symbols-sharp">casino</span>
-                Arbitrary Rule
-              </a>
-              <a href="playlist-builder.html" class="db-quick-link">
-                <span class="material-symbols-sharp">queue_music</span>
-                Build Playlist
-              </a>
-              <a href="shorthand-library.html" class="db-quick-link">
-                <span class="material-symbols-sharp">book</span>
-                Shorthand Library
-              </a>
-              <a href="elements-of-flow-lab.html" class="db-quick-link">
-                <span class="material-symbols-sharp">science</span>
-                Elements of Flow
-              </a>
-            </div>
+            <span class="db-eyebrow">Upcoming</span>
+            <div id="db-events-list"></div>
           </div>
 
         </div>
@@ -665,54 +704,173 @@
           <div class="db-continue-scroll" id="db-continue-scroll"></div>
         </div>
 
-        <!-- 4. Suggested Next Step + Practice Progress -->
+        <!-- 4. New Drop (full width) -->
+        <div class="db-card">
+          <span class="db-eyebrow">New Drop</span>
+          <a class="db-new-drop" href="https://flowschool.uscreen.io/programs/slo-mo-pigeon-kick-through-tree-lean" target="_blank" rel="noopener">
+            <div class="db-drop-thumb">
+              <img src="img/slo-mo-flow-cover.jpg" alt="Pigeon Kick Through &amp; Tree Lean">
+            </div>
+            <span class="db-drop-tag">Slo Mo Flow</span>
+            <div class="db-drop-title">Pigeon Kick Through &amp; Tree Lean</div>
+            <p class="db-drop-desc">A full class plan for a slow &amp; strong flow. Can be taught once per side or repeated depending on time. Works well for all-levels vinyasa that doesn't lean on repetition or sun salutations.</p>
+          </a>
+        </div>
+
+        <!-- 5. Suggested Next Step + Skill Map -->
         <div class="db-row db-row-2">
 
           <div class="db-card db-next-step" id="db-next-card">
             <span class="db-eyebrow">Suggested Next Step</span>
           </div>
 
+          <div class="db-card" id="db-score-card">
+            <span class="db-eyebrow">Skill Map</span>
+          </div>
+
+        </div>
+
+        <!-- POSE_SPOTLIGHT_START -->
+        <div class="db-row db-row-2" style="display:none">
           <div class="db-card">
-            <span class="db-eyebrow">Practice Progress</span>
-            <div class="db-stats-row" id="db-stats-row"></div>
-            <div>
-              <div class="db-contrib-head">
-                <span class="db-contrib-month" id="db-contrib-month"></span>
-                <span class="db-contrib-legend">Active days</span>
+            <span class="db-eyebrow">Pose Spotlight</span>
+            <div class="pose-spotlight">
+              <div>
+                <p class="pose-spotlight-name">Warrior II</p>
+                <p class="pose-spotlight-sub">5 ways to modify the same pose for different bodies and needs.</p>
               </div>
-              <div class="db-contrib-grid" id="db-contrib-grid"></div>
+              <div class="pose-mods">
+
+                <!-- 1. Classic -->
+                <div class="pose-mod">
+                  <svg viewBox="0 -4 100 114" class="pose-figure" aria-hidden="true">
+                    <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                      <circle cx="50" cy="10" r="6"/>
+                      <line x1="50" y1="16" x2="50" y2="22"/>
+                      <line x1="26" y1="22" x2="74" y2="22"/>
+                      <line x1="26" y1="22" x2="11" y2="32"/><line x1="11" y1="32" x2="4" y2="42"/>
+                      <circle cx="4" cy="42" r="3" fill="currentColor"/>
+                      <line x1="74" y1="22" x2="89" y2="32"/><line x1="89" y1="32" x2="96" y2="42"/>
+                      <circle cx="96" cy="42" r="3" fill="currentColor"/>
+                      <line x1="50" y1="22" x2="50" y2="52"/>
+                      <line x1="38" y1="52" x2="62" y2="52"/>
+                      <line x1="58" y1="52" x2="72" y2="76"/><line x1="72" y1="76" x2="72" y2="100"/>
+                      <line x1="62" y1="100" x2="82" y2="100"/>
+                      <line x1="42" y1="52" x2="24" y2="74"/><line x1="24" y1="74" x2="16" y2="98"/>
+                      <line x1="10" y1="95" x2="22" y2="101"/>
+                    </g>
+                  </svg>
+                  <div class="pose-mod-name">Classic</div>
+                  <div class="pose-mod-hint">Wide stance, full expression</div>
+                </div>
+
+                <!-- 2. Shortened Stance -->
+                <div class="pose-mod">
+                  <svg viewBox="0 -4 100 114" class="pose-figure" aria-hidden="true">
+                    <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                      <circle cx="50" cy="10" r="6"/>
+                      <line x1="50" y1="16" x2="50" y2="22"/>
+                      <line x1="26" y1="22" x2="74" y2="22"/>
+                      <line x1="26" y1="22" x2="11" y2="32"/><line x1="11" y1="32" x2="4" y2="42"/>
+                      <circle cx="4" cy="42" r="3" fill="currentColor"/>
+                      <line x1="74" y1="22" x2="89" y2="32"/><line x1="89" y1="32" x2="96" y2="42"/>
+                      <circle cx="96" cy="42" r="3" fill="currentColor"/>
+                      <line x1="50" y1="22" x2="50" y2="52"/>
+                      <line x1="40" y1="52" x2="60" y2="52"/>
+                      <line x1="57" y1="52" x2="64" y2="74"/><line x1="64" y1="74" x2="64" y2="100"/>
+                      <line x1="56" y1="100" x2="74" y2="100"/>
+                      <line x1="43" y1="52" x2="34" y2="74"/><line x1="34" y1="74" x2="30" y2="100"/>
+                      <line x1="24" y1="97" x2="36" y2="103"/>
+                    </g>
+                  </svg>
+                  <div class="pose-mod-name">Short Stance</div>
+                  <div class="pose-mod-hint">For tight hips or groin</div>
+                </div>
+
+                <!-- 3. Hands to Hips -->
+                <div class="pose-mod">
+                  <svg viewBox="0 -4 100 114" class="pose-figure" aria-hidden="true">
+                    <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                      <circle cx="50" cy="10" r="6"/>
+                      <line x1="50" y1="16" x2="50" y2="22"/>
+                      <line x1="26" y1="22" x2="74" y2="22"/>
+                      <line x1="26" y1="22" x2="16" y2="36"/><line x1="16" y1="36" x2="38" y2="48"/>
+                      <circle cx="38" cy="48" r="3" fill="currentColor"/>
+                      <line x1="74" y1="22" x2="84" y2="36"/><line x1="84" y1="36" x2="62" y2="48"/>
+                      <circle cx="62" cy="48" r="3" fill="currentColor"/>
+                      <line x1="50" y1="22" x2="50" y2="52"/>
+                      <line x1="38" y1="52" x2="62" y2="52"/>
+                      <line x1="58" y1="52" x2="72" y2="76"/><line x1="72" y1="76" x2="72" y2="100"/>
+                      <line x1="62" y1="100" x2="82" y2="100"/>
+                      <line x1="42" y1="52" x2="24" y2="74"/><line x1="24" y1="74" x2="16" y2="98"/>
+                      <line x1="10" y1="95" x2="22" y2="101"/>
+                    </g>
+                  </svg>
+                  <div class="pose-mod-name">Hands to Hips</div>
+                  <div class="pose-mod-hint">For neck or shoulder tension</div>
+                </div>
+
+                <!-- 4. Chair Support -->
+                <div class="pose-mod">
+                  <svg viewBox="0 -4 100 114" class="pose-figure" aria-hidden="true">
+                    <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                      <line x1="20" y1="60" x2="80" y2="60"/>
+                      <line x1="24" y1="60" x2="24" y2="96"/>
+                      <line x1="76" y1="60" x2="76" y2="96"/>
+                      <line x1="20" y1="38" x2="20" y2="60"/>
+                      <circle cx="50" cy="10" r="6"/>
+                      <line x1="50" y1="16" x2="50" y2="22"/>
+                      <line x1="26" y1="22" x2="74" y2="22"/>
+                      <line x1="26" y1="22" x2="11" y2="32"/><line x1="11" y1="32" x2="4" y2="42"/>
+                      <circle cx="4" cy="42" r="3" fill="currentColor"/>
+                      <line x1="74" y1="22" x2="89" y2="32"/><line x1="89" y1="32" x2="96" y2="42"/>
+                      <circle cx="96" cy="42" r="3" fill="currentColor"/>
+                      <line x1="50" y1="22" x2="50" y2="60"/>
+                      <line x1="36" y1="60" x2="64" y2="60"/>
+                      <line x1="60" y1="60" x2="74" y2="80"/><line x1="74" y1="80" x2="74" y2="100"/>
+                      <line x1="65" y1="100" x2="82" y2="100"/>
+                      <line x1="40" y1="60" x2="28" y2="78"/><line x1="28" y1="78" x2="20" y2="98"/>
+                      <line x1="14" y1="95" x2="26" y2="101"/>
+                    </g>
+                  </svg>
+                  <div class="pose-mod-name">Chair Support</div>
+                  <div class="pose-mod-hint">For balance or accessibility</div>
+                </div>
+
+                <!-- 5. Reverse Warrior -->
+                <div class="pose-mod">
+                  <svg viewBox="0 -4 100 114" class="pose-figure" aria-hidden="true">
+                    <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                      <circle cx="50" cy="10" r="6"/>
+                      <line x1="50" y1="16" x2="50" y2="22"/>
+                      <line x1="26" y1="22" x2="74" y2="22"/>
+                      <line x1="74" y1="22" x2="82" y2="12"/><line x1="82" y1="12" x2="88" y2="4"/>
+                      <circle cx="88" cy="4" r="3" fill="currentColor"/>
+                      <line x1="26" y1="22" x2="26" y2="38"/><line x1="26" y1="38" x2="28" y2="54"/>
+                      <circle cx="28" cy="54" r="3" fill="currentColor"/>
+                      <line x1="50" y1="22" x2="50" y2="52"/>
+                      <line x1="38" y1="52" x2="62" y2="52"/>
+                      <line x1="58" y1="52" x2="72" y2="76"/><line x1="72" y1="76" x2="72" y2="100"/>
+                      <line x1="62" y1="100" x2="82" y2="100"/>
+                      <line x1="42" y1="52" x2="24" y2="74"/><line x1="24" y1="74" x2="16" y2="98"/>
+                      <line x1="10" y1="95" x2="22" y2="101"/>
+                    </g>
+                  </svg>
+                  <div class="pose-mod-name">Reverse Warrior</div>
+                  <div class="pose-mod-hint">To open the side body</div>
+                </div>
+
+              </div>
             </div>
           </div>
 
         </div>
+        <!-- POSE_SPOTLIGHT_END -->
 
-        <!-- 5. Flow School Score + Recently Saved -->
-        <div class="db-row db-row-2-3">
-
-          <div class="db-card" id="db-score-card">
-            <span class="db-eyebrow">Flow School Score</span>
-          </div>
-
-          <div class="db-card">
-            <span class="db-eyebrow">Recently Saved</span>
-            <div id="db-saved-list"></div>
-          </div>
-
-        </div>
-
-        <!-- 6. Upcoming Events + Community Activity -->
-        <div class="db-row db-row-2">
-
-          <div class="db-card">
-            <span class="db-eyebrow">Upcoming</span>
-            <div id="db-events-list"></div>
-          </div>
-
-          <div class="db-card">
-            <span class="db-eyebrow">Community</span>
-            <div id="db-community-list"></div>
-          </div>
-
+        <!-- 6. Recently Saved -->
+        <div class="db-card">
+          <span class="db-eyebrow">Recently Saved</span>
+          <div id="db-saved-list"></div>
         </div>
 
         <!-- 7. Bonnie's Corner -->
@@ -797,8 +955,7 @@
       var greeting = h < 12 ? 'Good morning.' : h < 17 ? 'Good afternoon.' : 'Good evening.';
       document.getElementById('db-greeting').textContent = greeting;
       document.getElementById('db-subline').textContent  = DAILY_SUBLINES[dayOfYear() % DAILY_SUBLINES.length];
-      document.getElementById('db-streak-num').textContent = stats.streak || 0;
-      if (!stats.streak) document.getElementById('db-streak-pill').style.display = 'none';
+      // streak removed — moon widget handles top-right
     }
 
     function renderPrompt() {
@@ -857,6 +1014,7 @@
 
     function renderProgress(stats) {
       var statsEl = document.getElementById('db-stats-row');
+      if (!statsEl) return;
       statsEl.innerHTML = [
         { val: stats.streak || 0,               lbl: 'Day streak'   },
         { val: stats.experimentsCompleted || 0,  lbl: 'Experiments'  },
@@ -950,19 +1108,31 @@
       try {
         var playlists = JSON.parse(localStorage.getItem('flowschool_playlists') || '[]');
         playlists.forEach(function (p) {
-          items.push({ icon: 'queue_music', name: p.title || 'Untitled Playlist', sub: 'Playlist Builder', href: 'playlist-builder.html', time: p.savedAt ? new Date(p.savedAt).getTime() : 0 });
+          items.push({ icon: 'queue_music', name: p.title || 'Untitled Playlist', sub: 'Playlist Builder', href: 'playlist-builder.html?id=' + p.id, time: p.savedAt ? new Date(p.savedAt).getTime() : 0 });
         });
       } catch (_) {}
       try {
         var rules = JSON.parse(localStorage.getItem('flowschool_arules') || '[]');
         rules.forEach(function (r) {
-          items.push({ icon: 'casino', name: 'Saved Challenge', sub: 'Arbitrary Rules', href: 'arbitrary-rule-generator.html', time: r.id || 0 });
+          var name = r.title || 'Saved Challenge';
+          if (name.length > 60) name = name.slice(0, 57) + '…';
+          items.push({ icon: 'casino', name: name, sub: 'Arbitrary Rules', href: 'arbitrary-rule-generator.html?challenge=' + r.id, time: r.id || 0 });
         });
       } catch (_) {}
       try {
         var favs = JSON.parse(localStorage.getItem('flowschool_favs') || '[]');
-        favs.forEach(function (id) {
-          items.push({ icon: 'experiment', name: 'Movement Experiment', sub: 'Movement Experiments', href: 'movement-experiment-generator.html', time: 0 });
+        favs.forEach(function (f) {
+          var id = typeof f === 'object' ? f.id : f;
+          var title = typeof f === 'object' ? (f.title || 'Movement Experiment') : 'Movement Experiment';
+          var time = typeof f === 'object' ? (f.savedAt || 0) : 0;
+          items.push({ icon: 'experiment', name: title, sub: 'Movement Experiments', href: 'movement-experiment-generator.html?exp=' + id, time: time });
+        });
+      } catch (_) {}
+      try {
+        var flows = JSON.parse(localStorage.getItem('fs-cue-flows') || '{}');
+        Object.values(flows).forEach(function (fl) {
+          var time = fl.savedAt ? new Date(fl.savedAt).getTime() : 0;
+          items.push({ icon: 'edit_note', name: fl.name || 'Untitled Flow', sub: 'Cue Worksheet', href: 'cue-worksheet.html?flow=' + encodeURIComponent(fl.name), time: time });
         });
       } catch (_) {}
 
@@ -1035,7 +1205,67 @@
       renderSkillMap();
       renderSaved();
       renderEvents();
-      renderCommunity();
+      renderMoon();
+    }
+
+    // ── Moon Phase Widget ─────────────────────────────────────────────────────
+
+    var MOON_PHASES = [
+      'New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous',
+      'Full Moon', 'Waning Gibbous', 'Last Quarter', 'Waning Crescent'
+    ];
+    var LUNAR_CYCLE = 29.53059;
+    var KNOWN_NEW_MOON = new Date('2000-01-06T18:14:00Z').getTime();
+
+    function getMoonPhase(date) {
+      var elapsed = (date.getTime() - KNOWN_NEW_MOON) / 86400000;
+      var phase = ((elapsed % LUNAR_CYCLE) + LUNAR_CYCLE) % LUNAR_CYCLE;
+      return phase / LUNAR_CYCLE; // 0=new, 0.5=full
+    }
+
+    function moonSVG(phase) {
+      var R = 9, CX = 12, CY = 12;
+      var bg = 'rgba(var(--ink-rgb),.10)';
+      var lit = 'rgba(var(--ink-rgb),.80)';
+
+      if (phase < 0.02 || phase > 0.98) {
+        return '<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="' + bg + '"/></svg>';
+      }
+      if (phase > 0.48 && phase < 0.52) {
+        return '<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="' + lit + '"/></svg>';
+      }
+
+      var isWaxing = phase < 0.5;
+      var t = isWaxing ? phase * 2 : (1 - phase) * 2; // 0=dark,1=full
+      var rx = Math.abs(R * (1 - 2 * t));
+      var ts = t > 0.5 ? 1 : 0; // terminator sweep
+
+      var d;
+      if (isWaxing) {
+        d = 'M ' + CX + ' ' + (CY - R) + ' A ' + R + ' ' + R + ' 0 0 1 ' + CX + ' ' + (CY + R) + ' A ' + rx + ' ' + R + ' 0 0 ' + ts + ' ' + CX + ' ' + (CY - R);
+      } else {
+        var wts = t > 0.5 ? 0 : 1;
+        d = 'M ' + CX + ' ' + (CY - R) + ' A ' + R + ' ' + R + ' 0 0 0 ' + CX + ' ' + (CY + R) + ' A ' + rx + ' ' + R + ' 0 0 ' + wts + ' ' + CX + ' ' + (CY - R);
+      }
+
+      return '<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="' + bg + '"/><path d="' + d + '" fill="' + lit + '"/></svg>';
+    }
+
+    function renderMoon() {
+      var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      function tick() {
+        var now = new Date();
+        var phase = getMoonPhase(now);
+        var phaseIdx = Math.round(phase * 8) % 8;
+        var h = now.getHours().toString().padStart(2, '0');
+        var m = now.getMinutes().toString().padStart(2, '0');
+        var dateStr = MONTHS[now.getMonth()].toUpperCase() + ' ' + now.getDate();
+        document.getElementById('db-moon-svg').innerHTML = moonSVG(phase);
+        document.getElementById('db-moon-phase').textContent = MOON_PHASES[phaseIdx];
+        document.getElementById('db-moon-datetime').textContent = dateStr + ' · ' + h + ':' + m;
+      }
+      tick();
+      setInterval(tick, 60000);
     }
 
     init();

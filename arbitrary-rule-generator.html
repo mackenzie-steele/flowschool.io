@@ -9,8 +9,8 @@
   <style>
     /* ── Controls ── */
     .controls-bar {
-      padding: 32px 0 28px;
-      margin-bottom: 32px;
+      padding: 32px 0 0;
+      margin-bottom: 16px;
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
@@ -54,7 +54,7 @@
       letter-spacing: -.01em;
       line-height: var(--lh-heading);
       color: var(--text-1);
-      margin-bottom: 14px;
+      margin-bottom: 4px;
     }
 
     .rule-invite {
@@ -95,7 +95,7 @@
     }
 
     .rule-cat {
-      margin-bottom: 16px;
+      display: none;
     }
 
 
@@ -422,9 +422,8 @@
         <div class="challenge-label label-1">Your Rule</div>
         ${saveBtn}
       </div>
-      <span class="rule-cat tag">${CATEGORIES[r.cat]}</span>
       <div class="rule-text">${r.text}</div>
-      <div class="rule-invite">${invite}</div>`;
+      <span class="rule-cat tag">${CATEGORIES[r.cat]}</span>`;
       } else {
         card.innerHTML = `
       <div class="card-top">
@@ -436,8 +435,8 @@
           <div class="rule-item">
             <span class="rule-n label-2">0${i + 1}</span>
             <div>
-              <span class="rule-cat tag">${CATEGORIES[r.cat]}</span>
               <div class="rule-text">${r.text}</div>
+              <span class="rule-cat tag">${CATEGORIES[r.cat]}</span>
             </div>
           </div>`).join('')}
       </div>`;
@@ -461,7 +460,9 @@
         saved = saved.filter(c => !(c.ids.length === currentRuleIds.length && c.ids.every((id, i) => id === currentRuleIds[i])));
         toast('Challenge removed.');
       } else {
-        saved.push({ id: Date.now(), ids: [...currentRuleIds] });
+        const savedRules = currentRuleIds.map(id => RULES.find(r => r.id === id)).filter(Boolean);
+        const title = savedRules.map(r => r.text).join(' · ');
+        saved.push({ id: Date.now(), ids: [...currentRuleIds], title });
         toast('Challenge saved.');
       }
       localStorage.setItem('flowschool_arules', JSON.stringify(saved));
@@ -587,7 +588,21 @@
     // ─── INIT ────────────────────────────────────────────────────────────────────
 
     updateSavedBadge();
-    generate();
+
+    const _urlChallenge = new URLSearchParams(window.location.search).get('challenge');
+    if (_urlChallenge) {
+      const _entry = saved.find(c => String(c.id) === _urlChallenge);
+      if (_entry) {
+        const _rules = _entry.ids.map(id => RULES.find(r => r.id === id)).filter(Boolean);
+        if (_rules.length) {
+          currentRuleIds = [..._entry.ids];
+          ruleCount = _rules.length;
+          document.querySelectorAll('.count-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.n) === ruleCount));
+          document.querySelector('#generate-btn .btn-label').textContent = ruleCount === 1 ? 'Generate Rule' : 'Generate Challenge';
+          renderCard(_rules);
+        } else { generate(); }
+      } else { generate(); }
+    } else { generate(); }
   </script>
   <script src="lib/nav.js"></script>
   <script src="lib/tracker.js"></script>

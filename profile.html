@@ -144,23 +144,19 @@ textarea.pf-input { resize: vertical; min-height: 90px; line-height: 1.65; }
 }
 .pf-success.show { display: block; }
 
-/* ── Save bar ── */
-.save-bar {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 28px;
-  background: rgba(245,244,240,.92); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+/* ── Form actions ── */
+.pf-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 28px;
+  padding-top: 24px;
   border-top: 1px solid var(--border-light);
 }
-.save-bar-left { font-size: var(--text-small); color: var(--text-3); }
-.save-bar-right { display: flex; gap: 10px; }
 
 @media (max-width: 580px) {
-  .profile-wrap  { padding: 0 20px 100px; }
+  .profile-wrap  { padding: 0 20px 60px; }
   .avatar-section { padding: 22px 20px; gap: 16px; }
   .profile-form-card { padding: 24px 20px; }
-  .save-bar { padding: 12px 20px; }
-  .save-bar-left { display: none; }
 }
 </style>
 </head>
@@ -232,18 +228,14 @@ textarea.pf-input { resize: vertical; min-height: 90px; line-height: 1.65; }
       <input class="pf-input" type="text" id="instagram" placeholder="@yourhandle">
     </div>
 
+    <div class="pf-actions">
+      <button class="btn-primary" id="save-btn" disabled>Save profile</button>
+      <button class="btn-ghost" id="discard-btn" disabled>Discard</button>
+    </div>
+
   </div>
 
 </div><!-- /.profile-wrap -->
-
-<!-- Fixed save bar -->
-<div class="save-bar">
-  <span class="save-bar-left" id="save-status">Unsaved changes</span>
-  <div class="save-bar-right">
-    <button class="btn-secondary" id="discard-btn">Discard</button>
-    <button class="btn-primary" id="save-btn">Save profile</button>
-  </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="lib/supabase.js"></script>
@@ -327,40 +319,73 @@ document.getElementById('avatar-file').addEventListener('change', async e => {
 
 // ─── SAVE ────────────────────────────────────────────────────────────────────
 
+// ─── DIRTY STATE ─────────────────────────────────────────────────────────────
+
+const FIELD_IDS = ['display-name','bio','teaching-style','website','instagram'];
+
+function getCurrentValues() {
+  return {
+    display_name:   document.getElementById('display-name').value.trim(),
+    bio:            document.getElementById('bio').value.trim(),
+    teaching_style: document.getElementById('teaching-style').value.trim(),
+    website:        document.getElementById('website').value.trim(),
+    instagram:      document.getElementById('instagram').value.trim(),
+  };
+}
+
+function isDirty() {
+  const cur = getCurrentValues();
+  return (
+    cur.display_name   !== (originalData.display_name   || '') ||
+    cur.bio            !== (originalData.bio             || '') ||
+    cur.teaching_style !== (originalData.teaching_style  || '') ||
+    cur.website        !== (originalData.website         || '') ||
+    cur.instagram      !== (originalData.instagram       || '')
+  );
+}
+
+function updateButtons() {
+  const dirty = isDirty();
+  document.getElementById('save-btn').disabled    = !dirty;
+  document.getElementById('discard-btn').disabled = !dirty;
+}
+
+FIELD_IDS.forEach(id => {
+  document.getElementById(id).addEventListener('input', updateButtons);
+});
+
+// ─── SAVE ────────────────────────────────────────────────────────────────────
+
 document.getElementById('save-btn').addEventListener('click', async () => {
   const btn = document.getElementById('save-btn');
   btn.disabled = true;
   btn.textContent = 'Saving…';
   clearMessages();
 
-  const display_name    = document.getElementById('display-name').value.trim();
-  const bio             = document.getElementById('bio').value.trim();
-  const teaching_style  = document.getElementById('teaching-style').value.trim();
-  const website         = document.getElementById('website').value.trim();
-  const instagram       = document.getElementById('instagram').value.trim();
+  const vals = getCurrentValues();
 
   const { error } = await db
     .from('profiles')
     .upsert({
       id: currentUser.id,
-      display_name,
-      bio,
-      teaching_style,
-      website,
-      instagram,
+      display_name:   vals.display_name,
+      bio:            vals.bio,
+      teaching_style: vals.teaching_style,
+      website:        vals.website,
+      instagram:      vals.instagram,
       updated_at: new Date().toISOString(),
     });
 
   if (error) {
     showError(error.message || 'Save failed. Please try again.');
+    btn.disabled = false;
   } else {
-    originalData = { display_name, bio, teaching_style, website, instagram };
-    document.getElementById('avatar-name').textContent = display_name || currentUser.email.split('@')[0];
-    document.getElementById('save-status').textContent = 'All changes saved';
+    originalData = { ...vals };
+    document.getElementById('avatar-name').textContent = vals.display_name || currentUser.email.split('@')[0];
     showSuccess('Profile saved.');
+    updateButtons();
   }
 
-  btn.disabled = false;
   btn.textContent = 'Save profile';
 });
 
@@ -369,7 +394,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
 document.getElementById('discard-btn').addEventListener('click', () => {
   setFields(originalData);
   clearMessages();
-  document.getElementById('save-status').textContent = 'Unsaved changes';
+  updateButtons();
 });
 
 // ─── MESSAGES ────────────────────────────────────────────────────────────────
@@ -388,13 +413,6 @@ function clearMessages() {
   document.getElementById('pf-error').classList.remove('show');
   document.getElementById('pf-success').classList.remove('show');
 }
-
-// Track changes for save status
-['display-name','bio','teaching-style','website','instagram'].forEach(id => {
-  document.getElementById(id).addEventListener('input', () => {
-    document.getElementById('save-status').textContent = 'Unsaved changes';
-  });
-});
 
 init();
 </script>

@@ -112,30 +112,6 @@
       transform: none;
     }
 
-    /* ── Icon buttons ─────────────────────────────────────────── */
-    .btn-icon {
-      background: transparent;
-      border: 1px solid rgba(var(--ink-rgb), .14);
-      color: var(--text-3);
-      border-radius: 0;
-    }
-    .btn-icon:hover {
-      background: rgba(var(--ink-rgb), .05);
-      border-color: rgba(var(--ink-rgb), .28);
-      color: var(--text-1);
-    }
-    .btn-icon.saved {
-      background: rgba(var(--ink-rgb), .08);
-      border-color: rgba(var(--ink-rgb), .30);
-      color: var(--text-1);
-    }
-    .btn-icon[data-tooltip]::before {
-      background: var(--ink-solid);
-      color: var(--paper-solid);
-      border-color: transparent;
-      border-radius: 1px;
-    }
-
     /* ── Ghost sm + outline + saved ──────────────────────────── */
     .btn-ghost.sm { padding: 6px 10px; font-size: var(--text-small); }
 
@@ -1271,6 +1247,30 @@
     updateDurSlider();
     setupChips('style-chips', v => { S.style = v; });
     setupChips('mood-chips', v => { S.mood = v; });
+
+    const _urlPlaylist = new URLSearchParams(window.location.search).get('id');
+    if (_urlPlaylist) {
+      try {
+        const _pl = JSON.parse(localStorage.getItem('flowschool_playlists') || '[]').find(p => String(p.id) === _urlPlaylist);
+        if (_pl) {
+          S.style = _pl.style || S.style;
+          S.mood  = _pl.mood  || S.mood;
+          S.duration = _pl.duration || S.duration;
+          S.arcKey = _pl.arc || S.arcKey;
+          S.pts = sampleArc(S.arcKey, getKnotCount(S.duration));
+          document.getElementById('style-chips').querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.v === S.style));
+          document.getElementById('mood-chips').querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.v === S.mood));
+          durSlider.value = S.duration;
+          updateDurSlider();
+          renderArcs();
+          renderCurve();
+          setTimeout(() => {
+            renderResults(generate());
+            document.querySelector('.results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }
+      } catch (_) {}
+    }
 
     document.getElementById('reset-curve')?.addEventListener('click', () => {
       S.pts = sampleArc(S.arcKey, getKnotCount(S.duration)); renderCurve();

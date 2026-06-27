@@ -9,8 +9,11 @@
   <style>
     /* ── Controls bar ── */
     .controls-bar {
-      padding: 32px 0 28px;
-      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 32px 0 0;
+      margin-bottom: 16px;
     }
 
     .controls-filters {
@@ -39,7 +42,7 @@
     }
 
     .shuffle-btn {
-      flex-shrink: 0;
+      align-self: flex-start;
     }
 
     /* ── Experiment card ── */
@@ -235,6 +238,16 @@
         padding: 28px 22px;
       }
 
+      .controls-filters {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .shuffle-btn {
+        align-self: stretch;
+        justify-content: center;
+      }
+
       .exp-actions {
         flex-direction: column;
       }
@@ -277,12 +290,12 @@
           <button class="filter-chip" data-tag="slow-somatic">Slow &amp; Somatic</button>
           <button class="filter-chip" data-tag="sequencing">Creative Sequencing</button>
         </div>
-        <button class="shuffle-btn" id="shuffle-btn">
-          <span class="material-symbols-sharp">shuffle</span>
-          Shuffle
-        </button>
       </div>
       <p class="pool-count"><strong id="pool-num">28</strong> available</p>
+      <button class="shuffle-btn" id="shuffle-btn">
+        <span class="material-symbols-sharp">shuffle</span>
+        Shuffle
+      </button>
     </div>
 
     <div id="experiment-card" class="experiment-card">
@@ -1039,6 +1052,14 @@
     let activeFilters = new Set();
     let lastId = null;
     let favorites = JSON.parse(localStorage.getItem('flowschool_favs') || '[]');
+    // Migrate old format (array of numbers) to array of objects
+    if (favorites.length && typeof favorites[0] === 'number') {
+      favorites = favorites.map(id => {
+        const exp = EXPERIMENTS.find(e => e.id === id);
+        return { id, title: exp ? exp.title : String(id), savedAt: Date.now() };
+      });
+      localStorage.setItem('flowschool_favs', JSON.stringify(favorites));
+    }
 
     // ─── POOL ────────────────────────────────────────────────────────────────────
 
@@ -1138,9 +1159,10 @@
 
     document.getElementById('save-btn').addEventListener('click', () => {
       if (!lastId) return;
-      const idx = favorites.indexOf(lastId);
+      const idx = favorites.findIndex(f => f.id === lastId);
       if (idx === -1) {
-        favorites.push(lastId);
+        const exp = EXPERIMENTS.find(e => e.id === lastId);
+        favorites.push({ id: lastId, title: exp ? exp.title : String(lastId), savedAt: Date.now() });
         toast('Experiment saved.');
       } else {
         favorites.splice(idx, 1);
@@ -1153,7 +1175,7 @@
 
     function updateSaveBtn(id) {
       const btn = document.getElementById('save-btn');
-      const saved = favorites.includes(id);
+      const saved = favorites.some(f => f.id === id);
       btn.classList.toggle('saved', saved);
       btn.title = saved ? 'Saved' : 'Save experiment';
       btn.querySelector('.save-icon').textContent = 'bookmark';
@@ -1178,15 +1200,15 @@
         body.innerHTML = '<p class="favs-empty">No saved experiments yet. Shuffle one and save it.</p>';
         return;
       }
-      body.innerHTML = favorites.map(id => {
-        const exp = EXPERIMENTS.find(e => e.id === id);
+      body.innerHTML = favorites.map(f => {
+        const exp = EXPERIMENTS.find(e => e.id === f.id);
         if (!exp) return '';
         return `
       <div class="fav-item">
         <span class="fav-name">${exp.title}</span>
         <div class="fav-btns">
-          <button class="fav-view-btn" data-id="${id}">View</button>
-          <button class="fav-rm-btn" data-id="${id}" title="Remove">✕</button>
+          <button class="fav-view-btn" data-id="${f.id}">View</button>
+          <button class="fav-rm-btn" data-id="${f.id}" title="Remove">✕</button>
         </div>
       </div>`;
       }).join('');
@@ -1210,7 +1232,7 @@
       }
       if (rmBtn) {
         const id = parseInt(rmBtn.dataset.id);
-        favorites = favorites.filter(f => f !== id);
+        favorites = favorites.filter(f => f.id !== id);
         saveFavorites();
         renderFavsList();
         if (lastId === id) updateSaveBtn(id);
@@ -1241,7 +1263,13 @@
 
     updatePoolCount();
     updateFavBadge();
-    generate();
+
+    const _urlExp = new URLSearchParams(window.location.search).get('exp');
+    if (_urlExp) {
+      const _exp = EXPERIMENTS.find(e => e.id === parseInt(_urlExp));
+      if (_exp) { lastId = _exp.id; renderExperiment(_exp); updateSaveBtn(_exp.id); }
+      else { generate(); }
+    } else { generate(); }
   </script>
   <script src="lib/nav.js"></script>
   <script src="lib/tracker.js"></script>

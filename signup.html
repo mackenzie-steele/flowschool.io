@@ -62,7 +62,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; opacity: 0; tra
 // Redirect if already logged in
 (async () => {
   const { data: { user } } = await db.auth.getUser();
-  if (user) { window.location.href = 'dashboard.html'; return; }
+  if (user) { window.location.href = 'index.html'; return; }
   document.body.style.opacity = '1';
 })();
 
@@ -107,7 +107,7 @@ document.getElementById('auth-form').addEventListener('submit', async e => {
     btn.textContent = 'Create account';
   } else if (data.session) {
     // Email confirmation off — logged straight in
-    window.location.href = 'dashboard.html';
+    window.location.href = 'index.html';
   } else {
     // Email confirmation on
     sucEl.textContent = 'Check your email to confirm your account, then sign in.';

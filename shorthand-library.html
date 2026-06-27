@@ -178,7 +178,7 @@
     .lib-short {
       font-family: var(--font);
       font-size: var(--fs-h7);
-      font-weight: var(--weight-regular) !important;
+      font-weight: var(--weight-medium) !important;
       line-height: var(--lh-heading);
       color: var(--text-1);
       white-space: nowrap;
@@ -201,6 +201,7 @@
 
     .lib-table .tag {
       white-space: nowrap;
+      border: none;
     }
 
     .lib-table th:nth-child(3),
@@ -217,15 +218,6 @@
       display: flex;
       justify-content: flex-end;
       gap: 6px;
-    }
-
-    .lib-actions .btn-icon {
-      width: 32px;
-      height: 32px;
-    }
-
-    .lib-actions .btn-icon .material-symbols-sharp {
-      font-size: 16px;
     }
 
     /* Empty state */
@@ -589,7 +581,7 @@
       <table class="lib-table">
         <thead>
           <tr>
-            <th>Short</th>
+            <th>Shorthand</th>
             <th>Full Name</th>
             <th>Category</th>
             <th></th>
