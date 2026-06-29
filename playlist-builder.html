@@ -25,6 +25,10 @@
       --rf:  2px;
       --rs:  0px;
     }
+    [data-theme="dark"] {
+      --text-2: #C3C3C3;
+      --text-3: #A5A5A5;
+    }
 
     /* ── Base overrides (global.css hardcodes white) ──────────── */
     body    { background: var(--bg); color: var(--text-1); }
@@ -294,15 +298,6 @@
     }
     .arc-pill.on .arc-pill-name { color: var(--text-1); }
 
-    .arc-active-desc {
-      font-family: var(--font-mono);
-      font-size: var(--text-small);
-      color: var(--text-3);
-      margin-bottom: 18px;
-      min-height: 18px;
-      font-style: normal;
-      letter-spacing: .01em;
-    }
 
     /* ── Curve module ─────────────────────────────────────────── */
     .curve-hdr {
@@ -666,7 +661,6 @@
         <div class="step-body">
           <p class="label-1 eyebrow-label">04. Energy shape</p>
           <div class="arc-pills" id="arc-opts"></div>
-          <p class="arc-active-desc" id="arc-desc"></p>
           <div class="curve-hdr">
             <span class="curve-module-label">Curve Editor</span>
             <div class="curve-module-meta">
@@ -779,7 +773,8 @@
       style: 'vinyasa',
       mood: 'grounded',
       pts: sampleArc('bell-curve', getKnotCount(60)),
-      saved: false
+      saved: false,
+      userEdited: false,
     };
 
     // ─── CURVE ───────────────────────────────────────────────────────────────────
@@ -994,6 +989,7 @@
         if (drag === null) return;
         const c = svgCoords(svg, e.clientX, e.clientY);
         S.pts[drag] = snapEnergy(yToE(Math.max(PAD_T, Math.min(SVG_H - PAD_B, c.y))));
+        S.userEdited = true;
         renderCurve();
       });
 
@@ -1012,7 +1008,7 @@
       const fill   = isActive ? 'rgba(var(--ink-rgb),.08)' : 'rgba(var(--ink-rgb),.03)';
       const stroke = isActive ? 'rgba(var(--ink-rgb),.90)' : 'rgba(var(--ink-rgb),.38)';
       const sw     = isActive ? '1.8' : '1.2';
-      return `<svg class="arc-pill-curve" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      return `<svg class="arc-pill-curve" viewBox="0 0 ${W} ${H - p}" preserveAspectRatio="none">
     <path d="${d} L ${lp.x},${H - p} L ${fp.x},${H - p} Z" fill="${fill}"/>
     <path class="arc-line" d="${d}" fill="none" stroke="${stroke}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision"/>
   </svg>`;
@@ -1022,7 +1018,6 @@
 
     function renderArcs() {
       const el = document.getElementById('arc-opts');
-      const descEl = document.getElementById('arc-desc');
       el.innerHTML = '';
       Object.entries(ARC_SHAPES).forEach(([key, arc]) => {
         const d = document.createElement('div');
@@ -1030,12 +1025,11 @@
         const active = S.arcKey === key;
         d.innerHTML = `${miniCurve(arc.keys, active)}<span class="arc-pill-name">${arc.name}</span>`;
         d.addEventListener('click', () => {
-          S.arcKey = key; S.pts = sampleArc(key, getKnotCount(S.duration));
+          S.arcKey = key; S.pts = sampleArc(key, getKnotCount(S.duration)); S.userEdited = false;
           renderArcs(); renderCurve();
         });
         el.appendChild(d);
       });
-      if (descEl) descEl.textContent = ARC_SHAPES[S.arcKey].desc;
     }
 
     // ─── GENERATION ──────────────────────────────────────────────────────────────
@@ -1043,6 +1037,19 @@
     function fmt(s) {
       const m = Math.floor(s / 60), sec = s % 60;
       return `${m}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    function pickForTarget(tgt, used, tol = 20) {
+      const clamped = Math.min(100, Math.max(0, tgt));
+      const pool = [...SONGS]
+        .filter(s => !used.has(s.id) && Math.abs(s.energy - clamped) <= tol)
+        .sort(() => Math.random() - 0.5)
+        .sort((a, b) => Math.abs(a.energy - clamped) - Math.abs(b.energy - clamped));
+      if (pool.length) return pool[0];
+      // widen tolerance fallback
+      return [...SONGS]
+        .filter(s => !used.has(s.id))
+        .sort((a, b) => Math.abs(a.energy - clamped) - Math.abs(b.energy - clamped))[0] || null;
     }
 
     function generate() {
@@ -1054,45 +1061,46 @@
       const totalMax = totalTarget + 600;
       const avgDur = Math.round(SONGS.reduce((a, s) => a + s.dur, 0) / SONGS.length);
 
-      // Derive energy target per section by sampling the curve at each section's time midpoint
+      // Pass 1: for each song slot, sample the curve at that song's time position
       let cumSecs = 0;
-      const sectionMids = secDurs.map(d => { const m = (cumSecs + d / 2) / totalTarget; cumSecs += d; return m; });
-
-      // Build energy-sorted pool per section
-      const pools = SECTIONS.map((sec, i) => {
-        const tgt = Math.round(getCurveEnergy(sectionMids[i]) * mult);
-        let p = SONGS.filter(s => Math.abs(s.energy - tgt) <= 18).sort(() => Math.random() - .5).sort((a, b) => Math.abs(a.energy - tgt) - Math.abs(b.energy - tgt));
-        if (p.length < 2) p = SONGS.filter(s => Math.abs(s.energy - tgt) <= 32).sort(() => Math.random() - .5);
-        return p;
-      });
-
-      // Pass 1: seed each section with floor(target/avgDur) songs (min 1)
       const result = SECTIONS.map((sec, i) => {
-        const pool = pools[i];
         const target = secDurs[i];
         const wantCount = Math.max(1, Math.floor(target / avgDur));
+        const secStart = cumSecs;
+        cumSecs += target;
         const songs = [];
         let actual = 0;
-        for (const s of pool) {
-          if (songs.length >= wantCount) break;
-          if (!used.has(s.id)) { songs.push(s); actual += s.dur; used.add(s.id); }
+
+        for (let slot = 0; slot < wantCount; slot++) {
+          const tNorm = (secStart + target * (slot + 0.5) / wantCount) / totalTarget;
+          const tgt = Math.round(getCurveEnergy(tNorm) * mult);
+          const pick = pickForTarget(tgt, used);
+          if (pick) { songs.push(pick); actual += pick.dur; used.add(pick.id); }
         }
-        return { sec, songs, target, actual, pool };
+
+        // Sort songs within section to follow curve direction
+        if (songs.length > 1) {
+          const eStart = getCurveEnergy(secStart / totalTarget);
+          const eEnd   = getCurveEnergy(Math.min(1, cumSecs / totalTarget));
+          if (eEnd > eStart + 5)      songs.sort((a, b) => a.energy - b.energy);
+          else if (eStart > eEnd + 5) songs.sort((a, b) => b.energy - a.energy);
+        }
+
+        return { sec, songs, target, actual };
       });
 
-      // Pass 2: top up to totalTarget
+      // Pass 2: top up to totalMin
       let total = result.reduce((a, d) => a + d.actual, 0);
       while (total < totalMin) {
         const remaining = totalMin - total;
         const d = result.slice().sort((a, b) => (b.target - b.actual) - (a.target - a.actual))[0];
-        const closer = (d.pool.filter(s => !used.has(s.id) && s.dur >= remaining && total + s.dur <= totalMax)
-          .sort((a, b) => a.dur - b.dur)[0])
-          || (SONGS.filter(s => !used.has(s.id) && s.dur >= remaining && total + s.dur <= totalMax)
-            .sort((a, b) => a.dur - b.dur)[0]);
-        const filler = (d.pool.filter(s => !used.has(s.id) && s.dur < remaining && total + s.dur <= totalMax)
-          .sort((a, b) => b.dur - a.dur)[0])
-          || (SONGS.filter(s => !used.has(s.id) && s.dur < remaining && total + s.dur <= totalMax)
-            .sort((a, b) => b.dur - a.dur)[0]);
+        const i = result.indexOf(d);
+        const secMid = (secDurs.slice(0, i).reduce((a, b) => a + b, 0) + secDurs[i] * 0.75) / totalTarget;
+        const addTgt = Math.min(100, Math.round(getCurveEnergy(secMid) * mult));
+        const closer = SONGS.filter(s => !used.has(s.id) && s.dur >= remaining && total + s.dur <= totalMax)
+          .sort((a, b) => Math.abs(a.energy - addTgt) - Math.abs(b.energy - addTgt))[0];
+        const filler = SONGS.filter(s => !used.has(s.id) && s.dur < remaining && total + s.dur <= totalMax)
+          .sort((a, b) => Math.abs(a.energy - addTgt) - Math.abs(b.energy - addTgt))[0];
         const pick = closer || filler;
         if (!pick) break;
         d.songs.push(pick); d.actual += pick.dur; total += pick.dur; used.add(pick.id);
@@ -1264,7 +1272,9 @@
       const newDur = parseInt(durSlider.value);
       const newN = getKnotCount(newDur);
       if (newN !== S.pts.length) {
-        S.pts = Array.from({ length: newN }, (_, i) => Math.round(getCurveEnergy(i / (newN - 1))));
+        S.pts = S.userEdited
+          ? Array.from({ length: newN }, (_, i) => Math.round(getCurveEnergy(i / (newN - 1))))
+          : sampleArc(S.arcKey, newN);
       }
       S.duration = newDur;
       updateDurSlider();

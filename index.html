@@ -136,15 +136,20 @@
     }
 
     .db-prompt-tag {
-      font-size: 10px;
-      font-weight: var(--weight-semibold);
-      letter-spacing: .08em;
+      font-size: var(--text-micro);
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--ls-micro);
       text-transform: uppercase;
-      color: var(--accent);
-      background: var(--accent-dim);
-      border: 1px solid var(--accent-border);
-      padding: 3px 8px;
-      border-radius: var(--rf);
+      color: var(--text-2);
+      background: rgba(var(--ink-rgb), .06);
+      border: 1px solid rgba(var(--ink-rgb), .14);
+      padding: 4px 10px;
+      border-radius: 2px;
+    }
+    [data-theme="dark"] .db-prompt-tag {
+      background: #FFF55F;
+      color: #1B1B1B;
+      border: none;
     }
 
     .db-prompt-date {
@@ -260,6 +265,7 @@
       display: flex;
       flex-direction: column;
     }
+    .db-next-step .btn-primary { border-radius: 8px; }
 
     .db-next-because {
       font-size: var(--text-small);
@@ -727,12 +733,12 @@
         <!-- 5. Suggested Next Step + Skill Map -->
         <div class="db-row db-row-2">
 
-          <div class="db-card db-next-step" id="db-next-card">
-            <span class="db-eyebrow">Suggested Next Step</span>
-          </div>
-
           <div class="db-card" id="db-score-card">
             <span class="db-eyebrow">Skill Map</span>
+          </div>
+
+          <div class="db-card db-next-step" id="db-next-card">
+            <span class="db-eyebrow">Suggested Next Step</span>
           </div>
 
         </div>
@@ -929,7 +935,7 @@
         hoursTotal:           14,
       }));
       localStorage.setItem(RECENT_KEY, JSON.stringify([
-        { name: 'Movement Experiments', icon: 'experiment',       href: 'movement-experiment-generator.html', time: Date.now() - 86400000 * 1 },
+        { name: 'Movement Experiments', icon: 'gesture',           href: 'movement-experiment-generator.html', time: Date.now() - 86400000 * 1 },
         { name: 'Arbitrary Rules',      icon: 'casino',           href: 'arbitrary-rule-generator.html',      time: Date.now() - 86400000 * 2 },
         { name: 'Playlist Builder',     icon: 'queue_music',      href: 'playlist-builder.html',              time: Date.now() - 86400000 * 2 },
         { name: 'Shorthand Library',    icon: 'book',             href: 'shorthand-library.html',             time: Date.now() - 86400000 * 3 },
@@ -1132,7 +1138,7 @@
           var id = typeof f === 'object' ? f.id : f;
           var title = typeof f === 'object' ? (f.title || 'Movement Experiment') : 'Movement Experiment';
           var time = typeof f === 'object' ? (f.savedAt || 0) : 0;
-          items.push({ icon: 'experiment', name: title, sub: 'Movement Experiments', href: 'movement-experiment-generator.html?exp=' + id, time: time });
+          items.push({ icon: 'gesture', name: title, sub: 'Movement Experiments', href: 'movement-experiment-generator.html?exp=' + id, time: time });
         });
       } catch (_) {}
       try {
