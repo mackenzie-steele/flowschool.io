@@ -278,12 +278,12 @@
       font-size: var(--fs-h5);
       font-weight: var(--weight-regular);
       line-height: 1.25;
-      margin-bottom: 10px;
+      margin: 0 0 8px;
     }
 
     .db-next-desc {
       font-size: var(--text-body-sm);
-      color: var(--text-3);
+      color: var(--text-2);
       line-height: 1.65;
       flex: 1;
       margin-bottom: 20px;
@@ -358,9 +358,9 @@
     /* ── Skill Map ───────────────────────────────────────── */
     .db-skillmap-sub {
       font-size: var(--text-body-sm);
-      color: var(--text-3);
+      color: var(--text-2);
       line-height: 1.55;
-      margin: -4px 0 12px;
+      margin: 0 0 12px;
     }
 
     .db-skillmap-foot {
@@ -475,15 +475,23 @@
     .db-event:last-child { border-bottom: none; }
 
     .db-event-date {
-      width: 34px;
+      width: 40px;
+      height: 40px;
       flex-shrink: 0;
       text-align: center;
-      padding-top: 2px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      background: rgba(var(--ink-rgb), .02);
     }
 
     .db-event-mo {
       display: block;
-      font-size: 9px;
+      font-size: 8px;
       font-weight: var(--weight-bold);
       letter-spacing: .08em;
       text-transform: uppercase;
@@ -495,7 +503,7 @@
       font-size: var(--fs-h6);
       font-weight: var(--weight-regular);
       color: var(--text-1);
-      line-height: 1.1;
+      line-height: 1;
     }
 
     .db-event-title {
@@ -524,6 +532,20 @@
       color: var(--text-3);
       font-family: var(--font-mono);
     }
+
+    .db-event-signup {
+      background: none !important;
+      border: none !important;
+      padding: 0 !important;
+      font-size: var(--text-small) !important;
+      color: var(--text-3) !important;
+      font-family: var(--font) !important;
+      box-shadow: none !important;
+      cursor: pointer;
+      transition: color .15s;
+      flex-shrink: 0;
+    }
+    .db-event-signup:hover { color: var(--text-1) !important; }
 
     /* ── Community feed ──────────────────────────────────── */
     .db-feed-item {
@@ -623,7 +645,7 @@
     .db-bonnie-title {
       font-size: var(--fs-h5);
       font-weight: var(--weight-regular);
-      margin: 12px 0 10px;
+      margin: 0 0 8px;
       line-height: 1.3;
     }
 
@@ -1007,7 +1029,7 @@
         '<span class="db-eyebrow">Next Step</span>' +
         '<h3 class="db-next-title">' + step.title + '</h3>' +
         '<p class="db-next-desc">' + step.desc + '</p>' +
-        '<a href="' + step.href + '" class="btn-primary" style="align-self:flex-start">' + step.label + '</a>';
+        '<a href="' + step.href + '" class="btn-primary" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;border-radius:8px">' + step.label + '<span class="material-symbols-sharp" style="font-size:14px">arrow_forward</span></a>';
     }
 
     function renderProgress(stats) {
@@ -1095,6 +1117,7 @@
       var card = document.getElementById('db-score-card');
       card.innerHTML =
         '<span class="db-eyebrow">Your Skill Map</span>' +
+        '<h3 class="db-next-title">Your skills</h3>' +
         '<p class="db-skillmap-sub">Your map grows as you practice across Flow School tools.</p>' +
         '<svg viewBox="0 0 320 260" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">' +
           axisSVG + gridSVG + dataSVG + dotsSVG + labelsSVG +
@@ -1169,11 +1192,10 @@
           '<div style="flex:1;min-width:0">' +
             '<p class="db-event-title">' + e.title + '</p>' +
             '<div class="db-event-foot">' +
-              '<span class="db-event-type">' + e.type + '</span>' +
               (e.time ? '<span class="db-event-time">' + e.time + '</span>' : '') +
             '</div>' +
           '</div>' +
-          '<button class="btn-ghost sm db-event-signup" disabled style="flex-shrink:0;opacity:.55;cursor:default">Sign up</button>' +
+          '<button class="btn-ghost sm db-event-signup">Sign up</button>' +
         '</div>';
       }).join('');
     }

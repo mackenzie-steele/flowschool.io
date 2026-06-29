@@ -291,7 +291,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      overflow-y: auto;
       padding: 48px 32px;
       opacity: 0;
       pointer-events: none;
@@ -300,6 +301,14 @@
     .pol-overlay.active {
       opacity: 1;
       pointer-events: all;
+    }
+    .pol-inner {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: auto;
     }
     .pol-close {
       position: absolute;
@@ -340,13 +349,30 @@
       color: var(--text-1);
       line-height: 1.35;
       text-align: center;
-      max-width: 680px;
+      width: 100%;
+      min-height: 10rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
       margin-bottom: 60px;
       letter-spacing: -.01em;
+      transition: opacity .15s ease;
     }
     .pol-cue-text.no-cues {
       font-size: var(--fs-h5);
       color: var(--text-3);
+    }
+    .pol-countdown {
+      font-family: var(--font-mono);
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      color: var(--text-3);
+      letter-spacing: .04em;
+      min-height: 1.6rem;
+      display: flex;
+      align-items: center;
+      transition: opacity .3s;
     }
     .pol-nav {
       display: flex;
@@ -406,6 +432,8 @@
     .pol-overlay.ended .pol-progress,
     .pol-overlay.ended #pol-cue,
     .pol-overlay.ended .pol-nav,
+    .pol-overlay.ended .pol-controls-actions,
+    .pol-overlay.ended .pol-controls-card,
     .pol-overlay.ended .pol-util,
     .pol-overlay.ended .pol-script-wrap { display: none; }
     .pol-end-title {
@@ -428,6 +456,111 @@
     .pol-overlay .btn-primary,
     .pol-overlay .btn-ghost,
     .pol-overlay .pol-close { border-radius: 8px; }
+
+    /* ── Timer bar ── */
+    .pol-timer-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(var(--ink-rgb), .08);
+    }
+    .pol-timer-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--volt);
+    }
+
+    /* ── Timing controls ── */
+    .pol-controls-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .pol-audio-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: 1px solid rgba(var(--ink-rgb), .18);
+      color: var(--text-3);
+      padding: 10px;
+      border-radius: 0;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all .15s;
+    }
+    .pol-audio-btn:hover { color: var(--text-2); border-color: rgba(var(--ink-rgb), .32); }
+    .pol-audio-btn.muted { opacity: .4; }
+    .pol-start-btn {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--ink-solid);
+      color: var(--paper-solid);
+      border: none;
+      border-radius: 8px;
+      font-size: var(--text-ui);
+      font-family: var(--font);
+      font-weight: var(--weight-medium);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity .15s;
+    }
+    .pol-start-btn:hover { opacity: .82; }
+    .pol-controls-card {
+      width: 100%;
+      border: 1px solid var(--border);
+      padding: 20px 20px 16px;
+      margin-bottom: 4px;
+    }
+    .pol-ctl-label {
+      display: block;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-3);
+      margin-bottom: 12px;
+    }
+    .pol-range-wrap { width: 100%; }
+    .pol-range-val {
+      font-family: var(--font-mono);
+      font-size: var(--fs-h5);
+      font-weight: var(--weight-regular);
+      letter-spacing: .02em;
+      color: var(--text-1);
+      display: block;
+      margin-bottom: 10px;
+    }
+    .pol-range-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      padding: 0 1px;
+    }
+    .pol-range-ticks span {
+      display: block;
+      width: 1px;
+      height: 5px;
+      background: rgba(var(--ink-rgb), .16);
+    }
+    .pol-range-ticks span:first-child,
+    .pol-range-ticks span:last-child {
+      height: 10px;
+      background: rgba(var(--ink-rgb), .38);
+    }
+    .pol-range-ends {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+      font-size: var(--text-small);
+      color: var(--text-3);
+      font-family: var(--font-mono);
+    }
 
     /* ── Word bank drawer (fixed bottom) ── */
     .wb-drawer {
@@ -545,6 +678,7 @@
     /* ── Responsive ── */
     @media (max-width: 768px) {
       .wb-drawer { display: none; }
+      .wb-toolbar-btn { display: none; }
       .wrap { padding-bottom: 0; }
     }
 
@@ -613,6 +747,7 @@
       </button>
       <button class="btn-ghost sm" id="btn-remove-row">Remove Last</button>
       <div class="row-actions-spacer"></div>
+      <button class="btn-ghost sm wb-toolbar-btn" id="btn-word-bank">Word Bank</button>
       <button class="btn-ghost sm" id="btn-clear">Clear Worksheet</button>
     </div>
   </div>
@@ -681,41 +816,69 @@
 <!-- ── PRACTICE OUT LOUD OVERLAY ─────────────────────────────── -->
 
 <div class="pol-overlay" id="pol-overlay" aria-modal="true" role="dialog">
+  <div class="pol-timer-bar" id="pol-timer-bar">
+    <div class="pol-timer-fill" id="pol-timer-fill"></div>
+  </div>
+
   <button class="pol-close" id="pol-close">
     <span class="material-symbols-sharp">close</span>
   </button>
 
-  <div class="pol-meta" id="pol-meta">Pose Practice</div>
-  <div class="pol-progress" id="pol-progress">1 of 8</div>
-  <div class="pol-cue-text" id="pol-cue"></div>
+  <div class="pol-inner">
 
-  <div class="pol-nav">
-    <button class="btn-ghost" id="pol-prev">
-      <span class="material-symbols-sharp" style="font-size:18px;margin-right:2px">arrow_back</span>
-      Previous
-    </button>
-    <button class="btn-primary" id="pol-next">
-      Next
-      <span class="material-symbols-sharp" style="font-size:18px;margin-left:2px">arrow_forward</span>
-    </button>
-  </div>
-
-  <div class="pol-util">
-    <button class="btn-ghost sm" id="pol-show-script">Show Full Script</button>
-    <button class="btn-ghost sm" id="pol-restart">Start Over</button>
-  </div>
-
-  <div class="pol-script-wrap" id="pol-script-wrap">
-    <div id="pol-script-lines"></div>
-  </div>
-
-  <div class="pol-end" id="pol-end">
-    <div class="pol-end-title">Nice work.</div>
-    <p class="pol-end-sub">You made it through all your cues.</p>
-    <div class="pol-end-actions">
-      <button class="btn-ghost" id="pol-end-restart">Start Over</button>
-      <button class="btn-primary" id="pol-end-close">Close</button>
+    <div class="pol-meta" id="pol-meta">Pose Practice</div>
+    <div class="pol-progress" id="pol-progress">1 of 8</div>
+    <div class="pol-cue-text" id="pol-cue">
+      <span id="pol-cue-span"></span>
+      <span class="pol-countdown" id="pol-countdown"></span>
     </div>
+
+    <div class="pol-nav">
+      <button class="btn-icon" id="pol-prev" data-tooltip="Previous">
+        <span class="material-symbols-sharp">arrow_back</span>
+      </button>
+      <button class="btn-icon" id="pol-next" data-tooltip="Next">
+        <span class="material-symbols-sharp">arrow_forward</span>
+      </button>
+    </div>
+
+    <div class="pol-controls-actions">
+      <button class="pol-audio-btn" id="pol-audio-btn" title="Toggle sound">
+        <span class="material-symbols-sharp" id="pol-audio-icon" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 20">volume_up</span>
+      </button>
+      <button class="pol-start-btn" id="pol-timing-start">
+        <span class="material-symbols-sharp" id="pol-start-icon" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 20">play_arrow</span>
+        <span id="pol-start-label">Start</span>
+      </button>
+    </div>
+    <div class="pol-controls-card">
+      <span class="pol-ctl-label">Duration</span>
+      <div class="pol-range-wrap">
+        <span class="pol-range-val" id="pol-dur-val">4s</span>
+        <input type="range" class="range-slider" id="pol-dur-slider" min="2" max="8" step="1" value="4">
+        <div class="pol-range-ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="pol-range-ends"><span>2s</span><span>8s</span></div>
+      </div>
+    </div>
+
+    <div class="pol-util">
+      <button class="btn-ghost sm" id="pol-show-script">Show Full Script</button>
+      <button class="btn-ghost sm" id="pol-restart">Start Over</button>
+    </div>
+
+    <div class="pol-script-wrap" id="pol-script-wrap">
+      <div id="pol-script-lines"></div>
+    </div>
+
+    <div class="pol-end" id="pol-end">
+      <div class="pol-end-title">Nice work.</div>
+      <p class="pol-end-sub">You made it through all your cues.</p>
+      <div class="pol-end-actions">
+        <button class="btn-ghost" id="pol-end-restart">Start Over</button>
+        <button class="btn-primary" id="pol-end-close">Close</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -803,7 +966,7 @@ let activeInput = null; // last focused .cue-input
 let polIndex = 0;
 let polScriptVisible = false;
 let wbTab = 'verbs';
-let wbOpen = localStorage.getItem('fs-wb-open') !== 'false';
+let wbOpen = localStorage.getItem('fs-wb-open') === 'true';
 
 // ─── UTILITIES ───────────────────────────────────────────────────────────────
 
@@ -1191,6 +1354,97 @@ function getCuedRows() {
   return rows.filter(r => buildCue(r));
 }
 
+let polDuration = 4;
+let polTimerTimeout = null;
+let polTickInterval = null;
+let polTimerRunning = false;
+let polMuted = false;
+let polSecsLeft = 0;
+
+// ── Audio (shared approach with breath pacer) ──────────────────────────────
+let polAudioCtx = null;
+function polGetCtx() {
+  if (!polAudioCtx) polAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (polAudioCtx.state === 'suspended') polAudioCtx.resume();
+  return polAudioCtx;
+}
+function polPlayTone(freq, vol, dur) {
+  if (polMuted) return;
+  try {
+    const ctx = polGetCtx();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const when = ctx.currentTime + 0.01;
+    gain.gain.setValueAtTime(vol, when);
+    gain.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    osc.start(when);
+    osc.stop(when + dur + 0.01);
+  } catch (e) {}
+}
+function polTick() { polPlayTone(880, 0.07, 0.05); }
+
+function updateSliderFill(sl, val) {
+  const pct = ((val - sl.min) / (sl.max - sl.min)) * 100;
+  sl.style.background = `linear-gradient(to right,var(--slider-fill) ${pct}%,rgba(var(--ink-rgb),.12) ${pct}%)`;
+}
+
+function updatePolStartBtn() {
+  const icon  = document.getElementById('pol-start-icon');
+  const label = document.getElementById('pol-start-label');
+  if (!icon) return;
+  icon.textContent  = polTimerRunning ? 'stop' : 'play_arrow';
+  label.textContent = polTimerRunning ? 'Stop'  : 'Start';
+}
+
+function startPolTimer() {
+  stopPolTimer();
+  polTimerRunning = true;
+  updatePolStartBtn();
+  const fill = document.getElementById('pol-timer-fill');
+  fill.style.transition = 'none';
+  fill.style.width = '0%';
+  fill.offsetWidth; // force reflow
+  fill.style.transition = `width ${polDuration}s linear`;
+  fill.style.width = '100%';
+  // Countdown number
+  polSecsLeft = polDuration;
+  const countdownEl = document.getElementById('pol-countdown');
+  if (countdownEl) countdownEl.textContent = polSecsLeft;
+
+  polTick();
+  polTickInterval = setInterval(() => {
+    polSecsLeft = Math.max(0, polSecsLeft - 1);
+    if (countdownEl) countdownEl.textContent = polSecsLeft > 0 ? polSecsLeft : '';
+    polTick();
+  }, 1000);
+  polTimerTimeout = setTimeout(() => {
+    const cues = getCuedRows();
+    if (polIndex < cues.length - 1) {
+      polIndex++;
+      updatePOL();
+      startPolTimer();
+    } else {
+      document.getElementById('pol-overlay').classList.add('ended');
+      stopPolTimer();
+    }
+  }, polDuration * 1000);
+}
+
+function stopPolTimer() {
+  polTimerRunning = false;
+  if (polTickInterval) { clearInterval(polTickInterval); polTickInterval = null; }
+  if (polTimerTimeout) { clearTimeout(polTimerTimeout); polTimerTimeout = null; }
+  const fill = document.getElementById('pol-timer-fill');
+  if (fill) { fill.style.transition = 'none'; fill.style.width = '0%'; }
+  const countdownEl = document.getElementById('pol-countdown');
+  if (countdownEl) countdownEl.textContent = '';
+  updatePolStartBtn();
+}
+
 function openPOL() {
   const cues = getCuedRows();
   if (!cues.length) { showToast('Write some cues first.'); return; }
@@ -1201,9 +1455,12 @@ function openPOL() {
   updatePOL();
   document.getElementById('pol-overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
+  stopPolTimer();
+  updateSliderFill(document.getElementById('pol-dur-slider'), polDuration);
 }
 
 function closePOL() {
+  stopPolTimer();
   const overlay = document.getElementById('pol-overlay');
   overlay.classList.remove('active', 'ended');
   document.body.style.overflow = '';
@@ -1223,18 +1480,26 @@ function updatePOL() {
   const cue  = buildCue(row);
   const pose = row.pose ? ` ${row.pose.toUpperCase()}` : '';
   const polCueEl = document.getElementById('pol-cue');
-  polCueEl.textContent = inex + cue + pose;
-  polCueEl.className = 'pol-cue-text';
+  const polCueSpan = document.getElementById('pol-cue-span');
+  const newText = inex + cue + pose;
+  if (polCueSpan.textContent === newText) {
+    polCueEl.className = 'pol-cue-text';
+  } else {
+    polCueEl.style.opacity = '0';
+    setTimeout(() => {
+      polCueSpan.textContent = newText;
+      polCueEl.className = 'pol-cue-text';
+      polCueEl.style.opacity = '';
+    }, 150);
+  }
 
   // Prev / Next
   document.getElementById('pol-prev').disabled = polIndex === 0;
   const nextBtn = document.getElementById('pol-next');
-  if (polIndex === total - 1) {
-    nextBtn.querySelector ? null : null;
-    nextBtn.innerHTML = 'Done <span class="material-symbols-sharp" style="font-size:18px;margin-left:2px">check</span>';
-  } else {
-    nextBtn.innerHTML = 'Next <span class="material-symbols-sharp" style="font-size:18px;margin-left:2px">arrow_forward</span>';
-  }
+  const nextIcon = nextBtn.querySelector('.material-symbols-sharp');
+  nextIcon.textContent = polIndex === total - 1 ? 'check' : 'arrow_forward';
+  nextBtn.title = polIndex === total - 1 ? 'Done' : 'Next';
+  nextBtn.dataset.tooltip = nextBtn.title;
 
   // Update script if visible
   if (polScriptVisible) renderPOLScript(cues);
@@ -1330,25 +1595,52 @@ function init() {
   document.getElementById('pol-close').addEventListener('click', closePOL);
 
   document.getElementById('pol-prev').addEventListener('click', () => {
-    if (polIndex > 0) { polIndex--; updatePOL(); }
+    if (polIndex > 0) { polIndex--; updatePOL(); if (polTimerRunning) startPolTimer(); }
   });
   document.getElementById('pol-next').addEventListener('click', () => {
     const cues = getCuedRows();
     if (polIndex < cues.length - 1) {
       polIndex++;
       updatePOL();
+      if (polTimerRunning) startPolTimer();
     } else {
+      stopPolTimer();
       document.getElementById('pol-overlay').classList.add('ended');
     }
   });
   document.getElementById('pol-restart').addEventListener('click', () => {
     polIndex = 0;
     updatePOL();
+    if (polTimerRunning) startPolTimer();
   });
   document.getElementById('pol-end-restart').addEventListener('click', () => {
     document.getElementById('pol-overlay').classList.remove('ended');
     polIndex = 0;
     updatePOL();
+    if (polTimerRunning) startPolTimer();
+  });
+
+  // Duration slider
+  const durSlider = document.getElementById('pol-dur-slider');
+  durSlider.addEventListener('input', () => {
+    polDuration = parseInt(durSlider.value);
+    document.getElementById('pol-dur-val').textContent = polDuration + 's';
+    updateSliderFill(durSlider, polDuration);
+    if (polTimerRunning) startPolTimer();
+  });
+  updateSliderFill(durSlider, polDuration);
+
+  // Start / Stop toggle — warm AudioContext on the gesture that starts playback
+  document.getElementById('pol-timing-start').addEventListener('click', () => {
+    if (polTimerRunning) { stopPolTimer(); } else { polGetCtx(); startPolTimer(); }
+  });
+
+  // Audio mute toggle — also warms up AudioContext on first click (browser requires gesture)
+  document.getElementById('pol-audio-btn').addEventListener('click', () => {
+    polMuted = !polMuted;
+    document.getElementById('pol-audio-btn').classList.toggle('muted', polMuted);
+    document.getElementById('pol-audio-icon').textContent = polMuted ? 'volume_off' : 'volume_up';
+    if (!polMuted) polGetCtx();
   });
   document.getElementById('pol-end-close').addEventListener('click', closePOL);
   document.getElementById('pol-show-script').addEventListener('click', () => {
@@ -1375,11 +1667,13 @@ function init() {
   });
 
   // Word bank
-  document.getElementById('wb-handle').addEventListener('click', () => {
+  function toggleWB() {
     wbOpen = !wbOpen;
     localStorage.setItem('fs-wb-open', wbOpen);
     document.getElementById('wb-drawer').classList.toggle('open', wbOpen);
-  });
+  }
+  document.getElementById('wb-handle').addEventListener('click', toggleWB);
+  document.getElementById('btn-word-bank').addEventListener('click', toggleWB);
   document.querySelectorAll('.wb-tab').forEach(tab => {
     tab.addEventListener('click', () => switchWBTab(tab.dataset.wb));
   });
