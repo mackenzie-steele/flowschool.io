@@ -29,18 +29,18 @@ var SKILL_MAP_DATA = [
 // Tool-to-skill mapping — attributes session time to skill categories.
 // Future: store in Supabase table `tool_skill_mappings`.
 var TOOL_SKILL_MAP = {
-  'arbitrary-rule-generator.html':      ['Sequencing'],
-  'movement-experiment-generator.html': ['Sequencing'],
+  'arbitrary-rules.html':      ['Sequencing'],
+  'movement-experiments.html': ['Sequencing'],
   'shorthand-library.html':             ['Sequencing', 'Class Structure'],
   'v-ybp-d.html':                       ['Cueing'],
-  'breath-pace-trainer.html':           ['Cueing'],
+  'breath-pace.html':           ['Cueing'],
   'story-structure.html':               ['Class Structure', 'Storytelling'],
   'playlist-builder.html':              ['Class Structure'],
 };
 
 // Suggested next action per weakest skill — includes link to the relevant tool
 var SKILL_SUGGESTIONS = {
-  'Sequencing':      { pre: 'Try 10 minutes with ', tool: 'Arbitrary Rule Generator', post: ' to grow Sequencing.',     href: 'arbitrary-rule-generator.html' },
+  'Sequencing':      { pre: 'Try 10 minutes with ', tool: 'Arbitrary Rules', post: ' to grow Sequencing.',     href: 'arbitrary-rules.html' },
   'Cueing':          { pre: 'Try 10 minutes in ',   tool: 'the Cue Lab',              post: ' to build cueing skills.',  href: 'v-ybp-d.html'                  },
   'Class Structure': { pre: 'Try 10 minutes in ',   tool: 'the Playlist Builder',     post: ' to grow Class Structure.', href: 'playlist-builder.html'          },
   'Storytelling':    { pre: 'Shape a class arc in the ', tool: 'Playlist Builder', post: ' — controlling energy over time is the foundation of storytelling.', href: 'playlist-builder.html' },
@@ -48,14 +48,14 @@ var SKILL_SUGGESTIONS = {
 
 var NEXT_STEPS = [
   {
-    trigger: 'movement-experiment-generator.html',
+    trigger: 'movement-experiments.html',
     title:   'Add creative structure',
-    desc:    "You've been exploring movement. Now give it a rule. The Arbitrary Rule Generator adds a creative constraint to your next class so the movement has direction.",
-    href:    'arbitrary-rule-generator.html',
+    desc:    "You've been exploring movement. Now give it a rule. Arbitrary Rules adds a creative constraint to your next class so the movement has direction.",
+    href:    'arbitrary-rules.html',
     label:   'Generate a Rule',
   },
   {
-    trigger: 'arbitrary-rule-generator.html',
+    trigger: 'arbitrary-rules.html',
     title:   'Build the soundscape',
     desc:    "You set the constraint. Now build the playlist to match. Use the Playlist Builder to shape the energy arc of your class.",
     href:    'playlist-builder.html',
@@ -64,12 +64,12 @@ var NEXT_STEPS = [
   {
     trigger: 'playlist-builder.html',
     title:   'Write your cues',
-    desc:    "You have the music. Now sharpen the language. Use the Cue Worksheet to map out your verb, body part, and direction cues for each section of your class.",
-    href:    'cue-worksheet.html',
-    label:   'Open Cue Worksheet',
+    desc:    "You have the music. Now sharpen the language. Use Verb / Your Body Part / Direction to map out your verb, body part, and direction cues for each section of your class.",
+    href:    'verb-your-body-part-direction.html',
+    label:   'Open Verb / Your Body Part / Direction',
   },
   {
-    trigger: 'cue-worksheet.html',
+    trigger: 'verb-your-body-part-direction.html',
     title:   'Put it into shorthand',
     desc:    "You've been writing your cues. Now encode your sequences using Flow School shorthand so you can track and recall them over time.",
     href:    'shorthand-library.html',
@@ -79,28 +79,28 @@ var NEXT_STEPS = [
     trigger: 'shorthand-library.html',
     title:   'Take your notes into movement',
     desc:    "You've been documenting sequences. Take one into a movement experiment and see what changes when you add a creative constraint.",
-    href:    'movement-experiment-generator.html',
+    href:    'movement-experiments.html',
     label:   'Start a Movement Experiment',
   },
   {
-    trigger: 'breath-pace-trainer.html',
+    trigger: 'breath-pace.html',
     title:   'Build the playlist around the breath',
     desc:    "You've been working on breath pacing. Now build a playlist whose energy arc mirrors the breath pattern you want to teach.",
     href:    'playlist-builder.html',
     label:   'Build a Playlist',
   },
   {
-    trigger: 'flow-checker.html',
+    trigger: 'elements-of-flow.html',
     title:   'Take it into movement',
     desc:    "You've been reviewing your flow. Take one of the sequences into a movement experiment and see what changes when you add a creative constraint.",
-    href:    'movement-experiment-generator.html',
+    href:    'movement-experiments.html',
     label:   'Start a Movement Experiment',
   },
   {
     trigger: 'default',
     title:   'Start with movement',
     desc:    "The fastest way to develop your teaching voice is to get in your body. Begin with a movement experiment and let the physical practice lead.",
-    href:    'movement-experiment-generator.html',
+    href:    'movement-experiments.html',
     label:   'Start a Movement Experiment',
   },
 ];

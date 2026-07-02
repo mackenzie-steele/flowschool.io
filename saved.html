@@ -204,7 +204,7 @@
       },
       {
         key: 'cue-flows',
-        label: 'Cue Worksheet Flows',
+        label: 'Verb / Your Body Part / Direction Flows',
         icon: 'edit_note',
         load: function () {
           try {
@@ -212,7 +212,7 @@
             return Object.values(flows).map(function (fl) {
               return {
                 name: fl.name || 'Untitled Flow',
-                href: 'cue-worksheet.html?flow=' + encodeURIComponent(fl.name),
+                href: 'verb-your-body-part-direction.html?flow=' + encodeURIComponent(fl.name),
                 time: fl.savedAt ? new Date(fl.savedAt).getTime() : 0,
               };
             });
@@ -228,7 +228,7 @@
             return JSON.parse(localStorage.getItem('flowschool_favs') || '[]').map(function (f) {
               return {
                 name: typeof f === 'object' ? (f.title || 'Movement Experiment') : 'Movement Experiment',
-                href: 'movement-experiment-generator.html?exp=' + (typeof f === 'object' ? f.id : f),
+                href: 'movement-experiments.html?exp=' + (typeof f === 'object' ? f.id : f),
                 time: typeof f === 'object' ? (f.savedAt || 0) : 0,
               };
             });
@@ -246,7 +246,7 @@
               if (name.length > 80) name = name.slice(0, 77) + '…';
               return {
                 name: name,
-                href: 'arbitrary-rule-generator.html?challenge=' + r.id,
+                href: 'arbitrary-rules.html?challenge=' + r.id,
                 time: r.id || 0,
               };
             });

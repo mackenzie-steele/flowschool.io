@@ -912,7 +912,7 @@
           <span class="db-eyebrow">This Month</span>
           <h4 class="db-bonnie-title">Finding your rhythm.</h4>
           <p class="db-bonnie-body">June is about developing your internal timing as a teacher. Start by tracking your breath cues — are you giving students enough time to actually breathe? Try the Breath Pacer to build your internal clock, then apply it in your next class. The goal isn't to be perfectly timed. It's to become aware of the gap between what you think you're giving and what you're actually giving.</p>
-          <a href="breath-pace-trainer.html" class="btn-primary" style="margin-top:20px;display:inline-flex;align-items:center;gap:8px;border-radius:8px">
+          <a href="breath-pace.html" class="btn-primary" style="margin-top:20px;display:inline-flex;align-items:center;gap:8px;border-radius:8px">
             Try the Breath Pacer
             <span class="material-symbols-sharp" style="font-size:14px">arrow_forward</span>
           </a>
@@ -950,11 +950,11 @@
         hoursTotal:           14,
       }));
       localStorage.setItem(RECENT_KEY, JSON.stringify([
-        { name: 'Movement Experiments', icon: 'gesture',           href: 'movement-experiment-generator.html', time: Date.now() - 86400000 * 1 },
-        { name: 'Arbitrary Rules',      icon: 'casino',           href: 'arbitrary-rule-generator.html',      time: Date.now() - 86400000 * 2 },
+        { name: 'Movement Experiments', icon: 'gesture',           href: 'movement-experiments.html', time: Date.now() - 86400000 * 1 },
+        { name: 'Arbitrary Rules',      icon: 'casino',           href: 'arbitrary-rules.html',      time: Date.now() - 86400000 * 2 },
         { name: 'Playlist Builder',     icon: 'queue_music',      href: 'playlist-builder.html',              time: Date.now() - 86400000 * 2 },
         { name: 'Shorthand Library',    icon: 'book',             href: 'shorthand-library.html',             time: Date.now() - 86400000 * 3 },
-        { name: 'Breath Pacer',         icon: 'air',              href: 'breath-pace-trainer.html',           time: Date.now() - 86400000 * 4 },
+        { name: 'Breath Pacer',         icon: 'air',              href: 'breath-pace.html',           time: Date.now() - 86400000 * 4 },
         { name: 'Elements of Flow Lab', icon: 'science',          href: 'elements-of-flow-lab.html',          time: Date.now() - 86400000 * 5 },
       ]));
       localStorage.setItem(SEEDED_KEY, '1');
@@ -1146,7 +1146,7 @@
         rules.forEach(function (r) {
           var name = r.title || 'Saved Challenge';
           if (name.length > 60) name = name.slice(0, 57) + '…';
-          items.push({ icon: 'casino', name: name, sub: 'Arbitrary Rules', href: 'arbitrary-rule-generator.html?challenge=' + r.id, time: r.id || 0 });
+          items.push({ icon: 'casino', name: name, sub: 'Arbitrary Rules', href: 'arbitrary-rules.html?challenge=' + r.id, time: r.id || 0 });
         });
       } catch (_) {}
       try {
@@ -1155,14 +1155,14 @@
           var id = typeof f === 'object' ? f.id : f;
           var title = typeof f === 'object' ? (f.title || 'Movement Experiment') : 'Movement Experiment';
           var time = typeof f === 'object' ? (f.savedAt || 0) : 0;
-          items.push({ icon: 'gesture', name: title, sub: 'Movement Experiments', href: 'movement-experiment-generator.html?exp=' + id, time: time });
+          items.push({ icon: 'gesture', name: title, sub: 'Movement Experiments', href: 'movement-experiments.html?exp=' + id, time: time });
         });
       } catch (_) {}
       try {
         var flows = JSON.parse(localStorage.getItem('fs-cue-flows') || '{}');
         Object.values(flows).forEach(function (fl) {
           var time = fl.savedAt ? new Date(fl.savedAt).getTime() : 0;
-          items.push({ icon: 'edit_note', name: fl.name || 'Untitled Flow', sub: 'Cue Worksheet', href: 'cue-worksheet.html?flow=' + encodeURIComponent(fl.name), time: time });
+          items.push({ icon: 'edit_note', name: fl.name || 'Untitled Flow', sub: 'Verb / Your Body Part / Direction', href: 'verb-your-body-part-direction.html?flow=' + encodeURIComponent(fl.name), time: time });
         });
       } catch (_) {}
       try {
