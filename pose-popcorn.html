@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"light")}()</script>
+  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
+  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pose Popcorn</title>
@@ -63,7 +64,7 @@
       font-weight: var(--weight-regular);
       letter-spacing: -.01em;
       line-height: var(--lh-heading);
-      color: var(--volt);
+      color: var(--text-1);
     }
 
     .dest-card {
@@ -95,7 +96,7 @@
     }
 
     .deck-actions { justify-content: flex-end; }
-    .deck-actions .btn-primary { border-radius: 8px; }
+    .deck-actions .btn-primary { border-radius: var(--r-cta); }
 
     /* ── Chain section ── */
     .chain-section {
@@ -334,7 +335,7 @@
     .saved-chain-del:hover { color: var(--text-1); }
     .saved-chain-del.confirm-delete-armed,
     .saved-chain-del.confirm-delete-armed:hover {
-      color: #e05252;
+      color: var(--danger);
       transform: scale(1.15);
     }
 
@@ -428,7 +429,7 @@
 
     <!-- Hero -->
     <section class="hero">
-      <p class="label-1">Cue Lab</p>
+      <p class="label-1">Connect the dots.</p>
       <h3>Pose Popcorn</h3>
       <p>Start with a pose. Connect it to the next one. Practice the art of cueing transitions one link at a time.</p>
     </section>

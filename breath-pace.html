@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"light")}()</script>
+  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
+  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Breath Pace</title>
@@ -72,7 +73,7 @@
     }
 
     .start-btn {
-      border-radius: 8px;
+      border-radius: var(--r-cta);
     }
 
     .start-btn:hover {
@@ -176,13 +177,6 @@
       }
     }
 
-    .range-val {
-      font-family: var(--font-mono);
-      font-size: var(--fs-h5);
-      font-weight: var(--weight-regular);
-      letter-spacing: .02em;
-    }
-    .range-ticks span { background: rgba(var(--ink-rgb), .16); height: 5px; }
     .range-ticks span:nth-child(1),
     .range-ticks span:nth-child(7) {
       background: rgba(var(--ink-rgb), .38);

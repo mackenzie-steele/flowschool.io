@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"light")}()</script>
+  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
+  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Playlist Builder</title>
@@ -27,8 +28,6 @@
     }
 
     /* ── Ghost sm + outline + saved ──────────────────────────── */
-    .btn-ghost.sm { padding: 6px 10px; font-size: var(--text-small); }
-
     .btn-outline {
       background: none;
       border: 1px solid rgba(var(--ink-rgb), .18);
@@ -99,15 +98,7 @@
     }
 
     /* ── Range slider ─────────────────────────────────────────── */
-    .range-val {
-      font-family: var(--font-mono);
-      font-size: var(--fs-h5);
-      font-weight: var(--weight-regular);
-      color: var(--text-1);
-      letter-spacing: .02em;
-    }
     /* major ticks at 30, 45, 60, 75, 90 → positions 1, 4, 7, 10, 13 */
-    .range-ticks span { background: rgba(var(--ink-rgb), .16); height: 5px; }
     .range-ticks span:nth-child(1),
     .range-ticks span:nth-child(4),
     .range-ticks span:nth-child(7),
@@ -122,7 +113,7 @@
       padding: 14px 28px 18px;
       gap: 8px;
     }
-    .cta-bar .btn-primary { box-shadow: 0 2px 12px rgba(var(--ink-rgb), .16); border-radius: 8px; }
+    .cta-bar .btn-primary { box-shadow: 0 2px 12px rgba(var(--ink-rgb), .16); border-radius: var(--r-cta); }
 
 
 /* ── Config steps ─────────────────────────────────────────── */
@@ -273,28 +264,9 @@
       border-bottom: 1px solid rgba(var(--ink-rgb), .08);
       margin-bottom: 2px;
     }
-    .res-stats { display: flex; gap: 36px; }
-    .stat { display: flex; flex-direction: column; gap: 4px; }
-    .stat-val {
-      font-family: var(--font);
-      font-size: var(--fs-h5);
-      font-weight: var(--weight-regular) !important;
-      line-height: var(--lh-heading);
-      color: var(--text-1);
-      font-variant-numeric: tabular-nums;
-    }
-    .stat-lbl {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      font-weight: var(--weight-regular);
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.10em;
-    }
+    /* Base stats styles — global.css. Volt accent is page-specific. */
     .stat-val { color: var(--volt); }
-    [data-theme="dark"] .stat-val { color: #FFF55F; }
-    [data-theme="dark"] #dur-val  { color: #EFEFEF; }
-    .res-actions { display: flex; gap: 8px; align-items: center; }
+    [data-theme="dark"] #dur-val  { color: var(--text-1); }
 
     /* ── Playlist section cards ───────────────────────────────── */
     .pl-section {
@@ -400,9 +372,8 @@
       border-radius: 1px;
       background: rgba(var(--ink-rgb), .10);
     }
-    .ebar-seg.on { background: rgba(var(--ink-rgb), .38); }
     .ebar-seg.on { background: var(--volt); }
-    [data-theme="dark"] .ebar-seg.on { background: #FFF55F; }
+    [data-theme="dark"] .ebar-seg.on { background: var(--volt); }
     .song-copy { display: flex; align-items: center; justify-content: flex-end; margin-left: 20px; }
 
     /* ── Save modal (shake animation is page-specific) ───────── */
@@ -430,7 +401,7 @@
     .cp-ring    { stroke: var(--volt); }
     .cp-dot     { fill: var(--volt); }
     .arc-pill.on .arc-line { stroke: var(--volt); }
-    [data-theme="dark"] .cp-ring { fill: #1B1B1B; }
+    [data-theme="dark"] .cp-ring { fill: var(--paper-solid); }
   </style>
 </head>
 
@@ -538,13 +509,14 @@
     </div>
   </div>
 
+  </main>
+
   <div class="cta-bar">
     <button class="btn-primary" id="gen-btn">
       <span class="material-symbols-sharp">music_note</span>
       <span id="gen-label">Build this playlist</span>
     </button>
   </div>
-  </main>
 
   <script src="data/songs.js"></script>
   <script>

@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"light")}()</script>
+  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
+  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Saved — Flow School</title>
@@ -248,6 +249,40 @@
                 name: name,
                 href: 'arbitrary-rules.html?challenge=' + r.id,
                 time: r.id || 0,
+              };
+            });
+          } catch (_) { return []; }
+        },
+      },
+      {
+        key: 'classes',
+        label: 'Classes',
+        icon: 'edit_document',
+        load: function () {
+          try {
+            return JSON.parse(localStorage.getItem('flowschool_classes') || '[]').map(function (c) {
+              return {
+                name: c.title || 'Untitled Class',
+                href: 'class-writer.html?id=' + c.id,
+                time: c.editedAt || c.id || 0,
+              };
+            });
+          } catch (_) { return []; }
+        },
+      },
+      {
+        key: 'stories',
+        label: 'Stories',
+        icon: 'auto_stories',
+        load: function () {
+          try {
+            return JSON.parse(localStorage.getItem('flowschool_stories') || '[]').map(function (st) {
+              var name = st.text || 'Saved Story';
+              if (name.length > 80) name = name.slice(0, 77) + '…';
+              return {
+                name: name,
+                href: 'stories.html?id=' + st.id,
+                time: st.id || 0,
               };
             });
           } catch (_) { return []; }

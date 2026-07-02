@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"light")}()</script>
+  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
+  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flow School</title>
@@ -11,6 +12,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
   <link rel="stylesheet" href="global.css">
   <style>
+
+    /* hidden must always win — several modules set their own display */
+    [hidden] { display: none !important; }
 
     /* ── Dashboard wrapper ───────────────────────────────── */
     .db-wrap {
@@ -97,25 +101,178 @@
       line-height: 1;
     }
 
-    /* ── Pose Spotlight ──────────────────────────────────── */
-    .pose-spotlight { display: flex; flex-direction: column; gap: 14px; }
-    .pose-spotlight-name { font-size: var(--fs-h5); font-weight: var(--weight-medium); color: var(--text-1); margin: 0; }
-    .pose-spotlight-sub { font-size: var(--text-small); color: var(--text-3); margin: 2px 0 0; line-height: 1.4; }
-    .pose-mods { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
-    .pose-mod {
-      flex: 0 0 auto;
+    /* ── Your Favorite Classes — pinned, one tap from teaching ── */
+    .db-deck-card {
+      flex-shrink: 0;
+      width: 224px;
+      border: 1px solid var(--border);
+      padding: 18px;
+      text-decoration: none;
+      color: inherit;
+      background: rgba(var(--ink-rgb),.022);
+      transition: border-color .15s, background .15s;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      width: 76px;
-      padding: 12px 6px 10px;
-      border-radius: var(--r);
-      background: rgba(var(--ink-rgb), .03);
+      gap: 10px;
     }
-    .pose-figure { display: block; width: 64px; color: var(--text-1); }
-    .pose-mod-name { font-size: 10px; font-weight: var(--weight-medium); color: var(--text-2); text-align: center; line-height: 1.3; }
-    .pose-mod-hint { font-size: 9px; color: var(--text-3); text-align: center; line-height: 1.4; }
+
+    .db-deck-card:hover {
+      border-color: rgba(var(--ink-rgb),.22);
+      background: rgba(var(--ink-rgb),.038);
+    }
+
+    .db-deck-title {
+      font-size: var(--fs-h6);
+      font-weight: var(--weight-regular);
+      line-height: 1.3;
+      color: var(--text-1);
+      flex: 1;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .db-deck-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .04em;
+      color: var(--text-3);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Milestones — evidence of creative output ────────── */
+    .db-milestones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 40px;
+      padding: 2px 0 18px;
+    }
+
+    .db-mile-val {
+      display: block;
+      font-size: var(--fs-h5);
+      font-weight: var(--weight-regular);
+      color: var(--text-1);
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .db-mile-lbl {
+      display: block;
+      font-size: 10px;
+      font-weight: var(--weight-semibold);
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-top: 3px;
+    }
+
+    /* ── Teaching Log ─────────────────────────────────────── */
+    .db-log-item {
+      display: block;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-light);
+      text-decoration: none;
+      color: inherit;
+      transition: opacity .15s;
+    }
+
+    .db-log-item:last-child { border-bottom: none; }
+    .db-log-item:hover { opacity: .65; }
+
+    .db-log-head {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 3px;
+    }
+
+    .db-log-class {
+      font-size: var(--text-ui);
+      font-weight: var(--weight-medium);
+      color: var(--text-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .db-log-date {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-3);
+    }
+
+    .db-log-text {
+      font-size: var(--text-small);
+      color: var(--text-2);
+      line-height: 1.5;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    /* ── Flow Feedback — Drive upload folder ─────────────── */
+    .db-drive {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .db-drive-icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      background: rgba(var(--ink-rgb),.07);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .db-drive-icon .material-symbols-sharp { font-size: 20px; color: var(--text-2); }
+
+    .db-drive-info { flex: 1; min-width: 0; }
+    .db-drive-info .db-eyebrow { margin-bottom: 6px; }
+
+    .db-drive-title {
+      font-size: var(--fs-h6);
+      font-weight: var(--weight-regular);
+      color: var(--text-1);
+      margin: 0 0 4px;
+      line-height: 1.3;
+    }
+
+    .db-drive-desc {
+      font-size: var(--text-body-sm);
+      color: var(--text-2);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .db-drive-cta {
+      flex-shrink: 0;
+      white-space: nowrap;
+      border-radius: var(--r-cta);
+    }
+
+    @media (max-width: 640px) {
+      /* icon + text stay side by side; CTA drops to its own full-width
+         row below, separated by a hairline for a clear tap target */
+      .db-drive {
+        flex-wrap: wrap;
+        gap: 14px 16px;
+        align-items: flex-start;
+      }
+      .db-drive-info { flex: 1 1 calc(100% - 56px); }
+      .db-drive-cta {
+        flex-basis: 100%;
+        justify-content: center;
+      }
+    }
 
     /* ── Weekly Play Prompt ──────────────────────────────── */
     .db-prompt {
@@ -140,62 +297,10 @@
       justify-content: space-between;
     }
 
-    .db-prompt-tag {
-      font-size: var(--text-micro);
-      font-weight: var(--weight-bold);
-      letter-spacing: var(--ls-micro);
-      text-transform: uppercase;
-      color: var(--text-2);
-      background: rgba(var(--ink-rgb), .06);
-      border: 1px solid rgba(var(--ink-rgb), .14);
-      padding: 4px 10px;
-      border-radius: 2px;
-    }
-    .db-prompt-tag {
-      background: var(--volt);
-      color: #1B1B1B;
-      border: none;
-    }
-
     .db-prompt-date {
       font-size: var(--text-small);
       color: var(--text-3);
       font-family: var(--font-mono);
-    }
-
-    /* ── Quick Start ─────────────────────────────────────── */
-    .db-quick-links {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .db-quick-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 0;
-      font-size: var(--text-ui);
-      color: var(--text-2);
-      text-decoration: none;
-      transition: background .15s, color .15s;
-    }
-
-    .db-quick-link:hover {
-      background: rgba(var(--ink-rgb),.05);
-      color: var(--text-1);
-    }
-
-    .db-quick-link .material-symbols-sharp {
-      font-size: 16px;
-      color: var(--text-3);
-      flex-shrink: 0;
-      transition: color .15s;
-    }
-
-    .db-quick-link:hover .material-symbols-sharp {
-      color: var(--text-2);
     }
 
     /* ── Continue ────────────────────────────────────────── */
@@ -265,12 +370,59 @@
       margin: 0;
     }
 
+    /* ── Start Here (first run) ──────────────────────────── */
+    .db-start {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .db-start-step {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border-light);
+      text-decoration: none;
+      color: inherit;
+      transition: opacity .15s;
+    }
+
+    .db-start-step:last-child { border-bottom: none; }
+    .db-start-step:hover { opacity: .7; }
+
+    .db-start-n { flex-shrink: 0; min-width: 22px; }
+
+    .db-start-main { flex: 1; min-width: 0; }
+
+    .db-start-title {
+      display: block;
+      font-size: var(--text-ui);
+      font-weight: var(--weight-medium);
+      color: var(--text-1);
+      margin-bottom: 2px;
+    }
+
+    .db-start-desc {
+      display: block;
+      font-size: var(--text-small);
+      color: var(--text-3);
+      line-height: 1.4;
+    }
+
+    .db-start-arrow {
+      flex-shrink: 0;
+      align-self: center;
+      font-size: 15px;
+      color: var(--text-3);
+    }
+
     /* ── Next Step ───────────────────────────────────────── */
     .db-next-step {
       display: flex;
       flex-direction: column;
     }
-    .db-next-step .btn-primary { border-radius: 8px; }
+    .db-next-step .btn-primary { border-radius: var(--r-cta); }
 
     .db-next-because {
       font-size: var(--text-small);
@@ -294,72 +446,6 @@
       margin-bottom: 20px;
     }
 
-    /* ── Progress stats ──────────────────────────────────── */
-    .db-stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 22px;
-    }
-
-    .db-stat-val {
-      font-size: var(--fs-h4);
-      font-weight: var(--weight-regular);
-      color: var(--text-1);
-      line-height: 1;
-      display: block;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .db-stat-lbl {
-      font-size: 10px;
-      font-weight: var(--weight-semibold);
-      letter-spacing: .07em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      display: block;
-      margin-top: 4px;
-    }
-
-    /* Contribution graph */
-    .db-contrib-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .db-contrib-month {
-      font-size: 10px;
-      font-weight: var(--weight-semibold);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--text-3);
-    }
-
-    .db-contrib-legend {
-      font-size: 9px;
-      color: var(--text-3);
-      font-family: var(--font-mono);
-    }
-
-    .db-contrib-grid {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 4px;
-    }
-
-    .db-contrib-day {
-      aspect-ratio: 1;
-      border-radius: 0;
-      background: rgba(var(--ink-rgb),.08);
-    }
-
-    .db-contrib-day.active   { background: rgba(var(--ink-rgb),.45); }
-    .db-contrib-day.is-today { box-shadow: 0 0 0 1.5px rgba(var(--ink-rgb),.35); }
-    .db-contrib-day.future   { background: rgba(var(--ink-rgb),.03); }
-
-    /* ── Score ───────────────────────────────────────────── */
     /* ── Skill Map ───────────────────────────────────────── */
     .db-skillmap-sub {
       font-size: var(--text-body-sm);
@@ -524,14 +610,6 @@
       gap: 8px;
     }
 
-    .db-event-type {
-      font-size: 9px;
-      font-weight: var(--weight-bold);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--text-3);
-    }
-
     .db-event-time {
       font-size: var(--text-small);
       color: var(--text-3);
@@ -551,55 +629,6 @@
       flex-shrink: 0;
     }
     .db-event-signup:hover { color: var(--text-1) !important; }
-
-    /* ── Community feed ──────────────────────────────────── */
-    .db-feed-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .db-feed-item:last-child { border-bottom: none; }
-
-    .db-feed-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: var(--weight-bold);
-      color: var(--text-2);
-      flex-shrink: 0;
-    }
-
-    .db-feed-avatar.bonnie {
-      background: var(--accent-dim);
-      border-color: var(--accent-border);
-      color: var(--accent);
-    }
-
-    .db-feed-text {
-      font-size: var(--text-small);
-      color: var(--text-2);
-      flex: 1;
-      line-height: 1.4;
-    }
-
-    .db-feed-name { color: var(--text-1); font-weight: var(--weight-medium); }
-
-    .db-feed-time {
-      font-size: 10px;
-      color: var(--text-3);
-      font-family: var(--font-mono);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
 
     /* ── New Drop module ─────────────────────────────────── */
     .db-new-drop {
@@ -667,9 +696,6 @@
       .db-row-2,
       .db-row-3-2,
       .db-row-2-3 { grid-template-columns: 1fr; }
-
-      .db-stats-row { grid-template-columns: repeat(2, 1fr); }
-
     }
 
     @media (max-width: 768px) {
@@ -713,6 +739,16 @@
           </div>
         </div>
 
+        <!-- Your Favorite Classes — pinned in the Class Writer -->
+        <div class="db-card" id="db-deck-wrap" hidden>
+          <span class="db-eyebrow">Your Favorite Classes</span>
+          <div class="db-continue-scroll" id="db-deck-scroll"></div>
+        </div>
+
+        <!-- Creative output milestones — parked for now; set MILESTONES_ON
+             to true (or remove the flag) to bring the strip back -->
+        <div class="db-milestones" id="db-milestones" hidden></div>
+
         <!-- 2. Weekly Play Prompt + Upcoming Events -->
         <div class="db-row db-row-3-2">
 
@@ -731,23 +767,28 @@
 
         </div>
 
-        <!-- 3. Continue Where You Left Off -->
+        <!-- Flow Feedback — Drive upload folder (shared link for all teachers;
+             make per-teacher via Supabase profile field when the time comes) -->
+        <div class="db-card db-drive">
+          <div class="db-drive-icon"><span class="material-symbols-sharp">folder</span></div>
+          <div class="db-drive-info">
+            <span class="db-eyebrow">Flow Feedback</span>
+            <h4 class="db-drive-title">Share your flow.</h4>
+            <p class="db-drive-desc">Record 3&#8211;20 minutes of you teaching &#8212; horizontal, full body, well lit. Upload it to your folder and fill in your doc. By sharing, you&#8217;re signing up to receive from each other.</p>
+          </div>
+          <a class="btn-primary db-drive-cta" href="https://drive.google.com/drive/folders/1ZcuhP1p9U0MGRKBb6O3IzscNe07m4c4G?usp=drive_link" target="_blank" rel="noopener">Open your folder<span class="material-symbols-sharp" style="font-size:14px">open_in_new</span></a>
+        </div>
+
+        <!-- 3. Continue Where You Left Off / Start Here (first run) -->
         <div class="db-card">
-          <span class="db-eyebrow">Continue Where You Left Off</span>
+          <span class="db-eyebrow" id="db-continue-eyebrow">Continue Where You Left Off</span>
           <div class="db-continue-scroll" id="db-continue-scroll"></div>
         </div>
 
-        <!-- 4. New Drop (full width) -->
-        <div class="db-card">
+        <!-- 4. New Drop — content from data/dashboard-content.js -->
+        <div class="db-card" id="db-drop-card">
           <span class="db-eyebrow">New Drop</span>
-          <a class="db-new-drop" href="https://flowschool.uscreen.io/programs/slo-mo-pigeon-kick-through-tree-lean" target="_blank" rel="noopener">
-            <div class="db-drop-thumb">
-              <img src="img/slo-mo-flow-cover.jpg" alt="Pigeon Kick Through &amp; Tree Lean">
-            </div>
-            <span class="db-drop-tag">Slo Mo Flow</span>
-            <div class="db-drop-title">Pigeon Kick Through &amp; Tree Lean</div>
-            <p class="db-drop-desc">A full class plan for a slow &amp; strong flow. Can be taught once per side or repeated depending on time. Works well for all-levels vinyasa that doesn't lean on repetition or sun salutations.</p>
-          </a>
+          <div id="db-drop-body"></div>
         </div>
 
         <!-- 5. Suggested Next Step + Skill Map -->
@@ -763,165 +804,33 @@
 
         </div>
 
-        <!-- POSE_SPOTLIGHT_START -->
-        <div class="db-row db-row-2" style="display:none">
+        <!-- 6. Teaching Log + Recently Saved -->
+        <div class="db-row db-row-2">
+
           <div class="db-card">
-            <span class="db-eyebrow">Pose Spotlight</span>
-            <div class="pose-spotlight">
-              <div>
-                <p class="pose-spotlight-name">Warrior II</p>
-                <p class="pose-spotlight-sub">5 ways to modify the same pose for different bodies and needs.</p>
-              </div>
-              <div class="pose-mods">
+            <span class="db-eyebrow">Teaching Log</span>
+            <div id="db-log-list"></div>
+          </div>
 
-                <!-- 1. Classic -->
-                <div class="pose-mod">
-                  <svg viewBox="0 -4 100 114" class="pose-figure" aria-hidden="true">
-                    <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                      <circle cx="50" cy="10" r="6"/>
-                      <line x1="50" y1="16" x2="50" y2="22"/>
-                      <line x1="26" y1="22" x2="74" y2="22"/>
-                      <line x1="26" y1="22" x2="11" y2="32"/><line x1="11" y1="32" x2="4" y2="42"/>
-                      <circle cx="4" cy="42" r="3" fill="currentColor"/>
-                      <line x1="74" y1="22" x2="89" y2="32"/><line x1="89" y1="32" x2="96" y2="42"/>
-                      <circle cx="96" cy="42" r="3" fill="currentColor"/>
-                      <line x1="50" y1="22" x2="50" y2="52"/>
-                      <line x1="38" y1="52" x2="62" y2="52"/>
-                      <line x1="58" y1="52" x2="72" y2="76"/><line x1="72" y1="76" x2="72" y2="100"/>
-                      <line x1="62" y1="100" x2="82" y2="100"/>
-                      <line x1="42" y1="52" x2="24" y2="74"/><line x1="24" y1="74" x2="16" y2="98"/>
-                      <line x1="10" y1="95" x2="22" y2="101"/>
-                    </g>
-                  </svg>
-                  <div class="pose-mod-name">Classic</div>
-                  <div class="pose-mod-hint">Wide stance, full expression</div>
-                </div>
-
-                <!-- 2. Shortened Stance -->
-                <div class="pose-mod">
-                  <svg viewBox="0 -4 100 114" class="pose-figure" aria-hidden="true">
-                    <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                      <circle cx="50" cy="10" r="6"/>
-                      <line x1="50" y1="16" x2="50" y2="22"/>
-                      <line x1="26" y1="22" x2="74" y2="22"/>
-                      <line x1="26" y1="22" x2="11" y2="32"/><line x1="11" y1="32" x2="4" y2="42"/>
-                      <circle cx="4" cy="42" r="3" fill="currentColor"/>
-                      <line x1="74" y1="22" x2="89" y2="32"/><line x1="89" y1="32" x2="96" y2="42"/>
-                      <circle cx="96" cy="42" r="3" fill="currentColor"/>
-                      <line x1="50" y1="22" x2="50" y2="52"/>
-                      <line x1="40" y1="52" x2="60" y2="52"/>
-                      <line x1="57" y1="52" x2="64" y2="74"/><line x1="64" y1="74" x2="64" y2="100"/>
-                      <line x1="56" y1="100" x2="74" y2="100"/>
-                      <line x1="43" y1="52" x2="34" y2="74"/><line x1="34" y1="74" x2="30" y2="100"/>
-                      <line x1="24" y1="97" x2="36" y2="103"/>
-                    </g>
-                  </svg>
-                  <div class="pose-mod-name">Short Stance</div>
-                  <div class="pose-mod-hint">For tight hips or groin</div>
-                </div>
-
-                <!-- 3. Hands to Hips -->
-                <div class="pose-mod">
-                  <svg viewBox="0 -4 100 114" class="pose-figure" aria-hidden="true">
-                    <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                      <circle cx="50" cy="10" r="6"/>
-                      <line x1="50" y1="16" x2="50" y2="22"/>
-                      <line x1="26" y1="22" x2="74" y2="22"/>
-                      <line x1="26" y1="22" x2="16" y2="36"/><line x1="16" y1="36" x2="38" y2="48"/>
-                      <circle cx="38" cy="48" r="3" fill="currentColor"/>
-                      <line x1="74" y1="22" x2="84" y2="36"/><line x1="84" y1="36" x2="62" y2="48"/>
-                      <circle cx="62" cy="48" r="3" fill="currentColor"/>
-                      <line x1="50" y1="22" x2="50" y2="52"/>
-                      <line x1="38" y1="52" x2="62" y2="52"/>
-                      <line x1="58" y1="52" x2="72" y2="76"/><line x1="72" y1="76" x2="72" y2="100"/>
-                      <line x1="62" y1="100" x2="82" y2="100"/>
-                      <line x1="42" y1="52" x2="24" y2="74"/><line x1="24" y1="74" x2="16" y2="98"/>
-                      <line x1="10" y1="95" x2="22" y2="101"/>
-                    </g>
-                  </svg>
-                  <div class="pose-mod-name">Hands to Hips</div>
-                  <div class="pose-mod-hint">For neck or shoulder tension</div>
-                </div>
-
-                <!-- 4. Chair Support -->
-                <div class="pose-mod">
-                  <svg viewBox="0 -4 100 114" class="pose-figure" aria-hidden="true">
-                    <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                      <line x1="20" y1="60" x2="80" y2="60"/>
-                      <line x1="24" y1="60" x2="24" y2="96"/>
-                      <line x1="76" y1="60" x2="76" y2="96"/>
-                      <line x1="20" y1="38" x2="20" y2="60"/>
-                      <circle cx="50" cy="10" r="6"/>
-                      <line x1="50" y1="16" x2="50" y2="22"/>
-                      <line x1="26" y1="22" x2="74" y2="22"/>
-                      <line x1="26" y1="22" x2="11" y2="32"/><line x1="11" y1="32" x2="4" y2="42"/>
-                      <circle cx="4" cy="42" r="3" fill="currentColor"/>
-                      <line x1="74" y1="22" x2="89" y2="32"/><line x1="89" y1="32" x2="96" y2="42"/>
-                      <circle cx="96" cy="42" r="3" fill="currentColor"/>
-                      <line x1="50" y1="22" x2="50" y2="60"/>
-                      <line x1="36" y1="60" x2="64" y2="60"/>
-                      <line x1="60" y1="60" x2="74" y2="80"/><line x1="74" y1="80" x2="74" y2="100"/>
-                      <line x1="65" y1="100" x2="82" y2="100"/>
-                      <line x1="40" y1="60" x2="28" y2="78"/><line x1="28" y1="78" x2="20" y2="98"/>
-                      <line x1="14" y1="95" x2="26" y2="101"/>
-                    </g>
-                  </svg>
-                  <div class="pose-mod-name">Chair Support</div>
-                  <div class="pose-mod-hint">For balance or accessibility</div>
-                </div>
-
-                <!-- 5. Reverse Warrior -->
-                <div class="pose-mod">
-                  <svg viewBox="0 -4 100 114" class="pose-figure" aria-hidden="true">
-                    <g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                      <circle cx="50" cy="10" r="6"/>
-                      <line x1="50" y1="16" x2="50" y2="22"/>
-                      <line x1="26" y1="22" x2="74" y2="22"/>
-                      <line x1="74" y1="22" x2="82" y2="12"/><line x1="82" y1="12" x2="88" y2="4"/>
-                      <circle cx="88" cy="4" r="3" fill="currentColor"/>
-                      <line x1="26" y1="22" x2="26" y2="38"/><line x1="26" y1="38" x2="28" y2="54"/>
-                      <circle cx="28" cy="54" r="3" fill="currentColor"/>
-                      <line x1="50" y1="22" x2="50" y2="52"/>
-                      <line x1="38" y1="52" x2="62" y2="52"/>
-                      <line x1="58" y1="52" x2="72" y2="76"/><line x1="72" y1="76" x2="72" y2="100"/>
-                      <line x1="62" y1="100" x2="82" y2="100"/>
-                      <line x1="42" y1="52" x2="24" y2="74"/><line x1="24" y1="74" x2="16" y2="98"/>
-                      <line x1="10" y1="95" x2="22" y2="101"/>
-                    </g>
-                  </svg>
-                  <div class="pose-mod-name">Reverse Warrior</div>
-                  <div class="pose-mod-hint">To open the side body</div>
-                </div>
-
-              </div>
-            </div>
+          <div class="db-card">
+            <span class="db-eyebrow">Recently Saved</span>
+            <div id="db-saved-list"></div>
+            <a href="saved.html" class="db-view-all">View all saved <span class="material-symbols-sharp" style="font-size:13px;vertical-align:-2px">arrow_forward</span></a>
           </div>
 
         </div>
-        <!-- POSE_SPOTLIGHT_END -->
 
-        <!-- 6. Recently Saved -->
-        <div class="db-card">
-          <span class="db-eyebrow">Recently Saved</span>
-          <div id="db-saved-list"></div>
-          <a href="saved.html" class="db-view-all">View all saved <span class="material-symbols-sharp" style="font-size:13px;vertical-align:-2px">arrow_forward</span></a>
-        </div>
-
-        <!-- 7. Bonnie's Corner -->
-        <div class="db-card">
+        <!-- 7. This Month — content from data/dashboard-content.js -->
+        <div class="db-card" id="db-month-card">
           <span class="db-eyebrow">This Month</span>
-          <h4 class="db-bonnie-title">Finding your rhythm.</h4>
-          <p class="db-bonnie-body">June is about developing your internal timing as a teacher. Start by tracking your breath cues — are you giving students enough time to actually breathe? Try the Breath Pacer to build your internal clock, then apply it in your next class. The goal isn't to be perfectly timed. It's to become aware of the gap between what you think you're giving and what you're actually giving.</p>
-          <a href="breath-pace.html" class="btn-primary" style="margin-top:20px;display:inline-flex;align-items:center;gap:8px;border-radius:8px">
-            Try the Breath Pacer
-            <span class="material-symbols-sharp" style="font-size:14px">arrow_forward</span>
-          </a>
+          <div id="db-month-body"></div>
         </div>
 
 
       </div>
   </main>
 
+  <script src="data/dashboard-content.js"></script>
   <script src="data/dashboard-daily-quotes.js"></script>
   <script src="data/dashboard-weekly-prompts.js"></script>
   <script src="data/dashboard-data.js"></script>
@@ -929,44 +838,23 @@
   (function () {
 
     // ── State ───────────────────────────────────────────────────────
-    var STATS_KEY  = 'flowschool_stats';
     var RECENT_KEY = 'flowschool_recent';
-    var SEEDED_KEY = 'flowschool_seeded';
 
-    function seedDemoData() {
-      if (localStorage.getItem(SEEDED_KEY)) return;
-      var today    = new Date();
-      var todayDay = today.getDate();
-      var demoActiveDays = [1,3,5,6,8,10,11,13,15,16,18].filter(function (d) { return d <= todayDay; });
-      localStorage.setItem(STATS_KEY, JSON.stringify({
-        streak:               5,
-        longestStreak:        12,
-        lastActive:           today.toISOString().split('T')[0],
-        daysActive:           demoActiveDays,
-        experimentsCompleted: 12,
-        rulesGenerated:       28,
-        playlistsBuilt:       3,
-        score:                890,
-        hoursTotal:           14,
-      }));
-      localStorage.setItem(RECENT_KEY, JSON.stringify([
-        { name: 'Movement Experiments', icon: 'gesture',           href: 'movement-experiments.html', time: Date.now() - 86400000 * 1 },
-        { name: 'Arbitrary Rules',      icon: 'casino',           href: 'arbitrary-rules.html',      time: Date.now() - 86400000 * 2 },
-        { name: 'Playlist Builder',     icon: 'queue_music',      href: 'playlist-builder.html',              time: Date.now() - 86400000 * 2 },
-        { name: 'Shorthand Library',    icon: 'book',             href: 'shorthand-library.html',             time: Date.now() - 86400000 * 3 },
-        { name: 'Breath Pacer',         icon: 'air',              href: 'breath-pace.html',           time: Date.now() - 86400000 * 4 },
-        { name: 'Elements of Flow Lab', icon: 'science',          href: 'elements-of-flow-lab.html',          time: Date.now() - 86400000 * 5 },
-      ]));
-      localStorage.setItem(SEEDED_KEY, '1');
-    }
-
-    function loadStats() {
-      try { return JSON.parse(localStorage.getItem(STATS_KEY) || '{}'); } catch (_) { return {}; }
-    }
+    // One-time cleanup: earlier beta builds seeded demo streak/stat data.
+    try {
+      localStorage.removeItem('flowschool_stats');
+      localStorage.removeItem('flowschool_seeded');
+    } catch (_) {}
 
     function dayOfYear() {
       var now = new Date();
       return Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+    }
+
+    function escHTML(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
     }
 
     function timeAgo(ts) {
@@ -978,12 +866,98 @@
     }
 
     // ── Renderers ───────────────────────────────────────────────────
-    function renderWelcome(stats) {
+    function renderWelcome() {
       var h = new Date().getHours();
-      var greeting = h < 12 ? 'Good morning.' : h < 17 ? 'Good afternoon.' : 'Good evening.';
-      document.getElementById('db-greeting').textContent = greeting;
+      var greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+      // first name from the Supabase session, when one exists
+      var name = '';
+      try {
+        var raw = localStorage.getItem('sb-zizuopmcpzicbwngjagp-auth-token');
+        if (raw) {
+          var sess = JSON.parse(raw);
+          if (!sess.expires_at || sess.expires_at >= Date.now() / 1000) {
+            var meta = (sess.user && sess.user.user_metadata) || {};
+            name = (meta.full_name || meta.name || '').trim().split(/\s+/)[0] || '';
+          }
+        }
+      } catch (_) {}
+      document.getElementById('db-greeting').textContent = name ? greeting + ', ' + name + '.' : greeting + '.';
       document.getElementById('db-subline').textContent  = DAILY_SUBLINES[dayOfYear() % DAILY_SUBLINES.length];
-      // streak removed — moon widget handles top-right
+    }
+
+    // ── Your Favorite Classes — pinned for quick access ──
+    function renderOnDeck() {
+      var wrap = document.getElementById('db-deck-wrap');
+      var pinned = [];
+      try {
+        pinned = JSON.parse(localStorage.getItem('flowschool_classes') || '[]')
+          .filter(function (c) { return c.pinned; })
+          .sort(function (a, b) { return (b.editedAt || b.id) - (a.editedAt || a.id); });
+      } catch (_) {}
+      wrap.hidden = !pinned.length;
+      if (!pinned.length) return;
+      document.getElementById('db-deck-scroll').innerHTML = pinned.map(function (c) {
+        var meta = [(c.length || 60) + ' min'];
+        if (c.playlist) meta.push('\u266A ' + c.playlist);
+        return '<a class="db-deck-card" href="class-writer.html?id=' + c.id + '">' +
+          '<span class="db-deck-title">' + escHTML(c.title || 'Untitled Class') + '</span>' +
+          '<span class="db-deck-meta">' + escHTML(meta.join(' · ')) + '</span>' +
+        '</a>';
+      }).join('');
+    }
+
+    // ── Creative output milestones — celebrate what's been made ──
+    var MILESTONES_ON = false; // parked 2026-07-02; flip to true to restore
+    function renderMilestones() {
+      if (!MILESTONES_ON) return;
+      function count(key) {
+        try { return JSON.parse(localStorage.getItem(key) || '[]').length; } catch (_) { return 0; }
+      }
+      var items = [
+        { n: count('flowschool_classes'), one: 'Class created', many: 'Classes created' },
+        { n: count('flowschool_stories'), one: 'Story written', many: 'Stories written' },
+        // saved movement experiments + saved arbitrary-rule challenges —
+        // in Bonnie's language, both are experiments
+        { n: count('flowschool_favs') + count('flowschool_arules'), one: 'Experiment saved', many: 'Experiments saved' },
+      ].filter(function (i) { return i.n > 0; });
+      var el = document.getElementById('db-milestones');
+      el.hidden = !items.length;
+      el.innerHTML = items.map(function (i) {
+        return '<div><span class="db-mile-val">' + i.n + '</span><span class="db-mile-lbl">' + (i.n === 1 ? i.one : i.many) + '</span></div>';
+      }).join('');
+    }
+
+    // ── Teaching Log — recent notes across all classes ───────────
+    function renderTeachingLog() {
+      var el = document.getElementById('db-log-list');
+      var MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var entries = [];
+      try {
+        JSON.parse(localStorage.getItem('flowschool_classes') || '[]').forEach(function (c) {
+          var title = c.title || 'Untitled Class';
+          (c.notesLog || []).forEach(function (n) {
+            entries.push({ ts: n.ts, text: n.text, title: title, id: c.id });
+          });
+          // classes not yet opened since the log migration
+          if (c.notes) entries.push({ ts: c.editedAt || c.id, text: c.notes, title: title, id: c.id });
+        });
+      } catch (_) {}
+      entries.sort(function (a, b) { return b.ts - a.ts; });
+      entries = entries.slice(0, 4);
+      if (!entries.length) {
+        el.innerHTML = '<p class="db-saved-empty">Notes you take after teaching a class will land here.</p>';
+        return;
+      }
+      el.innerHTML = entries.map(function (e) {
+        var d = new Date(e.ts);
+        return '<a class="db-log-item" href="class-writer.html?id=' + e.id + '">' +
+          '<span class="db-log-head">' +
+            '<span class="db-log-class">' + escHTML(e.title) + '</span>' +
+            '<span class="db-log-date">' + MO[d.getMonth()] + ' ' + d.getDate() + '</span>' +
+          '</span>' +
+          '<span class="db-log-text">' + escHTML(e.text) + '</span>' +
+        '</a>';
+      }).join('');
     }
 
     function renderPrompt() {
@@ -1006,9 +980,37 @@
       try { recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch (_) {}
       recent = recent.filter(function (r) { return r.href !== 'story-structure.html' && r.href !== 'movement-planes-lab.html'; });
       if (!recent.length) {
-        el.innerHTML = '<p class="db-continue-empty">Visit a tool to see it here.</p>';
+        document.getElementById('db-continue-eyebrow').textContent = 'Start Here';
+        el.innerHTML =
+          '<div class="db-start">' +
+            '<a class="db-start-step" href="movement-experiments.html">' +
+              '<span class="db-start-n label-2">01</span>' +
+              '<span class="db-start-main">' +
+                '<span class="db-start-title">Play before you plan</span>' +
+                '<span class="db-start-desc">Draw a movement experiment and get on your mat.</span>' +
+              '</span>' +
+              '<span class="material-symbols-sharp db-start-arrow">arrow_forward</span>' +
+            '</a>' +
+            '<a class="db-start-step" href="arbitrary-rules.html">' +
+              '<span class="db-start-n label-2">02</span>' +
+              '<span class="db-start-main">' +
+                '<span class="db-start-title">Add a constraint</span>' +
+                '<span class="db-start-desc">Generate an arbitrary rule and see what it unlocks.</span>' +
+              '</span>' +
+              '<span class="material-symbols-sharp db-start-arrow">arrow_forward</span>' +
+            '</a>' +
+            '<a class="db-start-step" href="class-writer.html">' +
+              '<span class="db-start-n label-2">03</span>' +
+              '<span class="db-start-main">' +
+                '<span class="db-start-title">Write your first class</span>' +
+                '<span class="db-start-desc">Peak flow first &#8212; then build back from it.</span>' +
+              '</span>' +
+              '<span class="material-symbols-sharp db-start-arrow">arrow_forward</span>' +
+            '</a>' +
+          '</div>';
         return;
       }
+      document.getElementById('db-continue-eyebrow').textContent = 'Continue Where You Left Off';
       el.innerHTML = recent.map(function (r) {
         return '<a href="' + r.href + '" class="db-continue-card">' +
           '<div class="db-cc-icon"><span class="material-symbols-sharp">' + r.icon + '</span></div>' +
@@ -1036,35 +1038,7 @@
         '<span class="db-eyebrow">Next Step</span>' +
         '<h3 class="db-next-title">' + step.title + '</h3>' +
         '<p class="db-next-desc">' + step.desc + '</p>' +
-        '<a href="' + step.href + '" class="btn-primary" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;border-radius:8px">' + step.label + '<span class="material-symbols-sharp" style="font-size:14px">arrow_forward</span></a>';
-    }
-
-    function renderProgress(stats) {
-      var statsEl = document.getElementById('db-stats-row');
-      if (!statsEl) return;
-      statsEl.innerHTML = [
-        { val: stats.streak || 0,               lbl: 'Day streak'   },
-        { val: stats.experimentsCompleted || 0,  lbl: 'Experiments'  },
-        { val: stats.rulesGenerated || 0,        lbl: 'Rules'        },
-        { val: stats.hoursTotal || 0,            lbl: 'Hours'        },
-      ].map(function (s) {
-        return '<div><span class="db-stat-val">' + s.val + '</span><span class="db-stat-lbl">' + s.lbl + '</span></div>';
-      }).join('');
-
-      var today = new Date();
-      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      document.getElementById('db-contrib-month').textContent = months[today.getMonth()] + ' ' + today.getFullYear();
-      var daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-      var active = stats.daysActive || [];
-      var todayDate = today.getDate();
-      document.getElementById('db-contrib-grid').innerHTML = Array.from({ length: daysInMonth }, function (_, i) {
-        var day = i + 1;
-        var cls = 'db-contrib-day';
-        if (day > todayDate)       cls += ' future';
-        else if (active.indexOf(day) !== -1) cls += ' active';
-        if (day === todayDate)     cls += ' is-today';
-        return '<div class="' + cls + '" title="' + months[today.getMonth()] + ' ' + day + '"></div>';
-      }).join('');
+        '<a href="' + step.href + '" class="btn-primary" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px">' + step.label + '<span class="material-symbols-sharp" style="font-size:14px">arrow_forward</span></a>';
     }
 
     // ── Skill Map renderer ──────────────────────────────────────────
@@ -1092,14 +1066,13 @@
         return '<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="rgba(var(--ink-rgb),.12)" stroke-width="0.75"/>';
       }).join('');
 
-      var isDark = document.documentElement.dataset.theme === 'dark';
-      var voltRgb = isDark ? '255,245,95' : '27,27,27';
+      /* var(--volt) + opacity attributes — the radar re-themes live with the toggle */
       var dataPts = data.map(function (d, i) { var p = pt(d.score, i); return p[0] + ',' + p[1]; }).join(' ');
-      var dataSVG = '<polygon points="' + dataPts + '" fill="rgba(' + voltRgb + ',.15)" stroke="rgba(' + voltRgb + ',.70)" stroke-width="1.5" stroke-linejoin="round"/>';
+      var dataSVG = '<polygon points="' + dataPts + '" fill="var(--volt)" fill-opacity=".15" stroke="var(--volt)" stroke-opacity=".70" stroke-width="1.5" stroke-linejoin="round"/>';
 
       var dotsSVG = data.map(function (d, i) {
         var p = pt(d.score, i);
-        return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.5" fill="rgba(' + voltRgb + ',.90)"/>';
+        return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.5" fill="var(--volt)" fill-opacity=".90"/>';
       }).join('');
 
       var LABEL_OFFSET = 20;
@@ -1166,6 +1139,20 @@
         });
       } catch (_) {}
       try {
+        var classesSaved = JSON.parse(localStorage.getItem('flowschool_classes') || '[]');
+        classesSaved.forEach(function (c) {
+          items.push({ icon: 'edit_document', name: c.title || 'Untitled Class', sub: 'Class Writer', href: 'class-writer.html?id=' + c.id, time: c.editedAt || c.id || 0 });
+        });
+      } catch (_) {}
+      try {
+        var stories = JSON.parse(localStorage.getItem('flowschool_stories') || '[]');
+        stories.forEach(function (s) {
+          var name = s.text || 'Saved Story';
+          if (name.length > 60) name = name.slice(0, 57) + '…';
+          items.push({ icon: 'auto_stories', name: name, sub: 'Story Starters', href: 'stories.html?id=' + s.id, time: s.id || 0 });
+        });
+      } catch (_) {}
+      try {
         var poseChains = JSON.parse(localStorage.getItem('fs-pose-connector-saved') || '[]');
         poseChains.forEach(function (c) {
           items.push({ icon: 'conversion_path', name: c.name || 'Untitled Chain', sub: 'Pose Popcorn', href: 'pose-popcorn.html?chain=' + (c.savedAt || ''), time: c.savedAt || 0 });
@@ -1193,53 +1180,88 @@
 
     function renderEvents() {
       var MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      var today = new Date();
-      var el    = document.getElementById('db-events-list');
-      var upcoming = EVENTS.filter(function (e) { return e.date >= today; });
+      var el = document.getElementById('db-events-list');
+      var start = new Date();
+      start.setHours(0, 0, 0, 0);
+      var upcoming = (window.EVENTS || []).map(function (e) {
+        var p = String(e.date).split('-');
+        return { d: new Date(+p[0], +p[1] - 1, +p[2]), title: e.title, time: e.time, url: e.url };
+      }).filter(function (e) { return e.d >= start; })
+        .sort(function (a, b) { return a.d - b.d; });
+
+      if (!upcoming.length) {
+        el.innerHTML = '<p class="db-saved-empty">Nothing on the calendar right now.</p>';
+        return;
+      }
+
       el.innerHTML = upcoming.map(function (e) {
         return '<div class="db-event">' +
           '<div class="db-event-date">' +
-            '<span class="db-event-mo">' + MO[e.date.getMonth()] + '</span>' +
-            '<span class="db-event-day">' + e.date.getDate() + '</span>' +
+            '<span class="db-event-mo">' + MO[e.d.getMonth()] + '</span>' +
+            '<span class="db-event-day">' + e.d.getDate() + '</span>' +
           '</div>' +
           '<div style="flex:1;min-width:0">' +
-            '<p class="db-event-title">' + e.title + '</p>' +
+            '<p class="db-event-title">' + escHTML(e.title) + '</p>' +
             '<div class="db-event-foot">' +
-              (e.time ? '<span class="db-event-time">' + e.time + '</span>' : '') +
+              (e.time ? '<span class="db-event-time">' + escHTML(e.time) + '</span>' : '') +
             '</div>' +
           '</div>' +
-          '<button class="btn-ghost sm db-event-signup">Sign up</button>' +
+          (e.url ? '<a class="btn-ghost sm db-event-signup" href="' + escHTML(e.url) + '" target="_blank" rel="noopener">Sign up</a>' : '') +
         '</div>';
       }).join('');
     }
 
-    function renderCommunity() {
-      var el = document.getElementById('db-community-list');
-      el.innerHTML = COMMUNITY.map(function (c) {
-        return '<div class="db-feed-item">' +
-          '<div class="db-feed-avatar' + (c.isBonnie ? ' bonnie' : '') + '">' + c.avatar + '</div>' +
-          '<div class="db-feed-text">' +
-            '<span class="db-feed-name">' + c.name + '</span> ' + c.action +
-          '</div>' +
-          '<span class="db-feed-time">' + c.time + '</span>' +
-        '</div>';
-      }).join('');
+    function renderDrop() {
+      var card = document.getElementById('db-drop-card');
+      var drop = window.NEW_DROP;
+      if (!drop) { card.hidden = true; return; }
+      card.hidden = false;
+      document.getElementById('db-drop-body').innerHTML =
+        '<a class="db-new-drop" href="' + escHTML(drop.url) + '" target="_blank" rel="noopener">' +
+          '<div class="db-drop-thumb"><img src="' + escHTML(drop.image) + '" alt="' + escHTML(drop.title) + '"></div>' +
+          '<span class="db-drop-tag">' + escHTML(drop.tag) + '</span>' +
+          '<div class="db-drop-title">' + escHTML(drop.title) + '</div>' +
+          '<p class="db-drop-desc">' + escHTML(drop.description) + '</p>' +
+        '</a>';
     }
 
-
+    function renderMonth() {
+      var card = document.getElementById('db-month-card');
+      var entries = window.THIS_MONTH || {};
+      var now = new Date();
+      var key = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+      // current month, else the most recent earlier entry — never blank
+      var pick = entries[key];
+      if (!pick) {
+        var keys = Object.keys(entries).filter(function (k) { return k <= key; }).sort();
+        if (!keys.length) keys = Object.keys(entries).sort();
+        pick = keys.length ? entries[keys[keys.length - 1]] : null;
+      }
+      if (!pick) { card.hidden = true; return; }
+      card.hidden = false;
+      document.getElementById('db-month-body').innerHTML =
+        '<h4 class="db-bonnie-title">' + escHTML(pick.title) + '</h4>' +
+        '<p class="db-bonnie-body">' + escHTML(pick.body) + '</p>' +
+        '<a href="' + escHTML(pick.ctaHref) + '" class="btn-primary" style="margin-top:20px;display:inline-flex;align-items:center;gap:8px;border-radius:var(--r-cta)">' +
+          escHTML(pick.ctaLabel) +
+          '<span class="material-symbols-sharp" style="font-size:14px">arrow_forward</span>' +
+        '</a>';
+    }
 
     // ── Init ────────────────────────────────────────────────────────
     function init() {
-      seedDemoData();
-      var stats = loadStats();
-      renderWelcome(stats);
+      renderWelcome();
+      renderOnDeck();
+      renderMilestones();
+      renderTeachingLog();
       renderPrompt();
       renderContinue();
       renderNextStep();
-      renderProgress(stats);
       renderSkillMap();
       renderSaved();
       renderEvents();
+      renderDrop();
+      renderMonth();
       renderMoon();
     }
 

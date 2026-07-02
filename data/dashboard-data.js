@@ -1,21 +1,3 @@
-var EVENTS = [
-  { date: new Date(2026, 5, 20), title: 'Live Workshop: Finding Your Voice', type: 'Workshop', time: '11am PT' },
-  { date: new Date(2026, 5, 24), title: 'Cohort Call — Sequencing Deep Dive',  type: 'Cohort',   time: '10am PT' },
-  { date: new Date(2026, 6,  2), title: 'Community Practice Session',          type: 'Practice',  time: '9am PT'  },
-  { date: new Date(2026, 6,  8), title: 'New Course Drop: Circle Flows',       type: 'Release',   time: ''        },
-  { date: new Date(2026, 6, 15), title: 'Q&A with Bonnie',                     type: 'Q&A',       time: '12pm PT' },
-];
-
-var COMMUNITY = [
-  { name: 'Sarah M.',  action: 'completed the Flow Matrix',         time: '2h ago', avatar: 'S'                 },
-  { name: 'Alex T.',   action: 'shared a new arm balance sequence', time: '4h ago', avatar: 'A'                 },
-  { name: 'Jamie K.',  action: 'finished 10 movement experiments',  time: '6h ago', avatar: 'J'                 },
-  { name: 'Bonnie',    action: 'added a new teaching prompt',       time: '1d ago', avatar: 'B', isBonnie: true },
-  { name: 'Rachel L.', action: 'built a playlist for Yin class',    time: '1d ago', avatar: 'R'                 },
-  { name: 'Marcus D.', action: 'started Circle Flows',              time: '2d ago', avatar: 'M'                 },
-];
-
-
 // MOCK DATA — replace with Supabase query to `user_skill_progress` when ready.
 // Score formula: Math.min(100, Math.round(minutes / 1200 * 100))
 // 20 hours = 1,200 minutes = 100%
@@ -32,16 +14,17 @@ var TOOL_SKILL_MAP = {
   'arbitrary-rules.html':      ['Sequencing'],
   'movement-experiments.html': ['Sequencing'],
   'shorthand-library.html':             ['Sequencing', 'Class Structure'],
-  'v-ybp-d.html':                       ['Cueing'],
+  'verb-your-body-part-direction.html': ['Cueing'],
   'breath-pace.html':           ['Cueing'],
-  'story-structure.html':               ['Class Structure', 'Storytelling'],
   'playlist-builder.html':              ['Class Structure'],
+  'story-starters.html':                ['Storytelling'],
+  'class-writer.html':                  ['Sequencing', 'Class Structure'],
 };
 
 // Suggested next action per weakest skill — includes link to the relevant tool
 var SKILL_SUGGESTIONS = {
   'Sequencing':      { pre: 'Try 10 minutes with ', tool: 'Arbitrary Rules', post: ' to grow Sequencing.',     href: 'arbitrary-rules.html' },
-  'Cueing':          { pre: 'Try 10 minutes in ',   tool: 'the Cue Lab',              post: ' to build cueing skills.',  href: 'v-ybp-d.html'                  },
+  'Cueing':          { pre: 'Try 10 minutes in ',   tool: 'Verb / Your Body Part / Direction', post: ' to build cueing skills.', href: 'verb-your-body-part-direction.html' },
   'Class Structure': { pre: 'Try 10 minutes in ',   tool: 'the Playlist Builder',     post: ' to grow Class Structure.', href: 'playlist-builder.html'          },
   'Storytelling':    { pre: 'Shape a class arc in the ', tool: 'Playlist Builder', post: ' — controlling energy over time is the foundation of storytelling.', href: 'playlist-builder.html' },
 };

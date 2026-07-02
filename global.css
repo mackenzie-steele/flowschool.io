@@ -30,7 +30,7 @@
    20. App Shell / Sidebar
    21. Auth Form
    22. Dark Mode Element Overrides
-   23. Tool Page Components (controls-bar, modal, card-actions)
+   23. Tool Page Components (controls-bar, modal, card-actions, search)
 
    HOW TO ADD A NEW TOOL PAGE
    1. Copy the page shell from any existing tool (e.g. arbitrary-rule-generator.html)
@@ -70,6 +70,9 @@
 /* ─── 1. DESIGN TOKENS ───────────────────────────────────────── */
 
 :root {
+  /* Native UI (scrollbars, form controls) follows the theme */
+  color-scheme: light;
+
   /* Background */
   --bg: #F5F4F0;
 
@@ -77,6 +80,10 @@
   --ink-rgb:     22, 22, 18;
   --ink-solid:   #161614;
   --paper-solid: #F5F4F0;
+  /* Paper as RGB — for translucent paper surfaces (headers, toggles, veils) */
+  --paper-rgb:   245, 244, 240;
+  /* Sidebar surface — slightly warmer than paper */
+  --sidebar-bg:  rgba(243, 241, 237, .96);
 
   /* Surfaces */
   --surface:   rgba(var(--ink-rgb), .035);
@@ -97,13 +104,21 @@
   --accent-dim:    rgba(var(--ink-rgb), .08);
   --accent-border: rgba(var(--ink-rgb), .25);
 
+  /* Primary button hover fill */
+  --btn-hover: #2C2C28;
+
+  /* Semantic status */
+  --danger: #E05252;
+
   /* Slider fill — black in light, volt in dark */
   --slider-fill: var(--ink-solid);
 
   /* Radius — geometric */
-  --r:  0px;
-  --rf: 2px;
-  --rs: 0px;
+  --r:  0px;  /* cards, inputs, panels */
+  --rf: 2px;  /* fine detail (beta tag) */
+  --rs: 0px;  /* small controls */
+  --rb: 1px;  /* buttons, badges, toast */
+  --r-cta: 8px;  /* rounded CTAs, callouts, text-button hover pills */
 
   /* Button padding */
   --btn-pad-h: 24px;
@@ -112,11 +127,6 @@
   /* Card padding */
   --card-pad:       36px 40px;
   --card-pad-light: 32px;
-
-  /* Eyebrow Label Margin */
-  .eyebrow-label {
-    margin-bottom: 12px;
-  }
 
   /* Shadows */
   --shadow: 0 2px 16px rgba(var(--ink-rgb), .10),
@@ -181,17 +191,22 @@
   --transition-slow: .25s ease;
 
   /* Z-index scale */
-  --z-overlay:  45;
-  --z-sidebar:  50;
-  --z-sticky:  100;
-  --z-toast:   200;
-  --z-modal:   300;
+  --z-overlay:         45;
+  --z-sidebar:         50;
+  --z-sidebar-raised:  60;   /* mobile drawer above overlay */
+  --z-cta:             90;   /* sticky CTA bar, below header */
+  --z-sticky:         100;
+  --z-fab:            200;   /* floating controls (sidebar toggle) */
+  --z-toast:          200;
+  --z-modal:          300;
+  --z-grain:          999;   /* grain texture above everything */
 }
 
 
 /* ─── 1b. DARK MODE TOKENS ───────────────────────────────────── */
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg:            #1B1B1B;
   --ink-rgb:       239, 239, 239;
   --ink-solid:     #EFEFEF;
@@ -208,6 +223,9 @@
   --text-3:        #A5A5A5;
   --volt:          #FFF55F;
   --slider-fill:   var(--volt);
+  --paper-rgb:     27, 27, 27;
+  --sidebar-bg:    rgba(21, 21, 21, .96);
+  --btn-hover:     #EFEFEF;
 }
 
 [data-theme="dark"] .orb-1,
@@ -306,7 +324,7 @@ body::after {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 999;
+  z-index: var(--z-grain);
   opacity: 0.038;
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='256' height='256' filter='url(%23n)'/></svg>");
   background-size: 256px 256px;
@@ -403,6 +421,11 @@ li {
   color: var(--text-3);
 }
 
+/* Eyebrow label — spacing for small labels that sit above content */
+.eyebrow-label {
+  margin-bottom: 12px;
+}
+
 .button-text {
   font-family: var(--font);
   font-size: var(--fs-btn);
@@ -465,7 +488,7 @@ footer {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 90;
+  z-index: var(--z-cta);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -541,13 +564,13 @@ body.has-sidebar .cta-bar {
 /* ─── 6. HEADER / NAVIGATION ─────────────────────────────────── */
 
 .hdr {
-  background: rgba(245, 244, 240, .88);
+  background: rgba(var(--paper-rgb), .88);
   backdrop-filter: var(--glass);
   -webkit-backdrop-filter: var(--glass);
   border-bottom: 1px solid rgba(var(--ink-rgb), .10);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: var(--z-sticky);
 }
 
 .hdr-i {
@@ -639,10 +662,10 @@ body.has-sidebar .cta-bar {
   border: none;
   color: var(--text-3);
   padding: 8px 12px;
-  border-radius: var(--rs);
+  border-radius: var(--r-cta);
   font-size: var(--text-ui);
   cursor: pointer;
-  transition: color .15s, background .15s;
+  transition: color var(--transition-base), background var(--transition-base);
   font-family: var(--font);
   text-decoration: none;
   display: inline-flex;
@@ -671,12 +694,12 @@ body.has-sidebar .cta-bar {
   color: var(--paper-solid);
   border: none;
   padding: var(--btn-pad-v) var(--btn-pad-h);
-  border-radius: 1px;
+  border-radius: var(--rb);
   font-size: var(--fs-btn);
   font-weight: var(--weight-medium);
   font-family: var(--font);
   cursor: pointer;
-  transition: background .15s, transform .1s, box-shadow .15s;
+  transition: background var(--transition-base), transform .1s, box-shadow var(--transition-base);
   box-shadow: 0 2px 12px rgba(var(--ink-rgb), .18);
   white-space: nowrap;
   text-decoration: none;
@@ -686,7 +709,7 @@ body.has-sidebar .cta-bar {
 .generate-btn:hover,
 .shuffle-btn:hover,
 .start-btn:hover {
-  background: #2C2C28;
+  background: var(--btn-hover);
   transform: translateY(-1px);
   box-shadow: 0 4px 20px rgba(var(--ink-rgb), .22);
 }
@@ -703,7 +726,7 @@ body.has-sidebar .cta-bar {
 .shuffle-btn:disabled,
 .start-btn:disabled {
   background: rgba(var(--ink-rgb), .22);
-  color: rgba(245, 244, 240, .55);
+  color: rgba(var(--paper-rgb), .55);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -723,12 +746,12 @@ button svg {
   color: var(--text-2);
   border: 1px solid rgba(var(--ink-rgb), .18);
   padding: 11px 22px;
-  border-radius: 1px;
+  border-radius: var(--rb);
   font-size: var(--text-ui);
   font-weight: var(--weight-semibold);
   font-family: var(--font);
   cursor: pointer;
-  transition: all .15s;
+  transition: all var(--transition-base);
   text-decoration: none;
 }
 
@@ -752,12 +775,12 @@ button svg {
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 0;
+  border-radius: var(--r);
   background: transparent;
   border: 1px solid rgba(var(--ink-rgb), .14);
   color: var(--text-3);
   cursor: pointer;
-  transition: all .15s;
+  transition: all var(--transition-base);
   flex-shrink: 0;
 }
 
@@ -786,7 +809,7 @@ button svg {
 }
 
 .btn-icon .material-symbols-sharp {
-  transition: opacity .12s ease, transform .12s ease;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
 
 .btn-icon[data-tooltip] {
@@ -806,12 +829,12 @@ button svg {
   color: var(--paper-solid);
   background: var(--ink-solid);
   border: none;
-  border-radius: 1px;
+  border-radius: var(--rb);
   padding: 4px 8px;
   pointer-events: none;
   opacity: 0;
-  transition: opacity .12s ease, transform .12s ease;
-  z-index: 100;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  z-index: var(--z-sticky);
 }
 
 .btn-icon[data-tooltip]:hover::before {
@@ -830,12 +853,12 @@ button svg {
   background: transparent;
   border: 1px solid rgba(var(--ink-rgb), .14);
   color: var(--text-3);
-  border-radius: 0;
+  border-radius: var(--r);
   font-family: var(--font);
   font-size: var(--fs-chip);
   font-weight: var(--weight-regular);
   cursor: pointer;
-  transition: all .15s;
+  transition: all var(--transition-base);
 }
 
 /* LED-dot selection chips */
@@ -856,7 +879,7 @@ button svg {
   border-radius: 50%;
   border: 1px solid rgba(var(--ink-rgb), .22);
   background: transparent;
-  transition: all .15s;
+  transition: all var(--transition-base);
 }
 
 .chip:hover,
@@ -922,7 +945,7 @@ button svg {
 .controls-card {
   border: 1px solid rgba(var(--ink-rgb), .12);
   border-top-color: rgba(var(--ink-rgb), .22);
-  border-radius: 0;
+  border-radius: var(--r);
   padding: var(--card-pad);
   background: rgba(var(--ink-rgb), .02);
   backdrop-filter: none;
@@ -934,7 +957,7 @@ button svg {
 .practice-card,
 .why-card {
   border: 1px solid rgba(var(--ink-rgb), .08);
-  border-radius: 0;
+  border-radius: var(--r);
   padding: var(--card-pad-light);
   background: rgba(var(--ink-rgb), .018);
 }
@@ -958,7 +981,7 @@ button svg {
   letter-spacing: var(--ls-micro);
   text-transform: uppercase;
   padding: 4px 10px;
-  border-radius: 0;
+  border-radius: var(--r);
   background: rgba(var(--ink-rgb), .06);
   color: var(--text-2);
   border: 1px solid rgba(var(--ink-rgb), .14);
@@ -975,7 +998,7 @@ input[type="search"],
 input[type="url"],
 textarea,
 select {
-  border-radius: 0;
+  border-radius: var(--r);
 }
 
 /* ─── 12. RANGE SLIDERS ──────────────────────────────────────── */
@@ -987,11 +1010,14 @@ select {
   width: 100%;
 }
 
+/* Numeric readout above a slider — mono, h5 scale
+   (single source for both slider tools) */
 .range-val {
-  font-size: 1.75rem;
-  font-weight: var(--weight-semibold);
+  font-family: var(--font-mono);
+  font-size: var(--fs-h5);
+  font-weight: var(--weight-regular);
+  letter-spacing: .02em;
   color: var(--text-1);
-  font-family: var(--font);
   line-height: 1;
   margin-bottom: 6px;
 }
@@ -1001,7 +1027,7 @@ input[type=range].range-slider {
   appearance: none;
   width: 100%;
   height: 2px;
-  border-radius: 0;
+  border-radius: var(--r);
   outline: none;
   cursor: pointer;
   margin: 6px 0;
@@ -1012,7 +1038,7 @@ input[type=range].range-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
-  border-radius: 0;
+  border-radius: var(--r);
   background: var(--ink-solid);
   cursor: pointer;
   box-shadow: 0 1px 8px rgba(var(--ink-rgb), .22);
@@ -1027,7 +1053,7 @@ input[type=range].range-slider::-webkit-slider-thumb:active {
 input[type=range].range-slider::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  border-radius: 0;
+  border-radius: var(--r);
   background: var(--ink-solid);
   border: none;
   cursor: pointer;
@@ -1049,8 +1075,8 @@ input[type=range].range-slider:disabled {
   display: block;
   width: 1px;
   height: 5px;
-  background: rgba(var(--ink-rgb), .18);
-  border-radius: 0;
+  background: rgba(var(--ink-rgb), .16);
+  border-radius: var(--r);
 }
 
 .range-ends {
@@ -1090,7 +1116,7 @@ input[type=range].range-slider:disabled {
   align-items: center;
   gap: 9px;
   padding: 0;
-  transition: color .15s;
+  transition: color var(--transition-base);
 }
 
 .saved-toggle:hover,
@@ -1106,7 +1132,7 @@ input[type=range].range-slider:disabled {
   color: var(--text-2);
   border: 1px solid rgba(var(--ink-rgb), .14);
   padding: 2px 8px;
-  border-radius: 1px;
+  border-radius: var(--rb);
   line-height: 1.5;
 }
 
@@ -1138,7 +1164,7 @@ input[type=range].range-slider:disabled {
   font-size: var(--text-small);
   font-family: var(--font);
   cursor: pointer;
-  transition: color .15s;
+  transition: color var(--transition-base);
   padding: 0;
 }
 
@@ -1165,8 +1191,8 @@ input[type=range].range-slider:disabled {
   align-items: flex-start;
   justify-content: space-between;
   padding: 12px 14px;
-  border-radius: 0;
-  transition: background .15s;
+  border-radius: var(--r);
+  transition: background var(--transition-base);
   gap: 12px;
   border-bottom: 1px solid rgba(var(--ink-rgb), .06);
 }
@@ -1199,8 +1225,8 @@ input[type=range].range-slider:disabled {
   font-family: var(--font);
   cursor: pointer;
   padding: 4px 10px;
-  border-radius: 1px;
-  transition: all .15s;
+  border-radius: var(--r-cta);
+  transition: all var(--transition-base);
 }
 
 .saved-view-btn,
@@ -1236,12 +1262,12 @@ input[type=range].range-slider:disabled {
   border: none;
   color: var(--paper-solid);
   padding: 13px 24px;
-  border-radius: 1px;
+  border-radius: var(--rb);
   font-size: var(--text-ui);
   font-weight: var(--weight-medium);
   transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), opacity .3s ease;
   opacity: 0;
-  z-index: 200;
+  z-index: var(--z-toast);
   white-space: nowrap;
   pointer-events: none;
   backdrop-filter: none;
@@ -1273,12 +1299,12 @@ input[type=range].range-slider:disabled {
   border: 1px solid rgba(var(--ink-rgb), .18);
   color: var(--text-2);
   padding: 7px 14px;
-  border-radius: 1px;
+  border-radius: var(--rb);
   font-size: var(--text-ui);
   font-weight: var(--weight-medium);
   font-family: var(--font);
   cursor: pointer;
-  transition: border-color .15s, color .15s, background .15s;
+  transition: border-color var(--transition-base), color var(--transition-base), background var(--transition-base);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -1310,7 +1336,7 @@ input[type=range].range-slider:disabled {
   font-size: var(--text-label);
   font-weight: var(--weight-bold);
   color: var(--text-1);
-  transition: background .15s, border-color .15s;
+  transition: background var(--transition-base), border-color var(--transition-base);
 }
 
 .nav-avatar-btn:hover .nav-initial {
@@ -1330,30 +1356,26 @@ input[type=range].range-slider:disabled {
 
 /* ─── 15. ANIMATIONS ─────────────────────────────────────────── */
 
-/* Drift keyframes preserved but not used (orbs are now static) */
-@keyframes drift1 {
-  0%   { transform: translate(0, 0) }
-  100% { transform: translate(80px, 100px) }
-}
-
-@keyframes drift2 {
-  0%   { transform: translate(0, 0) }
-  100% { transform: translate(-90px, 70px) }
-}
-
-@keyframes drift3 {
-  0%   { transform: translate(0, 0) }
-  100% { transform: translate(60px, -80px) }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(14px) }
-  to   { opacity: 1; transform: translateY(0) }
-}
-
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(14px) }
   to   { opacity: 1; transform: translateY(0) }
+}
+
+/* ── Page entrance ─────────────────────────────────────────────
+   One restrained motion on arrival: main content fades in and
+   settles up 8px. The sidebar never moves (pinned via
+   view-transition-name), so navigation reads as the workspace
+   holding still while the page changes. Layers under the
+   cross-document crossfade in browsers that support it. */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  main {
+    animation: pageEnter .38s cubic-bezier(.2, .6, 0, 1) both;
+  }
 }
 
 .fade-up {
@@ -1362,7 +1384,7 @@ input[type=range].range-slider:disabled {
 
 .challenge-card.animate,
 .experiment-card.animate {
-  animation: slideUp .4s cubic-bezier(.22, .68, 0, 1.2);
+  animation: fadeUp .4s cubic-bezier(.22, .68, 0, 1.2);
 }
 
 
@@ -1424,7 +1446,7 @@ input[type=range].range-slider:disabled {
   flex-direction: column;
   padding: 36px;
   border: none;
-  border-radius: 0;
+  border-radius: var(--r);
   background: var(--bg);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -1461,7 +1483,7 @@ input[type=range].range-slider:disabled {
   font-size: var(--text-ui);
   font-weight: var(--weight-semibold);
   color: var(--text-3);
-  transition: gap .15s, color .15s;
+  transition: gap var(--transition-base), color var(--transition-base);
 }
 
 .tool-card:hover .tool-cta {
@@ -1484,13 +1506,13 @@ input[type=range].range-slider:disabled {
 /* ─── 19. AUTH PAGES ─────────────────────────────────────────── */
 
 .auth-hdr {
-  background: rgba(245, 244, 240, .88);
+  background: rgba(var(--paper-rgb), .88);
   backdrop-filter: var(--glass);
   -webkit-backdrop-filter: var(--glass);
   border-bottom: 1px solid rgba(var(--ink-rgb), .10);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: var(--z-sticky);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1522,13 +1544,13 @@ input[type=range].range-slider:disabled {
   top: 0;
   left: 0;
   bottom: 0;
-  background: rgba(243, 241, 237, .96);
+  background: var(--sidebar-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid rgba(var(--ink-rgb), .10);
   display: flex;
   flex-direction: column;
-  z-index: 50;
+  z-index: var(--z-sidebar);
   overflow-y: auto;
 }
 
@@ -1598,7 +1620,7 @@ input[type=range].range-slider:disabled {
   border: none;
   cursor: pointer;
   font-family: var(--font);
-  transition: color .15s;
+  transition: color var(--transition-base);
 }
 
 .nav-section-toggle:hover {
@@ -1608,7 +1630,7 @@ input[type=range].range-slider:disabled {
 .nav-chevron {
   font-size: 14px;
   opacity: .5;
-  transition: transform .22s ease, opacity .15s;
+  transition: transform .22s ease, opacity var(--transition-base);
   flex-shrink: 0;
 }
 
@@ -1635,11 +1657,11 @@ input[type=range].range-slider:disabled {
   align-items: center;
   gap: 8px;
   padding: 7px 10px;
-  border-radius: 0;
+  border-radius: var(--r);
   font-size: var(--text-ui);
   color: var(--text-2);
   text-decoration: none;
-  transition: background .15s, color .15s;
+  transition: background var(--transition-base), color var(--transition-base);
   line-height: 1.3;
 }
 
@@ -1734,7 +1756,7 @@ input[type=range].range-slider:disabled {
   color: var(--text-3);
   text-align: left;
   cursor: pointer;
-  transition: color .15s;
+  transition: color var(--transition-base);
 }
 
 .nav-signout-btn:hover {
@@ -1809,19 +1831,19 @@ input[type=range].range-slider:disabled {
   position: fixed;
   top: 14px;
   left: 14px;
-  z-index: 200;
-  background: rgba(245, 244, 240, .92);
+  z-index: var(--z-fab);
+  background: rgba(var(--paper-rgb), .92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(var(--ink-rgb), .14);
-  border-radius: 0;
+  border-radius: var(--r);
   width: 38px;
   height: 38px;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: var(--text-2);
-  transition: color .15s, border-color .15s, left .25s cubic-bezier(.4,0,.2,1);
+  transition: color var(--transition-base), border-color var(--transition-base), left .25s cubic-bezier(.4,0,.2,1);
 }
 
 .sidebar-toggle:hover {
@@ -1834,7 +1856,7 @@ input[type=range].range-slider:disabled {
   position: fixed;
   inset: 0;
   background: rgba(var(--ink-rgb), .35);
-  z-index: 45;
+  z-index: var(--z-overlay);
 }
 
 .sidebar-overlay.show {
@@ -1862,7 +1884,7 @@ body.has-sidebar {
   .app-sidebar {
     transform: translateX(-100%);
     transition: transform .25s cubic-bezier(.4, 0, .2, 1);
-    z-index: 60;
+    z-index: var(--z-sidebar-raised);
   }
 
   .app-sidebar.open {
@@ -1944,13 +1966,13 @@ body.has-sidebar {
   width: 100%;
   background: rgba(var(--ink-rgb), .04);
   border: 1px solid rgba(var(--ink-rgb), .14);
-  border-radius: 0;
+  border-radius: var(--r);
   padding: 13px 16px;
   color: var(--text-1);
   font-size: var(--text-body-sm);
   font-family: var(--font);
   outline: none;
-  transition: border-color .15s, background .15s;
+  transition: border-color var(--transition-base), background var(--transition-base);
 }
 
 .field-input:focus {
@@ -1974,7 +1996,7 @@ body.has-sidebar {
   padding: 4px;
   display: flex;
   align-items: center;
-  transition: color .15s;
+  transition: color var(--transition-base);
 }
 
 .pw-toggle:hover {
@@ -1988,7 +2010,7 @@ body.has-sidebar {
   padding: 10px 14px;
   background: rgba(160, 40, 40, .06);
   border: 1px solid rgba(160, 40, 40, .18);
-  border-radius: 0;
+  border-radius: var(--r);
   display: none;
 }
 
@@ -2003,7 +2025,7 @@ body.has-sidebar {
   padding: 14px 16px;
   background: rgba(var(--ink-rgb), .04);
   border: 1px solid rgba(var(--ink-rgb), .14);
-  border-radius: 0;
+  border-radius: var(--r);
   display: none;
   text-align: center;
 }
@@ -2036,7 +2058,7 @@ body.has-sidebar {
   color: var(--text-2);
   text-decoration: underline;
   text-underline-offset: 3px;
-  transition: color .15s;
+  transition: color var(--transition-base);
 }
 
 .auth-footer a:hover {
@@ -2085,22 +2107,8 @@ body.has-sidebar {
   fill: rgba(var(--ink-rgb), .88);
 }
 
-/* Semi-transparent paper bg elements — need explicit dark values */
-[data-theme="dark"] .hdr {
-  background: rgba(27, 27, 27, .88);
-}
-
-[data-theme="dark"] .auth-hdr {
-  background: rgba(27, 27, 27, .88);
-}
-
-[data-theme="dark"] .sidebar-toggle {
-  background: rgba(27, 27, 27, .92);
-}
-
-[data-theme="dark"] .app-sidebar {
-  background: rgba(21, 21, 21, .96);
-}
+/* Semi-transparent paper surfaces resolve per-theme via --paper-rgb /
+   --sidebar-bg — no per-element dark overrides needed. */
 
 /* Active nav icon → volt */
 .nav-item.active .material-symbols-sharp {
@@ -2110,7 +2118,7 @@ body.has-sidebar {
 
 /* Modal backdrop + card shadow — dark */
 [data-theme="dark"] .modal-backdrop {
-  background: rgba(27, 27, 27, .85);
+  background: rgba(var(--paper-rgb), .85);
 }
 
 [data-theme="dark"] .modal-card {
@@ -2171,12 +2179,99 @@ body.has-sidebar {
 }
 
 
+/* Results stats row — value/label pairs + action buttons under tool output */
+.res-stats { display: flex; gap: 36px; }
+.stat { display: flex; flex-direction: column; gap: 4px; }
+
+.stat-val {
+  font-family: var(--font);
+  font-size: var(--fs-h5);
+  font-weight: var(--weight-regular);
+  line-height: var(--lh-heading);
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-lbl {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-regular);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+}
+
+.res-actions { display: flex; gap: 8px; align-items: center; }
+
+
+/* ── Search field — icon + input (+ optional clear button) ──── */
+
+.search-wrap {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  background: rgba(var(--ink-rgb), .04);
+  border: 1px solid rgba(var(--ink-rgb), .14);
+  border-radius: var(--r);
+  padding: 13px 40px 13px 42px;
+  color: var(--text-1);
+  font-family: var(--font);
+  font-size: var(--text-body-sm);
+  outline: none;
+  transition: border-color var(--transition-base), background var(--transition-base);
+}
+
+.search-input::placeholder { color: var(--text-3); }
+
+.search-input:focus {
+  border-color: rgba(var(--ink-rgb), .38);
+  background: rgba(var(--ink-rgb), .06);
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon .material-symbols-sharp { font-size: 18px; }
+
+.search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: var(--text-body-lg);
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--r-cta);
+  transition: color var(--transition-base), background var(--transition-base);
+  font-family: var(--font);
+}
+
+.search-clear:hover {
+  color: var(--text-1);
+  background: rgba(var(--ink-rgb), .05);
+}
+
+
 /* ── Modal ───────────────────────────────────────────────────── */
 
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(245, 244, 240, .65);
+  background: rgba(var(--paper-rgb), .65);
   backdrop-filter: blur(14px) saturate(120%);
   -webkit-backdrop-filter: blur(14px) saturate(120%);
   display: flex;
@@ -2192,7 +2287,7 @@ body.has-sidebar {
   background: var(--paper-solid);
   border: 1px solid rgba(var(--ink-rgb), .16);
   border-top-color: rgba(var(--ink-rgb), .30);
-  border-radius: 0;
+  border-radius: var(--r);
   box-shadow: 0 4px 32px rgba(var(--ink-rgb), .12), 0 20px 60px rgba(var(--ink-rgb), .08);
   padding: 32px;
   width: min(400px, calc(100vw - 40px));
@@ -2208,7 +2303,7 @@ body.has-sidebar {
   box-sizing: border-box;
   background: rgba(var(--ink-rgb), .04);
   border: 1px solid rgba(var(--ink-rgb), .14);
-  border-radius: 0;
+  border-radius: var(--r);
   color: var(--text-1);
   font-family: var(--font);
   font-size: var(--fs-h7);
@@ -2224,11 +2319,11 @@ body.has-sidebar {
   background: rgba(var(--ink-rgb), .06);
 }
 
-.modal-input.error { border-color: #e05252; }
+.modal-input.error { border-color: var(--danger); }
 
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
 .modal-actions .btn-ghost,
 .modal-actions .btn-primary {
-  border-radius: 8px;
+  border-radius: var(--r-cta);
 }

@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"light")}()</script>
+  <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
+  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Elements of Flow — Flow School</title>
@@ -21,25 +22,7 @@
       justify-content: space-between;
       padding: 0 0 16px;
     }
-    .res-stats { display: flex; gap: 36px; }
-    .stat { display: flex; flex-direction: column; gap: 4px; }
-    .stat-val {
-      font-family: var(--font);
-      font-size: var(--fs-h5);
-      font-weight: var(--weight-regular);
-      line-height: var(--lh-heading);
-      color: var(--text-1);
-      font-variant-numeric: tabular-nums;
-    }
-    .stat-lbl {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      font-weight: var(--weight-regular);
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.10em;
-    }
-    .res-actions { display: flex; gap: 8px; align-items: center; }
+    /* .res-stats / .stat / .stat-val / .stat-lbl / .res-actions — global.css */
 
     /* Two-column grid */
     .fc-grid {
@@ -207,7 +190,7 @@
     .fc-complete {
       padding: 11px 14px;
       border: 1px solid var(--accent-border);
-      border-radius: 8px;
+      border-radius: var(--r-cta);
       background: var(--accent-dim);
       margin-bottom: 14px;
       display: none;
@@ -273,8 +256,6 @@
     }
 
     .fc-item.checked .fc-icon { opacity: 1; }
-
-    .fc-item.checked .fc-icon { color: #1B1B1B; }
 
     .fc-label {
       font-size: var(--text-ui);
