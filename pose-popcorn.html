@@ -7,6 +7,9 @@
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pose Popcorn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
   <link rel="stylesheet" href="global.css">
   <style>
 
@@ -26,7 +29,12 @@
       flex-direction: column;
       min-height: 200px;
       position: relative;
-      transition: opacity 0.2s ease, transform 0.2s ease;
+      transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .pose-card.locked {
+      opacity: .5;
+      filter: grayscale(.5);
     }
 
     .pose-card-eyebrow {
@@ -55,7 +63,7 @@
       font-weight: var(--weight-regular);
       letter-spacing: -.01em;
       line-height: var(--lh-heading);
-      color: var(--text-1);
+      color: var(--volt);
     }
 
     .dest-card {
@@ -110,14 +118,14 @@
     }
 
     .chain-title {
-      font-size: var(--fs-body);
+      font-size: var(--fs-h5);
       font-weight: var(--weight-medium);
       color: var(--text-1);
     }
 
     .chain-title-input {
       font-family: var(--font);
-      font-size: var(--fs-body);
+      font-size: var(--fs-h5);
       font-weight: var(--weight-medium);
       color: var(--text-1);
       background: transparent;
@@ -260,65 +268,79 @@
       font-size: var(--text-body-sm);
     }
 
-    /* ── Save modal ── */
-    .pc-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(245, 244, 240, .65);
-      backdrop-filter: blur(14px) saturate(120%);
-      -webkit-backdrop-filter: blur(14px) saturate(120%);
+    /* ── Chain header buttons ── */
+    .chain-header-btns {
       display: flex;
       align-items: center;
-      justify-content: center;
-      z-index: 400;
+      gap: 4px;
+      flex-shrink: 0;
     }
 
-    [data-theme="dark"] .pc-modal-backdrop {
-      background: rgba(27, 27, 27, .75);
+    /* ── Load modal saved-chain list ── */
+    .saved-chain-list {
+      border: 1px solid rgba(var(--ink-rgb), .10);
+      max-height: 260px;
+      overflow-y: auto;
     }
 
-    .pc-modal-backdrop[hidden] { display: none; }
+    .saved-chain-empty {
+      padding: 28px 16px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: var(--fs-body);
+    }
 
-    .pc-modal-card {
-      background: var(--paper-solid);
-      border: 1px solid rgba(var(--ink-rgb), .16);
-      border-top-color: rgba(var(--ink-rgb), .30);
-      box-shadow: 0 4px 32px rgba(var(--ink-rgb), .12), 0 20px 60px rgba(var(--ink-rgb), .08);
-      padding: 32px;
-      width: min(400px, calc(100vw - 40px));
+    .saved-chain-item {
       display: flex;
-      flex-direction: column;
-    }
-
-    [data-theme="dark"] .pc-modal-card {
-      box-shadow: 0 4px 32px rgba(0, 0, 0, .5), 0 20px 60px rgba(0, 0, 0, .4);
-    }
-
-    .pc-modal-card h3 { margin: 0 0 6px; font-size: var(--fs-h6); font-weight: var(--weight-medium); color: var(--text-1); }
-    .pc-modal-hint    { font-size: var(--fs-body); color: var(--text-3); margin: 0 0 20px; }
-
-    .pc-modal-input {
-      width: 100%;
-      background: rgba(var(--ink-rgb), .04);
-      border: 1px solid rgba(var(--ink-rgb), .14);
-      color: var(--text-1);
-      font-family: var(--font);
-      font-size: var(--fs-h7);
+      align-items: center;
+      gap: 12px;
       padding: 12px 16px;
-      outline: none;
-      transition: border-color .18s, background .18s;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(var(--ink-rgb), .07);
+      transition: background .12s;
     }
 
-    .pc-modal-input::placeholder { color: rgba(var(--ink-rgb), .28); }
-    .pc-modal-input:focus {
-      border-color: rgba(var(--ink-rgb), .38);
-      background: rgba(var(--ink-rgb), .06);
+    .saved-chain-item:last-child { border-bottom: none; }
+    .saved-chain-item:hover { background: rgba(var(--ink-rgb), .04); }
+    .saved-chain-info { flex: 1; min-width: 0; }
+
+    .saved-chain-name {
+      font-size: var(--fs-body);
+      color: var(--text-1);
+      font-weight: var(--weight-medium);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .pc-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-    .pc-modal-input.error { border-color: #e05252; }
+    .saved-chain-date { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+    .saved-chain-del {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(var(--ink-rgb), .22);
+      padding: 4px 6px;
+      font-size: 16px;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: color .12s, transform .12s;
+    }
+    .saved-chain-del .material-symbols-sharp { font-size: 15px; }
+
+    .saved-chain-del:hover { color: var(--text-1); }
+    .saved-chain-del.confirm-delete-armed,
+    .saved-chain-del.confirm-delete-armed:hover {
+      color: #e05252;
+      transform: scale(1.15);
+    }
+
+    /* ── Save modal (shake animation is page-specific) ── */
     @keyframes pc-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-    .pc-modal-input.shake { animation: pc-shake .3s ease; }
+    .modal-input.shake { animation: pc-shake .3s ease; }
 
     /* ── Summary overlay ── */
     .summary-overlay {
@@ -397,6 +419,7 @@
 </head>
 
 <body class="has-sidebar">
+  <script src="lib/nav.js"></script>
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
@@ -444,8 +467,8 @@
     <!-- Action buttons -->
     <div class="deck-actions">
       <button class="btn-primary" id="next-pose-btn">
-        Next Pose
-        <span class="material-symbols-sharp">arrow_forward</span>
+        <span id="next-pose-label">Next Pose</span>
+        <span class="material-symbols-sharp" id="next-pose-icon">arrow_forward</span>
       </button>
     </div>
 
@@ -454,16 +477,21 @@
       <div class="chain-header">
         <div>
           <div class="chain-title-wrap" id="chain-title-wrap">
-            <span class="chain-title" id="chain-title">Chain</span>
+            <span class="chain-title" id="chain-title" style="display:none"></span>
             <button class="chain-title-btn" id="chain-title-edit-btn" title="Rename chain" style="display:none">
               <span class="material-symbols-sharp">edit</span>
             </button>
           </div>
           <span class="chain-count" id="chain-count">0 connections</span>
         </div>
-        <button class="btn-icon" id="save-btn" data-tooltip="Save chain">
-          <span class="material-symbols-sharp save-icon">bookmark</span>
-        </button>
+        <div class="chain-header-btns">
+          <button class="btn-icon" id="load-btn" data-tooltip="Load saved chain">
+            <span class="material-symbols-sharp">history</span>
+          </button>
+          <button class="btn-icon" id="save-btn" data-tooltip="Save chain">
+            <span class="material-symbols-sharp save-icon">bookmark</span>
+          </button>
+        </div>
       </div>
       <div id="chain-list"></div>
     </div>
@@ -471,14 +499,26 @@
   </main>
 
   <!-- Save chain modal -->
-  <div class="pc-modal-backdrop" id="pc-modal" hidden>
-    <div class="pc-modal-card">
+  <div class="modal-backdrop" id="pc-modal" hidden>
+    <div class="modal-card">
       <h3>Name your chain</h3>
-      <p class="pc-modal-hint">Give it a name so you can find it later.</p>
-      <input type="text" class="pc-modal-input" id="pc-name-input" placeholder="Chain name" maxlength="80" autocomplete="off">
-      <div class="pc-modal-actions">
+      <p class="modal-hint">Give it a name so you can find it later.</p>
+      <input type="text" class="modal-input" id="pc-name-input" placeholder="Chain name" maxlength="80" autocomplete="off">
+      <div class="modal-actions">
         <button class="btn-ghost" id="pc-modal-cancel">Cancel</button>
         <button class="btn-primary" id="pc-modal-confirm">Save chain</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load chain modal -->
+  <div class="modal-backdrop" id="pc-load-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="pc-load-modal-heading">
+      <h3 id="pc-load-modal-heading">Load a chain</h3>
+      <p class="modal-hint">Select a previously saved chain to view and edit it.</p>
+      <div class="saved-chain-list" id="pc-saved-chain-list"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="pc-load-modal-cancel">Cancel</button>
       </div>
     </div>
   </div>
@@ -501,8 +541,8 @@
     </div>
   </div>
 
-  <script src="lib/nav.js"></script>
   <script src="lib/tracker.js"></script>
+  <script src="lib/confirm-delete.js"></script>
   <script src="data/poses.js"></script>
   <script>
 
@@ -512,6 +552,7 @@
     var chain     = [];
     var chainName = null;
     var chainSavedAt = null;
+    var isViewingSaved = false;
     var LS_KEY       = 'fs-pose-connector-chain';
 
     // ─── UTILS ───────────────────────────────────────────────────
@@ -559,6 +600,28 @@
       try { localStorage.setItem(LS_KEY, JSON.stringify(chain)); } catch(e) {}
     }
 
+    // Persists chain/note edits back into the saved chain entry (not just the scratch draft).
+    function syncSavedChain() {
+      if (!chainSavedAt) return;
+      var LS_SAVED = 'fs-pose-connector-saved';
+      try {
+        var saved = JSON.parse(localStorage.getItem(LS_SAVED) || '[]');
+        saved = saved.map(function(c) {
+          return String(c.savedAt) === String(chainSavedAt)
+            ? Object.assign({}, c, { transitions: JSON.parse(JSON.stringify(chain)) })
+            : c;
+        });
+        localStorage.setItem(LS_SAVED, JSON.stringify(saved));
+      } catch(e) {}
+    }
+
+    function updateLockState() {
+      document.getElementById('next-pose-label').textContent = isViewingSaved ? 'Start New Chain' : 'Next Pose';
+      document.getElementById('next-pose-icon').textContent  = isViewingSaved ? 'refresh' : 'arrow_forward';
+      document.getElementById('start-card').classList.toggle('locked', isViewingSaved);
+      document.getElementById('dest-card').classList.toggle('locked', isViewingSaved);
+    }
+
 
     // ─── ACTIONS ─────────────────────────────────────────────────
     function pushToChain() {
@@ -568,6 +631,7 @@
     }
 
     function nextPose() {
+      if (isViewingSaved) { startNewChain(); return; }
       animateTransition(function() {
         startPose = destPose;
         destPose  = pickPose(startPose);
@@ -692,18 +756,23 @@
       chain = [];
       chainName    = null;
       chainSavedAt = null;
-      saveToStorage();
+      isViewingSaved = false;
       setChainTitle('Chain');
+      document.getElementById('save-btn').classList.remove('saved');
       startPose = pickPose(null);
       destPose  = pickPose(startPose);
+      pushToChain();
       renderDeck();
-      renderChain();
+      updateLockState();
     }
 
     // ─── INIT ────────────────────────────────────────────────────
     function setChainTitle(name) {
-      document.getElementById('chain-title').textContent = name;
-      document.getElementById('chain-title-edit-btn').style.display = name && name !== 'Chain' ? '' : 'none';
+      var hasName = !!(name && name !== 'Chain');
+      var titleEl = document.getElementById('chain-title');
+      titleEl.textContent = hasName ? name : '';
+      titleEl.style.display = hasName ? '' : 'none';
+      document.getElementById('chain-title-edit-btn').style.display = hasName ? '' : 'none';
     }
 
     function startChainRename() {
@@ -756,10 +825,10 @@
         var span = document.createElement('span');
         span.className = 'chain-title';
         span.id = 'chain-title';
-        span.textContent = name;
         input.replaceWith(span);
         saveBtn.replaceWith(editBtn);
         cancelBtn.remove();
+        setChainTitle(name);
       }
 
       function commit() {
@@ -794,34 +863,104 @@
       return m ? decodeURIComponent(m[1]) : null;
     }
 
+    // Loads a saved chain entry into the page in read-only (locked) practice state —
+    // title and notes stay editable, but no new poses can be appended.
+    function applySavedChain(match) {
+      chain = match.transitions.map(function(t) { return { start: t.start, dest: t.dest, note: t.note || '' }; });
+      chainName    = match.name || null;
+      chainSavedAt = match.savedAt || null;
+      isViewingSaved = true;
+      var first = chain[0];
+      startPose = first.start;
+      destPose  = first.dest;
+      saveToStorage();
+      renderDeck();
+      renderChain();
+      setChainTitle(chainName || 'Chain');
+      document.getElementById('save-btn').classList.add('saved');
+      updateLockState();
+    }
+
+    function findSavedChain(savedAt) {
+      try {
+        var saved = JSON.parse(localStorage.getItem('fs-pose-connector-saved') || '[]');
+        return saved.find(function(c) { return String(c.savedAt) === String(savedAt); }) || null;
+      } catch(e) { return null; }
+    }
+
     function init() {
       var chainId = getParam('chain');
       if (chainId) {
-        try {
-          var saved = JSON.parse(localStorage.getItem('fs-pose-connector-saved') || '[]');
-          var match = saved.find(function(c) { return String(c.savedAt) === chainId; });
-          if (match && match.transitions && match.transitions.length) {
-            chain = match.transitions.map(function(t) { return { start: t.start, dest: t.dest, note: t.note || '' }; });
-            chainName    = match.name || null;
-            chainSavedAt = match.savedAt || null;
-            var last = chain[chain.length - 1];
-            startPose = last.start;
-            destPose  = last.dest;
-            saveToStorage();
-            renderDeck();
-            renderChain();
-            setChainTitle(chainName || 'Chain');
-            document.getElementById('save-btn').classList.add('saved');
-            history.replaceState(null, '', window.location.pathname);
-            return;
-          }
-        } catch(e) {}
+        var match = findSavedChain(chainId);
+        if (match && match.transitions && match.transitions.length) {
+          applySavedChain(match);
+          history.replaceState(null, '', window.location.pathname);
+          return;
+        }
       }
       startPose = pickPose(null);
       destPose  = pickPose(startPose);
       pushToChain();
       renderDeck();
       renderChain();
+      updateLockState();
+    }
+
+    // ─── LOAD SAVED CHAIN MODAL ──────────────────────────────────
+    function openLoadModal() {
+      renderSavedChainList();
+      document.getElementById('pc-load-modal').removeAttribute('hidden');
+    }
+
+    function closeLoadModal() {
+      document.getElementById('pc-load-modal').setAttribute('hidden', '');
+    }
+
+    function renderSavedChainList() {
+      var list = document.getElementById('pc-saved-chain-list');
+      var saved;
+      try { saved = JSON.parse(localStorage.getItem('fs-pose-connector-saved') || '[]'); } catch(e) { saved = []; }
+      saved = saved.slice().sort(function(a, b) { return (b.savedAt || 0) - (a.savedAt || 0); });
+
+      if (!saved.length) {
+        list.innerHTML = '<div class="saved-chain-empty">No saved chains yet.</div>';
+        return;
+      }
+
+      list.innerHTML = saved.map(function(entry) {
+        var d = entry.savedAt ? new Date(entry.savedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        return '<div class="saved-chain-item" data-saved-at="' + entry.savedAt + '">'
+          + '<div class="saved-chain-info">'
+          + '<div class="saved-chain-name">' + escHtml(entry.name || 'Untitled Chain') + '</div>'
+          + '<div class="saved-chain-date">' + d + '</div>'
+          + '</div>'
+          + '<button class="saved-chain-del" data-del="' + entry.savedAt + '" title="Delete">×</button>'
+          + '</div>';
+      }).join('');
+
+      list.querySelectorAll('.saved-chain-item').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+          if (e.target.closest('.saved-chain-del')) return;
+          var match = findSavedChain(el.dataset.savedAt);
+          if (!match || !match.transitions || !match.transitions.length) return;
+          applySavedChain(match);
+          closeLoadModal();
+        });
+      });
+
+      list.querySelectorAll('.saved-chain-del').forEach(function(btn) {
+        wireConfirmDelete(btn, function() {
+          var savedAt = btn.dataset.del;
+          var all;
+          try { all = JSON.parse(localStorage.getItem('fs-pose-connector-saved') || '[]'); } catch(err) { all = []; }
+          all = all.filter(function(c) { return String(c.savedAt) !== String(savedAt); });
+          try { localStorage.setItem('fs-pose-connector-saved', JSON.stringify(all)); } catch(err) {}
+          if (chainSavedAt && String(chainSavedAt) === String(savedAt)) {
+            startNewChain();
+          }
+          renderSavedChainList();
+        });
+      });
     }
 
     // ─── EVENTS ──────────────────────────────────────────────────
@@ -867,6 +1006,7 @@
         var note = ta ? ta.value : '';
         chain[idx].note = note;
         saveToStorage();
+        syncSavedChain();
         wrap.innerHTML = noteDisplayHTML(idx, note);
       } else if (action === 'cancel') {
         wrap.innerHTML = noteDisplayHTML(idx, chain[idx].note || '');
@@ -883,6 +1023,11 @@
     document.getElementById('next-pose-btn').addEventListener('click', nextPose);
     document.getElementById('chain-title-edit-btn').addEventListener('click', startChainRename);
     document.getElementById('save-btn').addEventListener('click', openSaveModal);
+    document.getElementById('load-btn').addEventListener('click', openLoadModal);
+    document.getElementById('pc-load-modal-cancel').addEventListener('click', closeLoadModal);
+    document.getElementById('pc-load-modal').addEventListener('click', function(e) {
+      if (e.target === e.currentTarget) closeLoadModal();
+    });
     document.getElementById('pc-modal-cancel').addEventListener('click', closeSaveModal);
     document.getElementById('pc-modal-confirm').addEventListener('click', confirmSaveChain);
     document.getElementById('pc-name-input').addEventListener('keydown', function(e) {

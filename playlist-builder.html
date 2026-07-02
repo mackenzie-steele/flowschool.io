@@ -7,115 +7,23 @@
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Playlist Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
   <link rel="stylesheet" href="global.css">
   <style>
 
-    /* ── Theme tokens ─────────────────────────────────────────── */
+    /* ── Page token overrides ─────────────────────────────────── */
+    /* Scoped to this page's own components (buttons, chips, empty state) —
+       must not redefine the shared --text-2, since that also drives the
+       sidebar nav and would make its inactive links unreadable in dark mode. */
     :root {
-      --bg:            var(--paper-solid);
-      --surface:       rgba(var(--ink-rgb), .035);
-      --surface-2:     rgba(var(--ink-rgb), .06);
-      --border:        rgba(var(--ink-rgb), .13);
-      --border-light:  rgba(var(--ink-rgb), .07);
-      --text-1:        #1B1B1B;
-      --text-2:        #333333;
-      --text-3:        #A5A5A5;
+      --pb-text-2:     #333333;       /* slightly stronger than global #555555 */
       --accent-dim:    rgba(var(--ink-rgb), .06);
       --accent-border: rgba(var(--ink-rgb), .18);
-      --r:   0px;
-      --rf:  2px;
-      --rs:  0px;
     }
     [data-theme="dark"] {
-      --text-1: #EFEFEF;
-      --text-2: #C3C3C3;
-      --text-3: #A5A5A5;
-    }
-
-    /* ── Base overrides (global.css hardcodes white) ──────────── */
-    body    { background: var(--bg); color: var(--text-1); }
-    h1, h2, h3, h4, h5, h6 { color: var(--text-1); }
-    p       { color: var(--text-2); }
-    .label-1 { color: var(--text-2); }
-    .label-2 { color: var(--text-3); }
-
-    /* ── Repurpose orbs as warm paper gradients ───────────────── */
-    .orb { filter: blur(100px); animation: none; }
-    .orb-1 {
-      background: radial-gradient(circle, rgba(215,205,185,.7) 0%, transparent 70%);
-      width: 900px; height: 700px;
-      top: -300px; left: -250px;
-      opacity: .55;
-    }
-    .orb-2 {
-      background: radial-gradient(circle, rgba(198,192,172,.55) 0%, transparent 70%);
-      width: 800px; height: 800px;
-      top: -200px; right: -250px;
-      opacity: .45;
-    }
-    .orb-3 {
-      background: radial-gradient(circle, rgba(205,198,178,.45) 0%, transparent 70%);
-      width: 700px; height: 700px;
-      bottom: -150px; left: 15%;
-      opacity: .40;
-    }
-
-
-    /* ── Header ───────────────────────────────────────────────── */
-    .hdr {
-      background: rgba(245, 244, 240, .88);
-      backdrop-filter: blur(20px) saturate(110%);
-      -webkit-backdrop-filter: blur(20px) saturate(110%);
-      border-bottom: 1px solid rgba(var(--ink-rgb), .10);
-    }
-    .hdr-logo { color: var(--text-1); }
-    .beta-tag {
-      color: var(--text-3);
-      border-color: rgba(var(--ink-rgb), .20);
-    }
-
-    /* ── Nav ──────────────────────────────────────────────────── */
-    .btn-ghost { color: var(--text-3); }
-    .btn-ghost:hover { color: var(--text-1); background: rgba(var(--ink-rgb), .05); }
-
-    .btn-nav-signup {
-      border-color: rgba(var(--ink-rgb), .18);
-      color: var(--text-2);
-    }
-    .btn-nav-signup:hover {
-      border-color: rgba(var(--ink-rgb), .35);
-      color: var(--text-1);
-      background: rgba(var(--ink-rgb), .04);
-    }
-    .nav-initial {
-      background: rgba(var(--ink-rgb), .06);
-      border-color: rgba(var(--ink-rgb), .16);
-      color: var(--text-1);
-    }
-    .nav-avatar-btn:hover .nav-initial {
-      background: rgba(var(--ink-rgb), .10);
-      border-color: rgba(var(--ink-rgb), .28);
-    }
-
-    /* ── Primary button ───────────────────────────────────────── */
-    .btn-primary {
-      background: var(--ink-solid);
-      color: var(--paper-solid);
-      border-radius: 1px;
-      box-shadow: 0 2px 12px rgba(var(--ink-rgb), .16);
-    }
-    .btn-primary:hover {
-      background: #2C2C28;
-      opacity: 1;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 20px rgba(var(--ink-rgb), .20);
-    }
-    .btn-primary:active  { transform: translateY(0); }
-    .btn-primary:disabled {
-      background: rgba(var(--ink-rgb), .20);
-      color: rgba(245, 244, 240, .55);
-      box-shadow: none;
-      transform: none;
+      --pb-text-2: var(--text-2);
     }
 
     /* ── Ghost sm + outline + saved ──────────────────────────── */
@@ -124,7 +32,7 @@
     .btn-outline {
       background: none;
       border: 1px solid rgba(var(--ink-rgb), .18);
-      color: var(--text-2);
+      color: var(--pb-text-2);
       padding: 10px 22px;
       font-weight: var(--weight-medium);
       border-radius: 0;
@@ -167,7 +75,7 @@
     .chip:hover {
       border-color: rgba(var(--ink-rgb), .28);
       background: rgba(var(--ink-rgb), .03);
-      color: var(--text-2);
+      color: var(--pb-text-2);
     }
     .chip:hover::before {
       border-color: rgba(var(--ink-rgb), .45);
@@ -198,17 +106,6 @@
       color: var(--text-1);
       letter-spacing: .02em;
     }
-    input[type=range].range-slider { background: rgba(var(--ink-rgb), .12); }
-    input[type=range].range-slider::-webkit-slider-thumb {
-      background: var(--ink-solid);
-      box-shadow: 0 1px 6px rgba(var(--ink-rgb), .25);
-      border-radius: 0;
-    }
-    input[type=range].range-slider::-moz-range-thumb {
-      background: var(--ink-solid);
-      box-shadow: 0 1px 6px rgba(var(--ink-rgb), .25);
-      border-radius: 0;
-    }
     /* major ticks at 30, 45, 60, 75, 90 → positions 1, 4, 7, 10, 13 */
     .range-ticks span { background: rgba(var(--ink-rgb), .16); height: 5px; }
     .range-ticks span:nth-child(1),
@@ -218,16 +115,6 @@
     .range-ticks span:nth-child(13) {
       background: rgba(var(--ink-rgb), .38);
       height: 10px;
-    }
-
-    /* ── Toast ────────────────────────────────────────────────── */
-    .toast {
-      background: var(--ink-solid);
-      border-color: transparent;
-      color: var(--paper-solid);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      border-radius: 1px;
     }
 
     /* ── CTA bar ──────────────────────────────────────────────── */
@@ -372,7 +259,7 @@
       justify-content: center;
       font-size: 20px;
     }
-    .empty h3 { font-size: var(--fs-h4); margin-bottom: 8px; color: var(--text-2); }
+    .empty h3 { font-size: var(--fs-h4); margin-bottom: 8px; color: var(--pb-text-2); }
     .empty p  { font-size: var(--fs-body); color: var(--text-3); margin: 0 auto; }
 
     /* ── Results header ───────────────────────────────────────── */
@@ -489,7 +376,7 @@
     .song-bpm {
       font-family: var(--font-mono);
       font-size: 11px;
-      color: var(--text-2);
+      color: var(--pb-text-2);
       text-transform: uppercase;
       letter-spacing: 0.08em;
       font-variant-numeric: tabular-nums;
@@ -518,58 +405,9 @@
     [data-theme="dark"] .ebar-seg.on { background: #FFF55F; }
     .song-copy { display: flex; align-items: center; justify-content: flex-end; margin-left: 20px; }
 
-    /* ── Save modal ───────────────────────────────────────────── */
-    .pl-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(245, 244, 240, .65);
-      backdrop-filter: blur(14px) saturate(120%);
-      -webkit-backdrop-filter: blur(14px) saturate(120%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 300;
-    }
-    .pl-modal-backdrop[hidden] { display: none; }
-
-    .pl-modal-card {
-      position: relative;
-      background: var(--paper-solid);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      border: 1px solid rgba(var(--ink-rgb), .16);
-      border-top-color: rgba(var(--ink-rgb), .30);
-      border-radius: 0;
-      box-shadow: 0 4px 32px rgba(var(--ink-rgb), .12), 0 20px 60px rgba(var(--ink-rgb), .08);
-      padding: 32px;
-      width: min(400px, calc(100vw - 40px));
-      display: flex;
-      flex-direction: column;
-    }
-    .pl-modal-card h3  { margin: 0 0 6px; font-size: var(--fs-h6); font-weight: var(--weight-medium); color: var(--text-1); }
-    .pl-modal-hint     { font-size: var(--fs-body); color: var(--text-3); margin: 0 0 20px; }
-    .pl-modal-input {
-      width: 100%;
-      box-sizing: border-box;
-      background: rgba(var(--ink-rgb), .04);
-      border: 1px solid rgba(var(--ink-rgb), .14);
-      border-radius: 0;
-      color: var(--text-1);
-      font-family: var(--font);
-      font-size: var(--fs-h7);
-      padding: 12px 16px;
-      outline: none;
-      transition: border-color .18s, background .18s;
-    }
-    .pl-modal-input::placeholder { color: rgba(var(--ink-rgb), .28); }
-    .pl-modal-input:focus {
-      border-color: rgba(var(--ink-rgb), .38);
-      background: rgba(var(--ink-rgb), .06);
-    }
-    .pl-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-    .pl-modal-input.error { border-color: #e05252; }
+    /* ── Save modal (shake animation is page-specific) ───────── */
     @keyframes pl-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-    .pl-modal-input.shake { animation: pl-shake .3s ease; }
+    .modal-input.shake { animation: pl-shake .3s ease; }
 
     /* ── Responsive ───────────────────────────────────────────── */
     @media (max-width: 680px) {
@@ -588,15 +426,6 @@
       .cta-bar  { padding: 12px 16px 16px; }
     }
 
-    [data-theme="dark"] .filter-chip.active::before {
-      background: #EFEFEF;
-      border-color: #EFEFEF;
-    }
-    [data-theme="dark"] .chip.on::before {
-      background: #FFF55F;
-      border-color: #FFF55F;
-    }
-
     .curve-line { stroke: var(--volt); }
     .cp-ring    { stroke: var(--volt); }
     .cp-dot     { fill: var(--volt); }
@@ -608,10 +437,12 @@
 <body class="has-sidebar">
 
 
+  <script src="lib/nav.js"></script>
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
 
+  <main>
   <section class="hero">
     <div class="inner">
       <p class="label-1">Build the rhythm of the room.</p>
@@ -695,12 +526,12 @@
 
   <div class="toast" id="toast"></div>
 
-  <div class="pl-modal-backdrop" id="pl-modal" hidden>
-    <div class="pl-modal-card" role="dialog" aria-modal="true" aria-labelledby="pl-modal-heading">
+  <div class="modal-backdrop" id="pl-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="pl-modal-heading">
       <h3 id="pl-modal-heading">Name your playlist</h3>
-      <p class="pl-modal-hint">Give it a name so you can find it later.</p>
-      <input type="text" class="pl-modal-input" id="pl-title-input" placeholder="Playlist name" maxlength="80" autocomplete="off">
-      <div class="pl-modal-actions">
+      <p class="modal-hint">Give it a name so you can find it later.</p>
+      <input type="text" class="modal-input" id="pl-title-input" placeholder="Playlist name" maxlength="80" autocomplete="off">
+      <div class="modal-actions">
         <button class="btn-ghost" id="pl-modal-cancel">Cancel</button>
         <button class="btn-primary" id="pl-modal-confirm">Save playlist</button>
       </div>
@@ -713,6 +544,7 @@
       <span id="gen-label">Build this playlist</span>
     </button>
   </div>
+  </main>
 
   <script src="data/songs.js"></script>
   <script>
@@ -1179,14 +1011,6 @@
       });
     }
 
-    // ─── TOAST ───────────────────────────────────────────────────────────────────
-
-    function toast(msg) {
-      const el = document.getElementById('toast');
-      el.textContent = msg; el.classList.add('show');
-      setTimeout(() => el.classList.remove('show'), 2800);
-    }
-
     function defaultTitle() {
       const arc = ARC_SHAPES[S.arcKey].name;
       const style = S.style.charAt(0).toUpperCase() + S.style.slice(1);
@@ -1368,7 +1192,7 @@
       }, 550);
     });
   </script>
-  <script src="lib/nav.js"></script>
+  <script src="lib/toast.js"></script>
   <script src="lib/tracker.js"></script>
 
 </body>

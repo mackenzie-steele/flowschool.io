@@ -6,56 +6,11 @@
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cue Worksheet — Flow School</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
   <link rel="stylesheet" href="global.css">
   <style>
-
-    /* ── Top bar: name input + save ── */
-    /* ── Save modal ── */
-    .pl-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(245, 244, 240, .65);
-      backdrop-filter: blur(14px) saturate(120%);
-      -webkit-backdrop-filter: blur(14px) saturate(120%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 300;
-    }
-    .pl-modal-backdrop[hidden] { display: none; }
-    .pl-modal-card {
-      position: relative;
-      background: var(--paper-solid);
-      border: 1px solid rgba(var(--ink-rgb), .16);
-      border-top-color: rgba(var(--ink-rgb), .30);
-      border-radius: 0;
-      box-shadow: 0 4px 32px rgba(var(--ink-rgb), .12), 0 20px 60px rgba(var(--ink-rgb), .08);
-      padding: 32px;
-      width: min(400px, calc(100vw - 40px));
-      display: flex;
-      flex-direction: column;
-    }
-    .pl-modal-card h3  { margin: 0 0 6px; font-size: var(--fs-h6); font-weight: var(--weight-medium); color: var(--text-1); }
-    .pl-modal-hint     { font-size: var(--fs-body); color: var(--text-3); margin: 0 0 20px; }
-    .pl-modal-input {
-      width: 100%;
-      box-sizing: border-box;
-      background: rgba(var(--ink-rgb), .04);
-      border: 1px solid rgba(var(--ink-rgb), .14);
-      border-radius: 0;
-      color: var(--text-1);
-      font-family: var(--font);
-      font-size: var(--fs-h7);
-      padding: 12px 16px;
-      outline: none;
-      transition: border-color .18s, background .18s;
-    }
-    .pl-modal-input::placeholder { color: rgba(var(--ink-rgb), .28); }
-    .pl-modal-input:focus {
-      border-color: rgba(var(--ink-rgb), .38);
-      background: rgba(var(--ink-rgb), .06);
-    }
-    .pl-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
     /* ── Worksheet toolbar ── */
     .ws-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -69,13 +24,13 @@
     }
     .ws-flow-title-wrap.visible { opacity: 1; }
     .ws-flow-title {
-      font-size: var(--fs-body);
+      font-size: var(--fs-h5);
       font-weight: var(--weight-medium);
       color: var(--text-1);
     }
     .ws-flow-title-input {
       font-family: var(--font);
-      font-size: var(--fs-body);
+      font-size: var(--fs-h5);
       font-weight: var(--weight-medium);
       color: var(--text-1);
       background: transparent;
@@ -99,6 +54,31 @@
     }
     .ws-edit-btn:hover { color: var(--text-1); }
     .ws-edit-btn .material-symbols-sharp { font-size: 18px; }
+
+    /* ── Autosave indicator ── */
+    .ws-autosave-indicator {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-3);
+    }
+    .ws-autosave-indicator.visible { display: flex; }
+    .ws-autosave-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--volt);
+      flex-shrink: 0;
+      animation: ws-autosave-pulse 2s ease-in-out infinite;
+    }
+    @keyframes ws-autosave-pulse {
+      0%, 100% { opacity: .35; transform: scale(.85); }
+      50%      { opacity: 1;   transform: scale(1); }
+    }
 
     /* ── Load modal flow list ── */
     .flow-list {
@@ -134,6 +114,9 @@
     }
     .flow-list-date { font-size: 11px; color: var(--text-3); margin-top: 2px; }
     .flow-list-del {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       background: none;
       border: none;
       cursor: pointer;
@@ -142,9 +125,15 @@
       font-size: 16px;
       line-height: 1;
       flex-shrink: 0;
-      transition: color .12s;
+      transition: color .12s, transform .12s;
     }
+    .flow-list-del .material-symbols-sharp { font-size: 15px; }
     .flow-list-del:hover { color: var(--text-1); }
+    .flow-list-del.confirm-delete-armed,
+    .flow-list-del.confirm-delete-armed:hover {
+      color: #e05252;
+      transform: scale(1.15);
+    }
 
     /* ── Worksheet container ── */
     .ws-card {
@@ -222,10 +211,7 @@
     .cue-input:focus { background: rgba(var(--ink-rgb), .03); }
     .cue-input.verb-input { font-weight: var(--weight-regular); }
     .cue-input.pose-input {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: .06em;
-      color: var(--text-3);
+      text-transform: uppercase;
     }
 
     /* IN/EX select */
@@ -255,6 +241,9 @@
       justify-content: center;
     }
     .row-rm {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       background: none;
       border: none;
       color: rgba(var(--ink-rgb), .20);
@@ -265,9 +254,15 @@
       line-height: 28px;
       text-align: center;
       font-size: 16px;
-      transition: color .12s;
+      transition: color .12s, transform .12s;
     }
+    .row-rm .material-symbols-sharp { font-size: 15px; }
     .row-rm:hover { color: var(--text-1); }
+    .row-rm.confirm-delete-armed,
+    .row-rm.confirm-delete-armed:hover {
+      color: #e05252;
+      transform: scale(1.15);
+    }
 
     /* ── Row actions bar ── */
     .row-actions {
@@ -337,44 +332,42 @@
       margin-bottom: 52px;
       text-align: center;
     }
-    .pol-progress {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: rgba(var(--ink-rgb), .30);
-      letter-spacing: .06em;
-      margin-bottom: 28px;
-      text-align: center;
+    /* ── Teleprompter scroll area ── */
+    .pol-prompter {
+      position: relative;
+      width: 80vw;
+      height: 46vh;
+      min-height: 260px;
+      margin-bottom: 24px;
     }
-    .pol-cue-text {
-      font-size: clamp(1.6rem, 4vw, 2.4rem);
-      font-weight: var(--weight-regular);
-      color: var(--text-1);
-      line-height: 1.35;
-      text-align: center;
-      width: 100%;
-      min-height: 10rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 60px;
-      letter-spacing: -.01em;
-      transition: opacity .15s ease;
+    .pol-prompter-scroll {
+      height: 100%;
+      overflow-y: auto;
+      scrollbar-width: none;
     }
-    .pol-cue-text.no-cues {
-      font-size: var(--fs-h5);
-      color: var(--text-3);
+    .pol-prompter-scroll::-webkit-scrollbar { display: none; }
+    .pol-prompter-pad-top {
+      height: 42%;
     }
-    .pol-countdown {
-      font-family: var(--font-mono);
-      font-size: clamp(1rem, 2.5vw, 1.4rem);
-      color: var(--text-3);
-      letter-spacing: .04em;
-      min-height: 1.6rem;
-      display: flex;
-      align-items: center;
-      transition: opacity .3s;
+    .pol-prompter-pad-bottom {
+      /* Generous so the last line scrolls fully past the top edge and out
+         of view, instead of stopping centered in the reading zone. */
+      height: 100%;
+    }
+    .pol-prompter-fade {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 72px;
+      pointer-events: none;
+    }
+    .pol-prompter-fade-top {
+      top: 0;
+      background: linear-gradient(to bottom, var(--bg), transparent);
+    }
+    .pol-prompter-fade-bottom {
+      bottom: 0;
+      background: linear-gradient(to top, var(--bg), transparent);
     }
     .pol-nav {
       display: flex;
@@ -390,117 +383,69 @@
       justify-content: center;
     }
 
-    /* Full script view inside POL */
-    .pol-script-wrap {
-      display: none;
-      width: 100%;
-      max-width: 580px;
-      margin-top: 40px;
-      border-top: 1px solid rgba(var(--ink-rgb), .08);
-    }
-    .pol-script-wrap.show { display: block; }
+    /* Teleprompter script lines */
     .pol-script-line {
       display: flex;
-      gap: 16px;
-      padding: 11px 0;
-      border-bottom: 1px solid rgba(var(--ink-rgb), .06);
-      font-size: var(--text-body-sm);
-      color: var(--text-3);
-      line-height: 1.5;
-      transition: color .15s;
+      gap: 18px;
+      padding: 16px 6px;
+      font-size: var(--fs-h3);
+      color: rgba(var(--ink-rgb), .26);
+      line-height: 1.3;
+      letter-spacing: -.01em;
+      transition: color .2s ease;
     }
-    .pol-script-line:last-child { border-bottom: none; }
     .pol-script-line.active { color: var(--text-1); font-weight: var(--weight-medium); }
-    .pol-line-num {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: rgba(var(--ink-rgb), .28);
-      flex-shrink: 0;
-      padding-top: 2px;
-      min-width: 20px;
-    }
-
-    /* ── POL end screen ── */
-    .pol-end {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 16px;
-      animation: pol-fade-in .4s ease;
-    }
-    .pol-overlay.ended .pol-end { display: flex; }
-    .pol-overlay.ended .pol-meta,
-    .pol-overlay.ended .pol-progress,
-    .pol-overlay.ended #pol-cue,
-    .pol-overlay.ended .pol-nav,
-    .pol-overlay.ended .pol-controls-actions,
-    .pol-overlay.ended .pol-controls-card,
-    .pol-overlay.ended .pol-util,
-    .pol-overlay.ended .pol-script-wrap { display: none; }
-    .pol-end-title {
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: var(--weight-medium);
-      color: var(--text-1);
-      letter-spacing: -.02em;
-    }
-    .pol-end-sub {
-      font-size: var(--fs-body);
-      color: var(--text-3);
-      margin: 0;
-    }
-    .pol-end-actions { display: flex; gap: 10px; margin-top: 16px; }
-    @keyframes pol-fade-in {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
 
     .pol-overlay .btn-primary,
     .pol-overlay .btn-ghost,
     .pol-overlay .pol-close { border-radius: 8px; }
 
-    /* ── Timer bar ── */
-    .pol-timer-bar {
+    /* ── Scroll progress bar ── */
+    .pol-progress-bar {
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 3px;
       background: rgba(var(--ink-rgb), .08);
     }
-    .pol-timer-fill {
+    .pol-progress-fill {
       height: 100%;
       width: 0%;
       background: var(--volt);
+      transition: width .1s linear;
     }
 
-    /* ── Timing controls ── */
+    /* ── Speed / play controls ── */
     .pol-controls-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       width: 100%;
-      margin-bottom: 12px;
+      margin-bottom: 28px;
     }
-    .pol-audio-btn {
+    .pol-inline-slider {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .pol-inline-slider .range-slider { flex: 1; }
+    .pol-speed-icon { font-size: 18px; color: var(--text-3); flex-shrink: 0; }
+    .pol-speed-val {
+      font-family: var(--font-mono);
+      font-size: var(--text-small);
+      color: var(--text-3);
+      min-width: 62px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .pol-start-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: none;
-      border: 1px solid rgba(var(--ink-rgb), .18);
-      color: var(--text-3);
-      padding: 10px;
-      border-radius: 0;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: all .15s;
-    }
-    .pol-audio-btn:hover { color: var(--text-2); border-color: rgba(var(--ink-rgb), .32); }
-    .pol-audio-btn.muted { opacity: .4; }
-    .pol-start-btn {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
       gap: 8px;
-      padding: 10px 18px;
+      width: 124px;
+      padding: 10px 0;
       background: var(--ink-solid);
       color: var(--paper-solid);
       border: none;
@@ -511,58 +456,9 @@
       cursor: pointer;
       white-space: nowrap;
       transition: opacity .15s;
+      flex-shrink: 0;
     }
     .pol-start-btn:hover { opacity: .82; }
-    .pol-controls-card {
-      width: 100%;
-      border: 1px solid var(--border);
-      padding: 20px 20px 16px;
-      margin-bottom: 4px;
-    }
-    .pol-ctl-label {
-      display: block;
-      font-size: 10px;
-      font-family: var(--font-mono);
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--text-3);
-      margin-bottom: 12px;
-    }
-    .pol-range-wrap { width: 100%; }
-    .pol-range-val {
-      font-family: var(--font-mono);
-      font-size: var(--fs-h5);
-      font-weight: var(--weight-regular);
-      letter-spacing: .02em;
-      color: var(--text-1);
-      display: block;
-      margin-bottom: 10px;
-    }
-    .pol-range-ticks {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 6px;
-      padding: 0 1px;
-    }
-    .pol-range-ticks span {
-      display: block;
-      width: 1px;
-      height: 5px;
-      background: rgba(var(--ink-rgb), .16);
-    }
-    .pol-range-ticks span:first-child,
-    .pol-range-ticks span:last-child {
-      height: 10px;
-      background: rgba(var(--ink-rgb), .38);
-    }
-    .pol-range-ends {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 4px;
-      font-size: var(--text-small);
-      color: var(--text-3);
-      font-family: var(--font-mono);
-    }
 
     /* ── Word bank drawer (fixed bottom) ── */
     .wb-drawer {
@@ -684,15 +580,22 @@
       .wrap { padding-bottom: 0; }
     }
 
+    @media (max-width: 580px) {
+      .pol-script-line { font-size: var(--fs-h4); }
+    }
+
   </style>
 </head>
 
 <body class="has-sidebar">
 
+  <script src="lib/nav.js"></script>
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
 <div class="orb orb-3"></div>
 <div class="toast" id="toast"></div>
+
+<main>
 
 <!-- ── HERO ────────────────────────────────────────────────────── -->
 
@@ -716,6 +619,13 @@
       </button>
     </div>
     <div class="ws-toolbar-btns">
+      <span class="ws-autosave-indicator" id="ws-autosave-indicator">
+        <span class="ws-autosave-dot"></span>
+        Auto Saved
+      </span>
+      <button class="btn-icon" id="ws-new-flow-btn" data-tooltip="New flow" style="display:none">
+        <span class="material-symbols-sharp">note_add</span>
+      </button>
       <button class="btn-icon" id="ws-load-btn" data-tooltip="Load saved flow">
         <span class="material-symbols-sharp">history</span>
       </button>
@@ -747,7 +657,6 @@
         <span class="material-symbols-sharp" style="font-size:15px;margin-right:4px">add</span>
         Add Row
       </button>
-      <button class="btn-ghost sm" id="btn-remove-row">Remove Last</button>
       <div class="row-actions-spacer"></div>
       <button class="btn-ghost sm wb-toolbar-btn" id="btn-word-bank">Word Bank</button>
       <button class="btn-ghost sm" id="btn-clear">Clear Worksheet</button>
@@ -766,14 +675,16 @@
 
 </div><!-- /wrap -->
 
+</main>
+
 <!-- ── SAVE MODAL ────────────────────────────────────────────── -->
 
-<div class="pl-modal-backdrop" id="ws-modal" hidden>
-  <div class="pl-modal-card" role="dialog" aria-modal="true" aria-labelledby="ws-modal-heading">
+<div class="modal-backdrop" id="ws-modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ws-modal-heading">
     <h3 id="ws-modal-heading">Name your flow</h3>
-    <p class="pl-modal-hint">Give it a name so you can find it later.</p>
-    <input type="text" class="pl-modal-input" id="ws-modal-input" placeholder="Flow name" maxlength="80" autocomplete="off">
-    <div class="pl-modal-actions">
+    <p class="modal-hint">Give it a name so you can find it later.</p>
+    <input type="text" class="modal-input" id="ws-modal-input" placeholder="Flow name" maxlength="80" autocomplete="off">
+    <div class="modal-actions">
       <button class="btn-ghost" id="ws-modal-cancel">Cancel</button>
       <button class="btn-primary" id="ws-modal-confirm">Save flow</button>
     </div>
@@ -782,12 +693,12 @@
 
 <!-- ── LOAD MODAL ────────────────────────────────────────────── -->
 
-<div class="pl-modal-backdrop" id="ws-load-modal" hidden>
-  <div class="pl-modal-card" role="dialog" aria-modal="true" aria-labelledby="ws-load-modal-heading">
+<div class="modal-backdrop" id="ws-load-modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ws-load-modal-heading">
     <h3 id="ws-load-modal-heading">Load a flow</h3>
-    <p class="pl-modal-hint">Select a previously saved flow to load it into the worksheet.</p>
+    <p class="modal-hint">Select a previously saved flow to load it into the worksheet.</p>
     <div class="flow-list" id="ws-flow-list"></div>
-    <div class="pl-modal-actions">
+    <div class="modal-actions">
       <button class="btn-ghost" id="ws-load-modal-cancel">Cancel</button>
     </div>
   </div>
@@ -818,8 +729,8 @@
 <!-- ── PRACTICE OUT LOUD OVERLAY ─────────────────────────────── -->
 
 <div class="pol-overlay" id="pol-overlay" aria-modal="true" role="dialog">
-  <div class="pol-timer-bar" id="pol-timer-bar">
-    <div class="pol-timer-fill" id="pol-timer-fill"></div>
+  <div class="pol-progress-bar" id="pol-progress-bar">
+    <div class="pol-progress-fill" id="pol-progress-fill"></div>
   </div>
 
   <button class="pol-close" id="pol-close">
@@ -829,10 +740,15 @@
   <div class="pol-inner">
 
     <div class="pol-meta" id="pol-meta">Pose Practice</div>
-    <div class="pol-progress" id="pol-progress">1 of 8</div>
-    <div class="pol-cue-text" id="pol-cue">
-      <span id="pol-cue-span"></span>
-      <span class="pol-countdown" id="pol-countdown"></span>
+
+    <div class="pol-prompter" id="pol-prompter">
+      <div class="pol-prompter-scroll" id="pol-prompter-scroll">
+        <div class="pol-prompter-pad-top"></div>
+        <div id="pol-script-lines"></div>
+        <div class="pol-prompter-pad-bottom"></div>
+      </div>
+      <div class="pol-prompter-fade pol-prompter-fade-top"></div>
+      <div class="pol-prompter-fade pol-prompter-fade-bottom"></div>
     </div>
 
     <div class="pol-nav">
@@ -845,40 +761,19 @@
     </div>
 
     <div class="pol-controls-actions">
-      <button class="pol-audio-btn" id="pol-audio-btn" title="Toggle sound">
-        <span class="material-symbols-sharp" id="pol-audio-icon" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 20">volume_up</span>
-      </button>
+      <div class="pol-inline-slider">
+        <span class="material-symbols-sharp pol-speed-icon">speed</span>
+        <input type="range" class="range-slider" id="pol-speed-slider" min="70" max="150" step="5" value="125">
+        <span class="pol-speed-val" id="pol-speed-val">125 WPM</span>
+      </div>
       <button class="pol-start-btn" id="pol-timing-start">
         <span class="material-symbols-sharp" id="pol-start-icon" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 20">play_arrow</span>
         <span id="pol-start-label">Start</span>
       </button>
     </div>
-    <div class="pol-controls-card">
-      <span class="pol-ctl-label">Duration</span>
-      <div class="pol-range-wrap">
-        <span class="pol-range-val" id="pol-dur-val">4s</span>
-        <input type="range" class="range-slider" id="pol-dur-slider" min="2" max="8" step="1" value="4">
-        <div class="pol-range-ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="pol-range-ends"><span>2s</span><span>8s</span></div>
-      </div>
-    </div>
 
     <div class="pol-util">
-      <button class="btn-ghost sm" id="pol-show-script">Show Full Script</button>
       <button class="btn-ghost sm" id="pol-restart">Start Over</button>
-    </div>
-
-    <div class="pol-script-wrap" id="pol-script-wrap">
-      <div id="pol-script-lines"></div>
-    </div>
-
-    <div class="pol-end" id="pol-end">
-      <div class="pol-end-title">Nice work.</div>
-      <p class="pol-end-sub">You made it through all your cues.</p>
-      <div class="pol-end-actions">
-        <button class="btn-ghost" id="pol-end-restart">Start Over</button>
-        <button class="btn-primary" id="pol-end-close">Close</button>
-      </div>
     </div>
 
   </div>
@@ -966,7 +861,6 @@ function setFlowStore(store) {
 let rows = [];
 let activeInput = null; // last focused .cue-input
 let polIndex = 0;
-let polScriptVisible = false;
 let wbTab = 'verbs';
 let wbOpen = localStorage.getItem('fs-wb-open') === 'true';
 
@@ -1015,10 +909,6 @@ function initRows(n) {
 function addRow() {
   rows.push(makeRow());
   renderRows();
-  if (flowName) {
-    flowName = '';
-    setFlowTitle('');
-  }
   // Focus verb input of new row
   const allRows = document.querySelectorAll('.cue-row');
   const last = allRows[allRows.length - 1];
@@ -1026,12 +916,6 @@ function addRow() {
     const inp = last.querySelector('.verb-input');
     if (inp) inp.focus();
   }
-}
-
-function removeLastRow() {
-  if (rows.length <= 1) { showToast('Keep at least one row.'); return; }
-  rows.pop();
-  renderRows();
 }
 
 function removeRow(i) {
@@ -1090,9 +974,17 @@ function renderRows() {
     });
   });
 
-  // Wire remove buttons
+  // Wire remove buttons — arm-to-confirm, shared with other saved-item
+  // delete buttons across the site (see lib/confirm-delete.js).
   container.querySelectorAll('.row-rm').forEach(btn => {
-    btn.addEventListener('click', () => { removeRow(parseInt(btn.dataset.idx, 10)); markDirty(); });
+    wireConfirmDelete(
+      btn,
+      () => { removeRow(parseInt(btn.dataset.idx, 10)); markDirty(); },
+      () => {
+        if (rows.length <= 1) { showToast('Keep at least one row.'); return false; }
+        return true;
+      }
+    );
   });
 }
 
@@ -1101,11 +993,15 @@ function buildRowHTML(row, i) {
   const previewClass = cue ? '' : ' empty';
   const previewText = cue || '—';
 
+  const verbPh = i === 0 ? ` placeholder="${PLACEHOLDER_CUE.verb}"` : '';
+  const bodyPh = i === 0 ? ` placeholder="${PLACEHOLDER_CUE.body}"` : '';
+  const dirPh  = i === 0 ? ` placeholder="${PLACEHOLDER_CUE.dir}"`  : '';
+
   const inexCell =`<div class="row-cell"><select class="inex-select" data-field="inex"><option${row.inex==='—'?' selected':''}>—</option><option${row.inex==='IN'?' selected':''}>IN</option><option${row.inex==='EX'?' selected':''}>EX</option></select></div>`;
-  const verbCell = `<div class="row-cell"><input class="cue-input verb-input" data-field="verb" value="${esc(row.verb)}" placeholder="${PLACEHOLDER_CUE.verb}" autocomplete="off" spellcheck="false"></div>`;
-  const bodyCell = `<div class="row-cell"><input class="cue-input" data-field="body" value="${esc(row.body)}" placeholder="${PLACEHOLDER_CUE.body}" autocomplete="off" spellcheck="false"></div>`;
-  const dirCell  = `<div class="row-cell"><input class="cue-input" data-field="dir" value="${esc(row.dir)}" placeholder="${PLACEHOLDER_CUE.dir}" autocomplete="off" spellcheck="false"></div>`;
-  const poseCell = `<div class="row-cell"><input class="cue-input pose-input" data-field="pose" value="${esc(row.pose)}" placeholder="Pose name" autocomplete="off" spellcheck="false"></div>`;
+  const verbCell = `<div class="row-cell"><input class="cue-input verb-input" data-field="verb" value="${esc(row.verb)}"${verbPh} autocomplete="off" spellcheck="false"></div>`;
+  const bodyCell = `<div class="row-cell"><input class="cue-input" data-field="body" value="${esc(row.body)}"${bodyPh} autocomplete="off" spellcheck="false"></div>`;
+  const dirCell  = `<div class="row-cell"><input class="cue-input" data-field="dir" value="${esc(row.dir)}"${dirPh} autocomplete="off" spellcheck="false"></div>`;
+  const poseCell = `<div class="row-cell"><input class="cue-input pose-input" data-field="pose" value="${esc(row.pose)}" autocomplete="off" spellcheck="false"></div>`;
   const rmCell   = `<div class="row-rm-cell"><button class="row-rm" data-idx="${i}" title="Remove row">×</button></div>`;
 
   return `<div class="cue-row" data-idx="${i}">${inexCell}${verbCell}${bodyCell}${dirCell}${poseCell}${rmCell}</div>`;
@@ -1156,15 +1052,20 @@ ${lines}
 
 // ─── EXPORT / SAVE ───────────────────────────────────────────────────────────
 
+// Mirrors the worksheet table verbatim — same column order (In/Ex, Verb,
+// Your Body Part, Direction, Pose Name), same raw values as typed, no
+// auto-inserted "your", capitalization, or punctuation.
+const INEX_LABELS = { IN: 'Inhale', EX: 'Exhale' };
+
 function buildScript() {
   const filled = rows.filter(r => r.verb || r.body || r.dir);
   if (!filled.length) return null;
   const header = flowName ? `${flowName}\n\n` : '';
   const lines = filled.map(r => {
-    const inex  = r.inex && r.inex !== '—' ? `[${r.inex}] ` : '';
-    const cue   = buildCue(r);
-    const pose  = r.pose ? ` ${r.pose.toUpperCase()}` : '';
-    return `${inex}${cue}${pose}`;
+    const inex = r.inex && INEX_LABELS[r.inex] ? `[${INEX_LABELS[r.inex]}] ` : '';
+    const parts = [r.verb, r.body, r.dir].map(v => (v || '').trim()).filter(Boolean);
+    const pose = r.pose ? ` ${r.pose.toUpperCase()}` : '';
+    return `${inex}${parts.join(' ')}${pose}`;
   });
   return header + lines.join('\n');
 }
@@ -1239,8 +1140,7 @@ function renderFlowList() {
   });
 
   list.querySelectorAll('.flow-list-del').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
+    wireConfirmDelete(btn, () => {
       const name = btn.dataset.del;
       const store = getFlowStore();
       delete store[name];
@@ -1251,11 +1151,26 @@ function renderFlowList() {
 }
 
 function setFlowTitle(name) {
-  const wrap = document.getElementById('ws-flow-title-wrap');
-  const el   = document.getElementById('ws-flow-title');
+  const wrap      = document.getElementById('ws-flow-title-wrap');
+  const el        = document.getElementById('ws-flow-title');
+  const indicator = document.getElementById('ws-autosave-indicator');
+  const newBtn    = document.getElementById('ws-new-flow-btn');
   if (!wrap || !el) return;
   el.textContent = name || '';
   wrap.classList.toggle('visible', !!name);
+  if (indicator) indicator.classList.toggle('visible', !!name);
+  if (newBtn) newBtn.style.display = name ? '' : 'none';
+}
+
+// Starts a blank flow. Only offered while viewing an already-saved flow —
+// that flow is already autosaved, so there's nothing to lose by leaving it.
+function startNewFlow() {
+  initRows(INITIAL_ROWS);
+  renderRows();
+  flowName = '';
+  setFlowTitle('');
+  setSaved(false);
+  showToast('Started a new flow.');
 }
 
 function startRename() {
@@ -1346,8 +1261,25 @@ function setSaved(saved) {
   btn.classList.toggle('saved', saved);
 }
 
+let _autosaveTimer;
 function markDirty() {
-  setSaved(false);
+  if (!flowName) { setSaved(false); return; }
+  clearTimeout(_autosaveTimer);
+  _autosaveTimer = setTimeout(autosaveFlow, 300);
+}
+
+// Persists edits back into the currently open flow's own entry — used while
+// editing a flow that's already been named/saved, so edits don't spin off a
+// separate unnamed flow.
+function autosaveFlow() {
+  if (!flowName) return;
+  try {
+    const store = getFlowStore();
+    if (!store[flowName]) return;
+    store[flowName] = { name: flowName, rows, savedAt: new Date().toISOString() };
+    setFlowStore(store);
+    setSaved(true);
+  } catch (e) {}
 }
 
 function saveToLocal(name) {
@@ -1363,172 +1295,194 @@ function saveToLocal(name) {
   }
 }
 
-// ─── PRACTICE OUT LOUD ───────────────────────────────────────────────────────
+// ─── PRACTICE OUT LOUD — TELEPROMPTER ─────────────────────────────────────────
 
 function getCuedRows() {
   return rows.filter(r => buildCue(r));
 }
 
-let polDuration = 4;
-let polTimerTimeout = null;
-let polTickInterval = null;
-let polTimerRunning = false;
-let polMuted = false;
-let polSecsLeft = 0;
+let polWPM = 125; // default reading pace, adjustable 70-150 via the speed slider
+let polTotalWords = 1; // cached word count of the current script, set by renderPOLScript
 
-// ── Audio (shared approach with breath pacer) ──────────────────────────────
-let polAudioCtx = null;
-function polGetCtx() {
-  if (!polAudioCtx) polAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (polAudioCtx.state === 'suspended') polAudioCtx.resume();
-  return polAudioCtx;
-}
-function polPlayTone(freq, vol, dur) {
-  if (polMuted) return;
-  try {
-    const ctx = polGetCtx();
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.value = freq;
-    const when = ctx.currentTime + 0.01;
-    gain.gain.setValueAtTime(vol, when);
-    gain.gain.exponentialRampToValueAtTime(0.0001, when + dur);
-    osc.start(when);
-    osc.stop(when + dur + 0.01);
-  } catch (e) {}
-}
-function polTick() { polPlayTone(880, 0.07, 0.05); }
+let polTimerRunning = false;
+let polRafId = null;
+let polLastTs = null;
 
 function updateSliderFill(sl, val) {
   const pct = ((val - sl.min) / (sl.max - sl.min)) * 100;
   sl.style.background = `linear-gradient(to right,var(--slider-fill) ${pct}%,rgba(var(--ink-rgb),.12) ${pct}%)`;
 }
 
+// Converts the WPM setting into an actual scroll speed for THIS script —
+// pixels-per-word is derived from the script's own rendered height, so the
+// pace stays accurate regardless of font size, line wraps, or cue length.
+function computePolPxPerSec() {
+  const scrollEl = document.getElementById('pol-prompter-scroll');
+  const scrollable = Math.max(1, scrollEl.scrollHeight - scrollEl.clientHeight);
+  const pxPerWord = scrollable / polTotalWords;
+  return pxPerWord * (polWPM / 60);
+}
+
+let polReachedEnd = false;
+
 function updatePolStartBtn() {
   const icon  = document.getElementById('pol-start-icon');
   const label = document.getElementById('pol-start-label');
   if (!icon) return;
-  icon.textContent  = polTimerRunning ? 'stop' : 'play_arrow';
-  label.textContent = polTimerRunning ? 'Stop'  : 'Start';
+  if (polTimerRunning) {
+    icon.textContent = 'pause';
+    label.textContent = 'Pause';
+  } else if (polReachedEnd) {
+    icon.textContent = 'replay';
+    label.textContent = 'Restart';
+  } else {
+    icon.textContent = 'play_arrow';
+    label.textContent = 'Start';
+  }
 }
 
-function startPolTimer() {
-  stopPolTimer();
+let polScrollPos = 0; // precise (sub-pixel) scroll position, tracked separately
+                       // from scrollTop — the DOM property rounds to whole
+                       // pixels on read, which silently swallows small
+                       // per-frame increments at slow WPM speeds.
+
+function startPolScroll() {
   polTimerRunning = true;
   updatePolStartBtn();
-  const fill = document.getElementById('pol-timer-fill');
-  fill.style.transition = 'none';
-  fill.style.width = '0%';
-  fill.offsetWidth; // force reflow
-  fill.style.transition = `width ${polDuration}s linear`;
-  fill.style.width = '100%';
-  // Countdown number
-  polSecsLeft = polDuration;
-  const countdownEl = document.getElementById('pol-countdown');
-  if (countdownEl) countdownEl.textContent = polSecsLeft;
-
-  polTick();
-  polTickInterval = setInterval(() => {
-    polSecsLeft = Math.max(0, polSecsLeft - 1);
-    if (countdownEl) countdownEl.textContent = polSecsLeft > 0 ? polSecsLeft : '';
-    polTick();
-  }, 1000);
-  polTimerTimeout = setTimeout(() => {
-    const cues = getCuedRows();
-    if (polIndex < cues.length - 1) {
-      polIndex++;
-      updatePOL();
-      startPolTimer();
-    } else {
-      document.getElementById('pol-overlay').classList.add('ended');
-      stopPolTimer();
-    }
-  }, polDuration * 1000);
+  updatePolProgressLabel();
+  polLastTs = null;
+  // Re-sync in case the user manually scrolled or jumped while paused.
+  polScrollPos = document.getElementById('pol-prompter-scroll').scrollTop;
+  if (polRafId) cancelAnimationFrame(polRafId);
+  polRafId = requestAnimationFrame(polScrollStep);
 }
 
-function stopPolTimer() {
+function stopPolScroll() {
   polTimerRunning = false;
-  if (polTickInterval) { clearInterval(polTickInterval); polTickInterval = null; }
-  if (polTimerTimeout) { clearTimeout(polTimerTimeout); polTimerTimeout = null; }
-  const fill = document.getElementById('pol-timer-fill');
-  if (fill) { fill.style.transition = 'none'; fill.style.width = '0%'; }
-  const countdownEl = document.getElementById('pol-countdown');
-  if (countdownEl) countdownEl.textContent = '';
   updatePolStartBtn();
+  updatePolProgressLabel();
+  if (polRafId) { cancelAnimationFrame(polRafId); polRafId = null; }
+  polLastTs = null;
+}
+
+function polScrollStep(ts) {
+  if (!polTimerRunning) return;
+  if (polLastTs == null) polLastTs = ts;
+  const dt = (ts - polLastTs) / 1000;
+  polLastTs = ts;
+
+  const scrollEl = document.getElementById('pol-prompter-scroll');
+  polScrollPos += computePolPxPerSec() * dt;
+  scrollEl.scrollTop = polScrollPos;
+
+  syncActiveLineToScroll();
+  updateScrollProgress();
+
+  if (scrollEl.scrollTop >= scrollEl.scrollHeight - scrollEl.clientHeight - 1) {
+    polReachedEnd = true;
+    stopPolScroll();
+    return;
+  }
+
+  polRafId = requestAnimationFrame(polScrollStep);
+}
+
+// Finds whichever script line currently sits in the fixed "reading zone"
+// (the vertical center of the prompter viewport) and marks it active.
+function syncActiveLineToScroll() {
+  const container = document.getElementById('pol-prompter');
+  const lines = document.querySelectorAll('.pol-script-line');
+  if (!lines.length) return;
+  const zoneY = container.getBoundingClientRect().top + container.clientHeight / 2;
+
+  let closest = lines[0];
+  let closestDist = Infinity;
+  lines.forEach(line => {
+    const r = line.getBoundingClientRect();
+    const dist = Math.abs((r.top + r.height / 2) - zoneY);
+    if (dist < closestDist) { closestDist = dist; closest = line; }
+  });
+
+  lines.forEach(line => line.classList.toggle('active', line === closest));
+
+  const idx = parseInt(closest.dataset.idx, 10);
+  if (!isNaN(idx) && idx !== polIndex) {
+    polIndex = idx;
+    updatePolProgressLabel();
+  }
+}
+
+function updatePolProgressLabel() {
+  const total = getCuedRows().length;
+  document.getElementById('pol-meta').textContent = flowName || 'Flow Practice';
+  document.getElementById('pol-prev').disabled = polTimerRunning || polIndex === 0;
+  document.getElementById('pol-next').disabled = polTimerRunning || polIndex === total - 1;
+}
+
+function updateScrollProgress() {
+  const scrollEl = document.getElementById('pol-prompter-scroll');
+  const max = scrollEl.scrollHeight - scrollEl.clientHeight;
+  const pct = max > 0 ? Math.min(100, Math.max(0, (scrollEl.scrollTop / max) * 100)) : 0;
+  document.getElementById('pol-progress-fill').style.width = pct + '%';
+}
+
+// Smoothly scrolls a given cue's line into the reading zone — used by the
+// Prev/Next quick-jump buttons.
+function jumpToPolLine(idx) {
+  const lines = document.querySelectorAll('.pol-script-line');
+  const target = lines[idx];
+  if (!target) return;
+  const container = document.getElementById('pol-prompter');
+  const scrollEl = document.getElementById('pol-prompter-scroll');
+
+  const targetRect = target.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  const delta = (targetRect.top + targetRect.height / 2) - (containerRect.top + containerRect.height / 2);
+  scrollEl.scrollTo({ top: scrollEl.scrollTop + delta, behavior: 'smooth' });
+
+  lines.forEach((l, i) => l.classList.toggle('active', i === idx));
+  polIndex = idx;
+  updatePolProgressLabel();
 }
 
 function openPOL() {
   const cues = getCuedRows();
   if (!cues.length) { showToast('Write some cues first.'); return; }
   polIndex = 0;
-  polScriptVisible = false;
-  document.getElementById('pol-script-wrap').classList.remove('show');
-  document.getElementById('pol-show-script').textContent = 'Show Full Script';
-  updatePOL();
-  document.getElementById('pol-overlay').classList.add('active');
+  polReachedEnd = false;
+  renderPOLScript(cues);
+  const overlay = document.getElementById('pol-overlay');
+  overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
-  stopPolTimer();
-  updateSliderFill(document.getElementById('pol-dur-slider'), polDuration);
+  stopPolScroll();
+  updateSliderFill(document.getElementById('pol-speed-slider'), polWPM);
+
+  requestAnimationFrame(() => {
+    document.getElementById('pol-prompter-scroll').scrollTop = 0;
+    syncActiveLineToScroll();
+    updateScrollProgress();
+    updatePolProgressLabel();
+  });
 }
 
 function closePOL() {
-  stopPolTimer();
-  const overlay = document.getElementById('pol-overlay');
-  overlay.classList.remove('active', 'ended');
+  stopPolScroll();
+  document.getElementById('pol-overlay').classList.remove('active');
   document.body.style.overflow = '';
-}
-
-function updatePOL() {
-  const cues = getCuedRows();
-  const total = cues.length;
-
-  document.getElementById('pol-meta').textContent = flowName || 'Flow Practice';
-  document.getElementById('pol-progress').textContent =
-    `${polIndex + 1} of ${total}`;
-
-  const row = cues[polIndex];
-  const inexMap = { 'IN': 'Inhale', 'EX': 'Exhale' };
-  const inex = row.inex && inexMap[row.inex] ? `${inexMap[row.inex]}. ` : '';
-  const cue  = buildCue(row);
-  const pose = row.pose ? ` ${row.pose.toUpperCase()}` : '';
-  const polCueEl = document.getElementById('pol-cue');
-  const polCueSpan = document.getElementById('pol-cue-span');
-  const newText = inex + cue + pose;
-  if (polCueSpan.textContent === newText) {
-    polCueEl.className = 'pol-cue-text';
-  } else {
-    polCueEl.style.opacity = '0';
-    setTimeout(() => {
-      polCueSpan.textContent = newText;
-      polCueEl.className = 'pol-cue-text';
-      polCueEl.style.opacity = '';
-    }, 150);
-  }
-
-  // Prev / Next
-  document.getElementById('pol-prev').disabled = polIndex === 0;
-  const nextBtn = document.getElementById('pol-next');
-  const nextIcon = nextBtn.querySelector('.material-symbols-sharp');
-  nextIcon.textContent = polIndex === total - 1 ? 'check' : 'arrow_forward';
-  nextBtn.title = polIndex === total - 1 ? 'Done' : 'Next';
-  nextBtn.dataset.tooltip = nextBtn.title;
-
-  // Update script if visible
-  if (polScriptVisible) renderPOLScript(cues);
 }
 
 function renderPOLScript(cues) {
   const wrap = document.getElementById('pol-script-lines');
+  let wordCount = 0;
   wrap.innerHTML = cues.map((row, i) => {
-    const inex   = row.inex && row.inex !== '—' ? `[${row.inex}] ` : '';
-    const cue    = buildCue(row);
-    const pose   = row.pose ? ` ${row.pose.toUpperCase()}` : '';
-    const active = i === polIndex ? ' active' : '';
-    return `<div class="pol-script-line${active}"><span class="pol-line-num">${i + 1}</span><span>${esc(inex + cue + pose)}</span></div>`;
+    const inex = row.inex && row.inex !== '—' ? `[${row.inex}] ` : '';
+    const cue  = buildCue(row);
+    const pose = row.pose ? ` ${row.pose.toUpperCase()}` : '';
+    const text = inex + cue + pose;
+    wordCount += text.split(/\s+/).filter(Boolean).length;
+    return `<div class="pol-script-line" data-idx="${i}"><span>${esc(text)}</span></div>`;
   }).join('');
+  polTotalWords = wordCount || 1;
 }
 
 // ─── WORD BANK ───────────────────────────────────────────────────────────────
@@ -1576,13 +1530,13 @@ function init() {
 
   // Row actions
   document.getElementById('btn-add-row').addEventListener('click', () => { addRow(); markDirty(); });
-  document.getElementById('btn-remove-row').addEventListener('click', () => { removeLastRow(); markDirty(); });
   document.getElementById('btn-clear').addEventListener('click', () => { clearWorksheet(); markDirty(); });
 
   // Check my cues
   document.getElementById('btn-pdf').addEventListener('click', copyScript);
 
   // Export / save
+  document.getElementById('ws-new-flow-btn').addEventListener('click', startNewFlow);
   document.getElementById('ws-load-btn').addEventListener('click', openLoadModal);
   document.getElementById('ws-edit-btn').addEventListener('click', startRename);
   document.getElementById('ws-load-modal-cancel').addEventListener('click', closeLoadModal);
@@ -1611,62 +1565,51 @@ function init() {
   document.getElementById('pol-close').addEventListener('click', closePOL);
 
   document.getElementById('pol-prev').addEventListener('click', () => {
-    if (polIndex > 0) { polIndex--; updatePOL(); if (polTimerRunning) startPolTimer(); }
+    if (polIndex > 0) jumpToPolLine(polIndex - 1);
   });
   document.getElementById('pol-next').addEventListener('click', () => {
     const cues = getCuedRows();
-    if (polIndex < cues.length - 1) {
-      polIndex++;
-      updatePOL();
-      if (polTimerRunning) startPolTimer();
-    } else {
-      stopPolTimer();
-      document.getElementById('pol-overlay').classList.add('ended');
-    }
+    if (polIndex < cues.length - 1) jumpToPolLine(polIndex + 1);
   });
   document.getElementById('pol-restart').addEventListener('click', () => {
+    stopPolScroll();
+    polReachedEnd = false;
+    updatePolStartBtn();
+    document.getElementById('pol-prompter-scroll').scrollTo({ top: 0, behavior: 'smooth' });
     polIndex = 0;
-    updatePOL();
-    if (polTimerRunning) startPolTimer();
+    setTimeout(() => { syncActiveLineToScroll(); updateScrollProgress(); updatePolProgressLabel(); }, 320);
   });
-  document.getElementById('pol-end-restart').addEventListener('click', () => {
-    document.getElementById('pol-overlay').classList.remove('ended');
-    polIndex = 0;
-    updatePOL();
-    if (polTimerRunning) startPolTimer();
+  // Speed slider (words per minute)
+  const speedSlider = document.getElementById('pol-speed-slider');
+  speedSlider.addEventListener('input', () => {
+    polWPM = parseInt(speedSlider.value);
+    document.getElementById('pol-speed-val').textContent = polWPM + ' WPM';
+    updateSliderFill(speedSlider, polWPM);
   });
+  updateSliderFill(speedSlider, polWPM);
 
-  // Duration slider
-  const durSlider = document.getElementById('pol-dur-slider');
-  durSlider.addEventListener('input', () => {
-    polDuration = parseInt(durSlider.value);
-    document.getElementById('pol-dur-val').textContent = polDuration + 's';
-    updateSliderFill(durSlider, polDuration);
-    if (polTimerRunning) startPolTimer();
-  });
-  updateSliderFill(durSlider, polDuration);
-
-  // Start / Stop toggle — warm AudioContext on the gesture that starts playback
+  // Start / Pause / Restart toggle
   document.getElementById('pol-timing-start').addEventListener('click', () => {
-    if (polTimerRunning) { stopPolTimer(); } else { polGetCtx(); startPolTimer(); }
+    if (polTimerRunning) {
+      stopPolScroll();
+    } else if (polReachedEnd) {
+      polReachedEnd = false;
+      document.getElementById('pol-prompter-scroll').scrollTop = 0;
+      polIndex = 0;
+      syncActiveLineToScroll();
+      updateScrollProgress();
+      updatePolProgressLabel();
+      startPolScroll();
+    } else {
+      startPolScroll();
+    }
   });
 
-  // Audio mute toggle — also warms up AudioContext on first click (browser requires gesture)
-  document.getElementById('pol-audio-btn').addEventListener('click', () => {
-    polMuted = !polMuted;
-    document.getElementById('pol-audio-btn').classList.toggle('muted', polMuted);
-    document.getElementById('pol-audio-icon').textContent = polMuted ? 'volume_off' : 'volume_up';
-    if (!polMuted) polGetCtx();
-  });
-  document.getElementById('pol-end-close').addEventListener('click', closePOL);
-  document.getElementById('pol-show-script').addEventListener('click', () => {
-    polScriptVisible = !polScriptVisible;
-    const wrap = document.getElementById('pol-script-wrap');
-    wrap.classList.toggle('show', polScriptVisible);
-    document.getElementById('pol-show-script').textContent =
-      polScriptVisible ? 'Hide Script' : 'Show Full Script';
-    if (polScriptVisible) renderPOLScript(getCuedRows());
-  });
+  // Block manual scroll input (wheel/trackpad/touch) — the prompter only
+  // advances via auto-scroll or the Prev/Next arrows, never by dragging.
+  const prompterScroll = document.getElementById('pol-prompter-scroll');
+  prompterScroll.addEventListener('wheel', e => e.preventDefault(), { passive: false });
+  prompterScroll.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
   // Keyboard nav in POL overlay
   document.addEventListener('keydown', e => {
@@ -1677,6 +1620,9 @@ function init() {
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
       e.preventDefault();
       document.getElementById('pol-prev').click();
+    } else if (e.key === ' ') {
+      e.preventDefault();
+      document.getElementById('pol-timing-start').click();
     } else if (e.key === 'Escape') {
       closePOL();
     }
@@ -1708,13 +1654,14 @@ document.addEventListener('DOMContentLoaded', () => {
       rows = JSON.parse(JSON.stringify(flow.rows));
       renderRows();
       setSaved(true);
+      setFlowTitle(flowName);
     }
   }
 });
 
 </script>
 
-<script src="lib/nav.js"></script>
 <script src="lib/tracker.js"></script>
+<script src="lib/confirm-delete.js"></script>
 </body>
 </html>
