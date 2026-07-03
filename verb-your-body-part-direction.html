@@ -152,8 +152,8 @@
     .cue-hdr,
     .cue-row {
       display: grid;
-      grid-template-columns: 80px 1fr 1.3fr 1.5fr 1.4fr 36px;
-      min-width: 600px;
+      grid-template-columns: 80px 1fr 1.3fr 1.5fr 1.4fr 30px 30px;
+      min-width: 620px;
     }
 
     /* ── Column header row ── */
@@ -172,6 +172,7 @@
       white-space: nowrap;
     }
     .col-lbl:last-child { border-right: none; }
+    .col-lbl:empty { border-right: none; }
     .col-lbl.accent { color: var(--text-1); }
 
     /* ── Cue rows ── */
@@ -233,6 +234,62 @@
       appearance: none;
       -webkit-appearance: none;
       text-align: center;
+    }
+
+    /* Reorder buttons — visible on row hover / focus */
+    .row-mv-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .row-mv {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      padding: 0;
+      width: 22px;
+      height: 13px;
+      color: rgba(var(--ink-rgb), .25);
+      cursor: pointer;
+      opacity: 0;
+      transition: color .12s, opacity .12s;
+    }
+    .row-mv .material-symbols-sharp { font-size: 15px; }
+    .cue-row:hover .row-mv,
+    .cue-row:focus-within .row-mv { opacity: 1; }
+    .row-mv:hover { color: var(--text-1); }
+
+    /* ── Pose shorthand suggest — same contract as the class editor ── */
+    .sh-suggest {
+      position: fixed;
+      z-index: 300;
+      min-width: 230px;
+      max-width: 320px;
+      background: var(--paper-solid);
+      border: 1px solid rgba(var(--ink-rgb), .16);
+      border-top-color: rgba(var(--ink-rgb), .30);
+      box-shadow: 0 4px 24px rgba(var(--ink-rgb), .10);
+      animation: fadeUp .14s ease both;
+    }
+    .sh-row { display: flex; align-items: baseline; gap: 12px; padding: 8px 12px; cursor: pointer; }
+    .sh-row.sel,
+    .sh-row:hover { background: rgba(var(--ink-rgb), .05); }
+    .sh-code { flex-shrink: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; color: var(--text-1); }
+    .sh-full { font-size: 11px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sh-word { font-size: 12.5px; color: var(--text-1); }
+    .sh-hint {
+      display: flex;
+      gap: 14px;
+      padding: 6px 12px;
+      border-top: 1px solid var(--border-light);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: .08em;
+      color: var(--text-3);
+      user-select: none;
     }
 
     /* Remove button */
@@ -461,33 +518,35 @@
     }
     .pol-start-btn:hover { opacity: .82; }
 
-    /* ── Word bank drawer (fixed bottom) ── */
-    .wb-drawer {
-      position: fixed;
-      bottom: 0;
-      left: 224px;
-      right: 0;
-      z-index: 200;
-      background: var(--bg);
-      border-top: 1px solid rgba(var(--ink-rgb), .14);
-      box-shadow: 0 -6px 32px rgba(var(--ink-rgb), .07);
-      transform: translateY(calc(100% - 48px));
-      transition: transform .28s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    [data-theme="dark"] .wb-drawer {
-      box-shadow: 0 -6px 32px rgba(0, 0, 0, .40);
-    }
-    .wb-drawer.open { transform: translateY(0); }
+    /* ── Word bank rail — in the page, beside the worksheet ── */
+    #main-wrap { max-width: 1140px; }
+    .hero .inner { max-width: 1140px; }
 
-    .wb-handle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 22px;
-      height: 48px;
-      cursor: pointer;
-      user-select: none;
+    .ws-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 48px;
+      align-items: start;
     }
+
+    .ws-main { min-width: 0; }
+
+    .wb-rail {
+      position: sticky;
+      top: 24px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top-color: rgba(var(--ink-rgb), .22);
+      background: rgba(var(--ink-rgb), .02);
+      padding: 18px 20px 22px;
+    }
+
+    @media (max-width: 980px) {
+      .ws-layout { display: flex; flex-direction: column; align-items: stretch; gap: 40px; }
+      .wb-rail { position: static; max-height: none; }
+    }
+
     .wb-title {
       display: flex;
       align-items: center;
@@ -497,34 +556,18 @@
       text-transform: uppercase;
       letter-spacing: .12em;
       color: var(--text-3);
+      margin-bottom: 16px;
     }
     .wb-title .material-symbols-sharp { font-size: 14px; }
-    .wb-chevron {
-      font-size: 18px;
-      color: var(--text-3);
-      transition: transform .25s;
-    }
-    .wb-drawer.open .wb-chevron { transform: rotate(180deg); }
-
-    .wb-body {
-      padding: 0 22px 20px;
-      max-height: 260px;
-      overflow-y: auto;
-      background: var(--bg);
-    }
 
     .wb-tabs {
       display: flex;
       gap: 0;
       margin-bottom: 14px;
       border-bottom: 1px solid rgba(var(--ink-rgb), .08);
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      background: var(--bg);
     }
     .wb-tab {
-      padding: 8px 16px;
+      padding: 8px 12px;
       background: none;
       border: none;
       border-bottom: 2px solid transparent;
@@ -571,16 +614,6 @@
     }
     .wb-word:active { background: rgba(var(--ink-rgb), .10); }
 
-    /* Extra bottom padding so drawer collapsed bar doesn't cover content */
-    .wrap { padding-bottom: 72px; }
-
-    /* ── Responsive ── */
-    @media (max-width: 768px) {
-      .wb-drawer { display: none; }
-      .wb-toolbar-btn { display: none; }
-      .wrap { padding-bottom: 0; }
-    }
-
     @media (max-width: 580px) {
       .pol-script-line { font-size: var(--fs-h4); }
     }
@@ -591,6 +624,7 @@
 <body class="has-sidebar">
 
   <script src="lib/nav.js"></script>
+<script src="data/shorthand.js"></script>
 <div class="toast" id="toast"></div>
 
 <main>
@@ -606,6 +640,8 @@
 </section>
 
 <div class="wrap" id="main-wrap">
+<div class="ws-layout">
+<div class="ws-main">
 
   <!-- ── WORKSHEET TOOLBAR ────────────────────────────────────── -->
 
@@ -656,7 +692,6 @@
         Add Row
       </button>
       <div class="row-actions-spacer"></div>
-      <button class="btn-ghost sm wb-toolbar-btn" id="btn-word-bank">Word Bank</button>
       <button class="btn-ghost sm" id="btn-clear">Clear Worksheet</button>
     </div>
   </div>
@@ -671,6 +706,23 @@
   </div>
 
 
+</div><!-- /ws-main -->
+
+<aside class="wb-rail" id="wb-rail">
+  <div class="wb-title">
+    <span class="material-symbols-sharp">library_books</span>
+    Word Bank
+  </div>
+  <div class="wb-tabs">
+    <button class="wb-tab active" data-wb="verbs">Verbs</button>
+    <button class="wb-tab" data-wb="body">Body Parts</button>
+    <button class="wb-tab" data-wb="dirs">Directions</button>
+  </div>
+  <p class="wb-hint">Click a word to insert it into the active field.</p>
+  <div class="wb-words" id="wb-words"></div>
+</aside>
+
+</div><!-- /ws-layout -->
 </div><!-- /wrap -->
 
 </main>
@@ -703,26 +755,6 @@
 </div>
 
 <!-- ── WORD BANK DRAWER ───────────────────────────────────────── -->
-
-<div class="wb-drawer" id="wb-drawer">
-  <div class="wb-handle" id="wb-handle">
-    <div class="wb-title">
-      <span class="material-symbols-sharp">library_books</span>
-      Word Bank
-    </div>
-    <span class="material-symbols-sharp wb-chevron">expand_less</span>
-  </div>
-  <div class="wb-body">
-    <div class="wb-tabs">
-      <button class="wb-tab active" data-wb="verbs">Verbs</button>
-      <button class="wb-tab" data-wb="body">Body Parts</button>
-      <button class="wb-tab" data-wb="dirs">Directions</button>
-    </div>
-    <p class="wb-hint">Click a word to insert it into the active field.</p>
-    <div class="wb-words" id="wb-words"></div>
-  </div>
-</div>
-
 
 <!-- ── PRACTICE OUT LOUD OVERLAY ─────────────────────────────── -->
 
@@ -860,7 +892,6 @@ let rows = [];
 let activeInput = null; // last focused .cue-input
 let polIndex = 0;
 let wbTab = 'verbs';
-let wbOpen = localStorage.getItem('fs-wb-open') === 'true';
 
 // ─── UTILITIES ───────────────────────────────────────────────────────────────
 
@@ -904,6 +935,28 @@ function initRows(n) {
   rows = Array.from({ length: n }, makeRow);
 }
 
+function moveRow(i, delta, focusField) {
+  const j = i + delta;
+  if (j < 0 || j >= rows.length) return;
+  const tmp = rows[i]; rows[i] = rows[j]; rows[j] = tmp;
+  renderRows();
+  markDirty();
+  if (focusField) {
+    const rowEl = document.querySelectorAll('.cue-row')[j];
+    const el = rowEl && rowEl.querySelector(`[data-field="${focusField}"]`);
+    if (el) el.focus();
+  }
+}
+
+// alt+arrows resequence the row you're writing in
+document.getElementById('cue-rows').addEventListener('keydown', e => {
+  if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+  const rowEl = e.target.closest('.cue-row');
+  if (!rowEl) return;
+  e.preventDefault();
+  moveRow(parseInt(rowEl.dataset.idx, 10), e.key === 'ArrowUp' ? -1 : 1, e.target.dataset.field);
+});
+
 function addRow() {
   rows.push(makeRow());
   renderRows();
@@ -935,7 +988,7 @@ function clearWorksheet() {
 
 function renderHeader() {
   const hdr = document.getElementById('cue-hdr');
-  const cols = ['In / Ex', 'Verb', 'Your Body Part', 'Direction', 'Pose Name', ''];
+  const cols = ['In / Ex', 'Verb', 'Your Body Part', 'Direction', 'Pose Name', '', ''];
   hdr.innerHTML = cols.map(c =>
     `<div class="col-lbl">${esc(c)}</div>`
   ).join('');
@@ -953,7 +1006,7 @@ function renderRows() {
         activeInput = el;
         const fieldToTab = { verb: 'verbs', body: 'body', dir: 'dirs' };
         const tab = fieldToTab[el.dataset.field];
-        if (tab && wbOpen) switchWBTab(tab);
+        if (tab) switchWBTab(tab);
       }
     });
     el.addEventListener('input', () => {
@@ -973,6 +1026,12 @@ function renderRows() {
   });
 
   // Wire remove buttons — arm-to-confirm, shared with other saved-item
+  container.querySelectorAll('.row-mv').forEach(btn => {
+    btn.addEventListener('click', () => {
+      moveRow(parseInt(btn.closest('.cue-row').dataset.idx, 10), parseInt(btn.dataset.mv, 10));
+    });
+  });
+
   // delete buttons across the site (see lib/confirm-delete.js).
   container.querySelectorAll('.row-rm').forEach(btn => {
     wireConfirmDelete(
@@ -1000,9 +1059,13 @@ function buildRowHTML(row, i) {
   const bodyCell = `<div class="row-cell"><input class="cue-input" data-field="body" value="${esc(row.body)}"${bodyPh} autocomplete="off" spellcheck="false"></div>`;
   const dirCell  = `<div class="row-cell"><input class="cue-input" data-field="dir" value="${esc(row.dir)}"${dirPh} autocomplete="off" spellcheck="false"></div>`;
   const poseCell = `<div class="row-cell"><input class="cue-input pose-input" data-field="pose" value="${esc(row.pose)}" autocomplete="off" spellcheck="false"></div>`;
+  const mvCell   = `<div class="row-mv-cell">` +
+    (i > 0 ? `<button class="row-mv" data-mv="-1" title="Move up (alt+&#8593;)"><span class="material-symbols-sharp">keyboard_arrow_up</span></button>` : '') +
+    (i < rows.length - 1 ? `<button class="row-mv" data-mv="1" title="Move down (alt+&#8595;)"><span class="material-symbols-sharp">keyboard_arrow_down</span></button>` : '') +
+    `</div>`;
   const rmCell   = `<div class="row-rm-cell"><button class="row-rm" data-idx="${i}" title="Remove row">×</button></div>`;
 
-  return `<div class="cue-row" data-idx="${i}">${inexCell}${verbCell}${bodyCell}${dirCell}${poseCell}${rmCell}</div>`;
+  return `<div class="cue-row" data-idx="${i}">${inexCell}${verbCell}${bodyCell}${dirCell}${poseCell}${mvCell}${rmCell}</div>`;
 }
 
 
@@ -1299,7 +1362,7 @@ function getCuedRows() {
   return rows.filter(r => buildCue(r));
 }
 
-let polWPM = 125; // default reading pace, adjustable 70-150 via the speed slider
+let polWPM = Math.min(150, Math.max(70, parseInt(localStorage.getItem('fs-pol-wpm'), 10) || 125)); // remembered pace, 70-150
 let polTotalWords = 1; // cached word count of the current script, set by renderPOLScript
 
 let polTimerRunning = false;
@@ -1483,6 +1546,137 @@ function renderPOLScript(cues) {
   polTotalWords = wordCount || 1;
 }
 
+// ─── CUE SUGGEST ─────────────────────────────────────────────────────────────
+// Inline suggestions for every worksheet column: verbs, body parts, and
+// directions complete from the word bank; the pose column speaks
+// shorthand. Same contract as the class editor — Tab inserts, arrows
+// arm, Enter only when armed, Esc dismisses until the text changes.
+
+const CUE_SH = (function () {
+  const panel = document.createElement('div');
+  panel.className = 'sh-suggest';
+  panel.hidden = true;
+  document.body.appendChild(panel);
+
+  const FIELD_WB = { verb: 'verbs', body: 'body', dir: 'dirs' };
+  const state = { el: null, items: [], sel: -1, mode: 'word', dismissed: null };
+
+  function rankPose(q) {
+    q = q.toLowerCase();
+    const scored = [];
+    (typeof SHORTHAND === 'undefined' ? [] : SHORTHAND).forEach(e => {
+      const code = e.short.toLowerCase(), full = e.full.toLowerCase();
+      let sc = -1;
+      if (code.indexOf(q) === 0) sc = 0;
+      else if (full.split(/\s+/).some(w => w.indexOf(q) === 0)) sc = 1;
+      else if (code.indexOf(q) !== -1) sc = 2;
+      else if (full.indexOf(q) !== -1) sc = 3;
+      if (sc >= 0) scored.push({ e, sc });
+    });
+    scored.sort((a, b) => a.sc - b.sc || a.e.short.length - b.e.short.length);
+    return scored.slice(0, 6).map(x => ({ label: x.e.short, sub: x.e.full, value: x.e.short }));
+  }
+
+  // bank entries can be whole phrases ("your left ankle") — match the
+  // field as typed, or its last word, and complete the full entry
+  function rankWords(list, q) {
+    const lq = q.toLowerCase();
+    const last = lq.split(/\s+/).pop();
+    const scored = [];
+    list.forEach(w => {
+      const lw = w.toLowerCase();
+      let sc = -1;
+      if (lw.indexOf(lq) === 0) sc = 0;
+      else if (last.length >= 2 && lw.split(/\s+/).some(x => x.indexOf(last) === 0)) sc = 1;
+      else if (lw.indexOf(lq) !== -1) sc = 2;
+      if (sc >= 0) scored.push({ w, sc });
+    });
+    scored.sort((a, b) => a.sc - b.sc || a.w.length - b.w.length);
+    return scored.slice(0, 6).map(x => ({ label: x.w, sub: '', value: x.w }));
+  }
+
+  function hide() { panel.hidden = true; state.el = null; state.sel = -1; }
+
+  function hideIfStale() { if (document.activeElement !== state.el) hide(); }
+
+  function render() {
+    panel.innerHTML = state.items.map((it, i) =>
+      `<div class="sh-row${i === state.sel ? ' sel' : ''}" data-i="${i}">` +
+        (it.sub
+          ? `<span class="sh-code">${esc(it.label)}</span><span class="sh-full">${esc(it.sub)}</span>`
+          : `<span class="sh-word">${esc(it.label)}</span>`) +
+      `</div>`
+    ).join('') + '<div class="sh-hint"><span>tab &#183; insert</span><span>esc &#183; dismiss</span></div>';
+  }
+
+  function show(el) {
+    const field = el.dataset.field;
+    if (el.value === state.dismissed && state.el !== el) state.dismissed = null;
+    let items, q;
+    if (field === 'pose') {
+      q = el.value.trim();
+      if (q.length < 2 || el.value === state.dismissed) return hide();
+      items = rankPose(q);
+      state.mode = 'pose';
+    } else {
+      q = el.value.slice(0, el.selectionStart).replace(/^\s+/, '');
+      if (q.length < 2 || el.value === state.dismissed) return hide();
+      items = rankWords(WB[FIELD_WB[field]] || [], q);
+      state.mode = 'word';
+    }
+    if (!items.length) return hide();
+    // the word is already complete — nothing useful to say
+    if (items.length === 1 && items[0].value.toLowerCase() === q.toLowerCase()) return hide();
+
+    state.el = el; state.items = items; state.sel = -1;
+    render();
+    const r = el.getBoundingClientRect();
+    panel.hidden = false;
+    panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - panel.offsetWidth - 8)) + 'px';
+    panel.style.top = (r.bottom + 4) + 'px';
+  }
+
+  function insert(i) {
+    const el = state.el, it = state.items[i];
+    if (!el || !it) return;
+    // both modes complete the whole field — the entry IS the answer
+    el.value = it.value;
+    state.dismissed = el.value; // completed — don't instantly reopen
+    hide();
+    el.focus();
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function onKey(ev) {
+    if (panel.hidden || state.el !== ev.target) return;
+    if (ev.key === 'Tab') { ev.preventDefault(); insert(state.sel === -1 ? 0 : state.sel); }
+    else if (ev.key === 'ArrowDown') { ev.preventDefault(); state.sel = (state.sel + 1) % state.items.length; render(); }
+    else if (ev.key === 'ArrowUp') { ev.preventDefault(); state.sel = state.sel <= 0 ? state.items.length - 1 : state.sel - 1; render(); }
+    else if (ev.key === 'Enter' && state.sel !== -1) { ev.preventDefault(); insert(state.sel); }
+    else if (ev.key === 'Escape') { state.dismissed = ev.target.value; hide(); }
+  }
+
+  panel.addEventListener('mousedown', ev => {
+    const row = ev.target.closest('.sh-row');
+    if (!row) return;
+    ev.preventDefault();
+    insert(parseInt(row.dataset.i, 10));
+  });
+
+  return { show, hide, hideIfStale, onKey };
+})();
+
+(function () {
+  const rowsEl = document.getElementById('cue-rows');
+  const FIELDS = { verb: 1, body: 1, dir: 1, pose: 1 };
+  const suggests = el => el.classList && el.classList.contains('cue-input') && FIELDS[el.dataset.field];
+  rowsEl.addEventListener('input', e => { if (suggests(e.target)) CUE_SH.show(e.target); });
+  rowsEl.addEventListener('keydown', e => { if (suggests(e.target)) CUE_SH.onKey(e); });
+  rowsEl.addEventListener('focusout', () => setTimeout(CUE_SH.hideIfStale, 120));
+  // fixed-position panel can't follow a scroll — just close
+  window.addEventListener('scroll', CUE_SH.hide, true);
+})();
+
 // ─── WORD BANK ───────────────────────────────────────────────────────────────
 
 function switchWBTab(tab) {
@@ -1513,6 +1707,7 @@ function insertWord(word) {
   const sep   = (start > 0 && val[start - 1] !== ' ') ? ' ' : '';
   el.value = val.slice(0, start) + sep + word + val.slice(end);
   const pos = start + sep.length + word.length;
+  el.focus();
   el.setSelectionRange(pos, pos);
   el.dispatchEvent(new Event('input', { bubbles: true }));
   el.focus();
@@ -1579,10 +1774,13 @@ function init() {
   });
   // Speed slider (words per minute)
   const speedSlider = document.getElementById('pol-speed-slider');
+  speedSlider.value = polWPM;
+  document.getElementById('pol-speed-val').textContent = polWPM + ' WPM';
   speedSlider.addEventListener('input', () => {
     polWPM = parseInt(speedSlider.value);
     document.getElementById('pol-speed-val').textContent = polWPM + ' WPM';
     updateSliderFill(speedSlider, polWPM);
+    localStorage.setItem('fs-pol-wpm', polWPM);
   });
   updateSliderFill(speedSlider, polWPM);
 
@@ -1627,18 +1825,10 @@ function init() {
   });
 
   // Word bank
-  function toggleWB() {
-    wbOpen = !wbOpen;
-    localStorage.setItem('fs-wb-open', wbOpen);
-    document.getElementById('wb-drawer').classList.toggle('open', wbOpen);
-  }
-  document.getElementById('wb-handle').addEventListener('click', toggleWB);
-  document.getElementById('btn-word-bank').addEventListener('click', toggleWB);
   document.querySelectorAll('.wb-tab').forEach(tab => {
     tab.addEventListener('click', () => switchWBTab(tab.dataset.wb));
   });
   renderWBWords();
-  document.getElementById('wb-drawer').classList.toggle('open', wbOpen);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -309,7 +309,14 @@ body {
   color: var(--text-1);
   min-height: 100vh;
   overflow-x: hidden;
+  /* main absorbs leftover height so the footer sits at the viewport
+     bottom on short pages (fixed children — sidebar, toasts, modals —
+     are out of flow and unaffected) */
+  display: flex;
+  flex-direction: column;
 }
+
+main { flex: 1 0 auto; }
 
 /* Global grain texture */
 body::after {
