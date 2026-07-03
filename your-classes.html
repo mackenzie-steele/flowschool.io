@@ -186,8 +186,9 @@
     .cw-spec .cw-length-btns { flex-wrap: wrap; }
 
     @media (max-width: 980px) {
-      /* single column: setup panel follows the writing */
-      .cw-layout { display: flex; flex-direction: column; gap: 36px; }
+      /* single column: setup panel follows the writing, everything full width
+         (align-items: start from the desktop grid would shrink-wrap children) */
+      .cw-layout { display: flex; flex-direction: column; gap: 36px; align-items: stretch; }
       .cw-spec { position: static; }
     }
 
@@ -812,11 +813,12 @@
   <!-- ── EDIT VIEW ── -->
   <div id="edit-view" hidden>
     <div class="post-bar">
-      <button class="btn-ghost" id="cancel-btn">
+      <button class="btn-ghost" id="editor-back-btn">
         <span class="material-symbols-sharp" style="font-size:16px;margin-right:6px">arrow_back</span>
-        Back
+        Your Classes
       </button>
       <div class="post-edit-actions">
+        <button class="btn-ghost" id="cancel-btn">Cancel</button>
         <button class="btn-primary" id="save-btn">Save to Your Library</button>
       </div>
     </div>
@@ -1649,15 +1651,20 @@
       toast('Copy ready \u2014 make it yours.');
     }
 
-    document.getElementById('cancel-btn').addEventListener('click', function () {
+    // both exits guard unsaved changes; back honors its label (the list),
+    // cancel returns to where the edit began
+    function leaveEditor(dest) {
       function leave() {
         dirty = false;
-        if (editingId != null) { showTeach(editingId, true); }
-        else { showList(true); }
+        if (dest === 'list' || editingId == null) { showList(true); }
+        else { showTeach(editingId, true); }
       }
       if (dirty) { confirmDiscard(function (yes) { if (yes) leave(); }); }
       else { leave(); }
-    });
+    }
+
+    document.getElementById('cancel-btn').addEventListener('click', function () { leaveEditor('auto'); });
+    document.getElementById('editor-back-btn').addEventListener('click', function () { leaveEditor('list'); });
 
     document.getElementById('save-btn').addEventListener('click', function () {
       var sections = collectSections();

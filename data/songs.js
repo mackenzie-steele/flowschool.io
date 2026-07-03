@@ -7,11 +7,11 @@
 //   bpm     — beats per minute (integer)
 //   dur     — duration in seconds (integer)  e.g. 3:45 = 225
 //   energy  — energy level 0–100
-//             10–25   Arrival / Closing / Savasana
+//             10–25   Begin In / Savasana
 //             26–50   Warm Up
 //             51–72   Build
 //             73–96   Peak
-//             38–60   Downshift
+//             38–60   Cool Down
 //
 // To add a song: copy any row, increment the id, fill in the fields.
 // ─────────────────────────────────────────────────────────────────────────────

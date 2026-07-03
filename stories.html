@@ -232,7 +232,7 @@
         <div class="post-body" id="post-body"></div>
 
         <div id="post-edit" hidden>
-          <textarea class="post-edit-area" id="post-edit-area" placeholder="A few lines is enough. What happened? What did you learn? Where does it land on the mat?"></textarea>
+          <textarea class="post-edit-area" id="post-edit-area" placeholder="Write it like you&#8217;d tell it in class&#8230;"></textarea>
         </div>
 
         <p class="post-meta" id="post-meta"></p>
@@ -373,6 +373,8 @@
         var s = stories.find(function (x) { return x.id === currentId; });
         var area = document.getElementById('post-edit-area');
         area.value = s ? s.text : '';
+        editBaseline = area.value;
+        updateSaveEnabled();
         autoGrow();
         area.focus();
       }
@@ -399,6 +401,8 @@
       setEditing(true);
       var area = document.getElementById('post-edit-area');
       area.value = '';
+      editBaseline = '';
+      updateSaveEnabled();
       autoGrow();
       area.focus();
       if (push) history.pushState({}, '', st ? 'stories.html?new=' + starterId : 'stories.html?new=blank');
@@ -447,7 +451,18 @@
       editArea.style.height = 'auto';
       editArea.style.height = editArea.scrollHeight + 'px';
     }
-    editArea.addEventListener('input', autoGrow);
+
+    // save enables only when the text differs from what's stored
+    var editBaseline = '';
+    function updateSaveEnabled() {
+      document.getElementById('save-edit-btn').disabled =
+        editArea.value.trim() === editBaseline.trim();
+    }
+
+    editArea.addEventListener('input', function () {
+      autoGrow();
+      updateSaveEnabled();
+    });
 
     document.getElementById('stories-search').addEventListener('input', function (e) {
       renderList(e.target.value);

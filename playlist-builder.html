@@ -304,7 +304,7 @@
     /* ── Song rows ────────────────────────────────────────────── */
     .song {
       display: grid;
-      grid-template-columns: 28px 1fr auto auto auto;
+      grid-template-columns: 28px 1fr auto auto auto auto;
       align-items: center;
       gap: 20px;
       padding: 10px 20px;
@@ -375,6 +375,34 @@
     .ebar-seg.on { background: var(--volt); }
     [data-theme="dark"] .ebar-seg.on { background: var(--volt); }
     .song-copy { display: flex; align-items: center; justify-content: flex-end; margin-left: 20px; }
+    .song-swap { display: flex; align-items: center; justify-content: flex-end; }
+
+    /* bare glyph, no chrome — quieter than the copy button */
+    .song-swap-btn {
+      display: inline-flex;
+      align-items: center;
+      background: none;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+      color: var(--text-3);
+      transition: color var(--transition-fast);
+    }
+
+    .song-swap-btn:hover { color: var(--text-1); }
+    .song-swap-btn .material-symbols-sharp { font-size: 17px; }
+
+    /* results no longer match the controls */
+    .res-stale {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-3);
+      white-space: nowrap;
+      align-self: center;
+      margin-right: 6px;
+    }
 
     /* ── Save modal (shake animation is page-specific) ───────── */
     @keyframes pl-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
@@ -392,7 +420,7 @@
     }
     @media (max-width: 580px) {
       .res-hdr  { flex-direction: column; align-items: flex-start; }
-      .song     { grid-template-columns: 24px 1fr auto auto; padding: 10px 16px; }
+      .song     { grid-template-columns: 24px 1fr auto auto auto; padding: 10px 16px; }
       .ebar     { display: none; }
       .cta-bar  { padding: 12px 16px 16px; }
     }
@@ -520,16 +548,14 @@
     // ─── DATA ────────────────────────────────────────────────────────────────────
 
     const SECTIONS = [
-      { id: 'arrival',   label: 'Arrival',   color: '#C0BCAF' },
-      { id: 'warmup',    label: 'Warm Up',   color: '#9A9688' },
+      { id: 'warmup',    label: 'Warm Up',   color: '#C0BCAF' },
       { id: 'build',     label: 'Build',     color: '#6E6A60' },
       { id: 'peak',      label: 'Peak',      color: 'var(--ink-solid)' },
-      { id: 'downshift', label: 'Downshift', color: '#9A9688' },
-      { id: 'closing',   label: 'Closing',   color: '#C0BCAF' }
+      { id: 'downshift', label: 'Cool Down', color: '#9A9688' }
     ];
 
     function getSecDur(min) {
-      const base = [300, 600, 900, 600, 720, 480]; // proportions from 60-min baseline
+      const base = [900, 900, 1080, 720]; // proportions from 60-min baseline (peak absorbs savasana's share)
       const t = min * 60;
       const parts = base.map(b => Math.round(t * b / 3600));
       parts[parts.length - 1] += t - parts.reduce((a, b) => a + b, 0); // ensure exact sum
@@ -539,7 +565,7 @@
     // Arc shapes defined as (normalizedTime, energy) keypoints — sampled to any N
     const ARC_SHAPES = {
       // Keypoints are in normalized class time (0–1). Section boundaries for reference:
-      // Arrival ends ~0.08 · Warm Up ends ~0.25 · Build ends ~0.50 · Peak ends ~0.67 · Downshift ends ~0.87
+      // Warm Up ends 0.25 · Build ends 0.50 · Peak ends 0.80 · Cool Down ends 1.0
       'slow-build':    { name: 'Slow Build',      desc: 'Ease in. Let the energy find you.',             keys: [[0, 8],  [.45, 12], [.65, 85], [.82, 38], [1, 12]] },
       'bell-curve':    { name: 'Bell Curve',       desc: 'Rise to the middle. Land softly.',              keys: [[0, 12], [.25, 52], [.55, 92], [.80, 48], [1, 12]] },
       'strong-start':  { name: 'Strong Start',     desc: 'Lead with fire. Land with intention.',          keys: [[0, 88], [.08, 92], [.25, 75], [.50, 52], [.67, 32], [.87, 18], [1, 12]] },
@@ -565,9 +591,25 @@
 
     // Interpolate current S.pts at any normalized time position 0–1
     function getCurveEnergy(normT) {
-      const n = S.pts.length, pos = normT * (n - 1);
-      const lo = Math.floor(pos), hi = Math.min(lo + 1, n - 1);
-      return S.pts[lo] + (S.pts[hi] - S.pts[lo]) * (pos - lo);
+      // monotone cubic (Fritsch–Carlson) — the same family the curve is
+      // DRAWN with, so song targets sample the shape the teacher sees
+      const pts = S.pts, n = pts.length;
+      if (n < 2) return pts[0] || 0;
+      const pos = Math.max(0, Math.min(1, normT)) * (n - 1);
+      const i = Math.min(Math.floor(pos), n - 2), t = pos - i;
+      const d = [];
+      for (let k = 0; k < n - 1; k++) d.push(pts[k + 1] - pts[k]);
+      const m = [d[0]];
+      for (let k = 1; k < n - 1; k++) m.push(d[k - 1] * d[k] <= 0 ? 0 : (d[k - 1] + d[k]) / 2);
+      m.push(d[n - 2]);
+      for (let k = 0; k < n - 1; k++) {
+        if (d[k] === 0) { m[k] = 0; m[k + 1] = 0; continue; }
+        const a = m[k] / d[k], b = m[k + 1] / d[k], sq = a * a + b * b;
+        if (sq > 9) { const tau = 3 / Math.sqrt(sq); m[k] = tau * a * d[k]; m[k + 1] = tau * b * d[k]; }
+      }
+      const h00 = 2 * t ** 3 - 3 * t ** 2 + 1, h10 = t ** 3 - 2 * t ** 2 + t,
+            h01 = -2 * t ** 3 + 3 * t ** 2,    h11 = t ** 3 - t ** 2;
+      return h00 * pts[i] + h10 * m[i] + h01 * pts[i + 1] + h11 * m[i + 1];
     }
 
     // SONGS is loaded from data/songs.js
@@ -802,7 +844,10 @@
         renderCurve();
       });
 
-      svg.addEventListener('pointerup', () => { drag = null; });
+      svg.addEventListener('pointerup', () => {
+        if (drag !== null) markSettingsChanged();
+        drag = null;
+      });
       svg.addEventListener('pointercancel', () => { drag = null; });
     }
 
@@ -836,9 +881,29 @@
         d.addEventListener('click', () => {
           S.arcKey = key; S.pts = sampleArc(key, getKnotCount(S.duration)); S.userEdited = false;
           renderArcs(); renderCurve();
+          markSettingsChanged();
         });
         el.appendChild(d);
       });
+    }
+
+    // ─── SETTINGS-CHANGE HONESTY ─────────────────────────────────────────────────
+    // Once a playlist is built, changing any control brings the build
+    // button back as "Rebuild" and flags the results as stale.
+
+    let built = false;
+
+    function markSettingsChanged() {
+      if (!built) return;
+      const bar = document.querySelector('.cta-bar');
+      const btn = document.getElementById('gen-btn');
+      bar.style.display = '';
+      btn.disabled = false;
+      document.getElementById('gen-label').textContent = 'Rebuild this playlist';
+      const actions = document.querySelector('.res-actions');
+      if (actions && !document.querySelector('.res-stale')) {
+        actions.insertAdjacentHTML('afterbegin', '<span class="res-stale">settings changed</span>');
+      }
     }
 
     // ─── GENERATION ──────────────────────────────────────────────────────────────
@@ -852,9 +917,14 @@
       const clamped = Math.min(100, Math.max(0, tgt));
       const pool = [...SONGS]
         .filter(s => !used.has(s.id) && Math.abs(s.energy - clamped) <= tol)
-        .sort(() => Math.random() - 0.5)
         .sort((a, b) => Math.abs(a.energy - clamped) - Math.abs(b.energy - clamped));
-      if (pool.length) return pool[0];
+      if (pool.length) {
+        // any song within 4 energy of the best match is a fair draw —
+        // real variety on regenerate without drifting off the curve
+        const best = Math.abs(pool[0].energy - clamped);
+        const near = pool.filter(s => Math.abs(s.energy - clamped) <= best + 4);
+        return near[Math.floor(Math.random() * near.length)];
+      }
       // widen tolerance fallback
       return [...SONGS]
         .filter(s => !used.has(s.id))
@@ -887,16 +957,18 @@
           if (pick) { songs.push(pick); actual += pick.dur; used.add(pick.id); }
         }
 
-        // Sort songs within section to follow curve direction
-        if (songs.length > 1) {
-          const eStart = getCurveEnergy(secStart / totalTarget);
-          const eEnd   = getCurveEnergy(Math.min(1, cumSecs / totalTarget));
-          if (eEnd > eStart + 5)      songs.sort((a, b) => a.energy - b.energy);
-          else if (eStart > eEnd + 5) songs.sort((a, b) => b.energy - a.energy);
-        }
-
-        return { sec, songs, target, actual };
+        return { sec, songs, target, actual, secStart, secEnd: cumSecs };
       });
+
+      // sort songs within each section to follow the curve's direction
+      function sortAlongCurve(d) {
+        if (d.songs.length < 2) return;
+        const eStart = getCurveEnergy(d.secStart / totalTarget);
+        const eEnd   = getCurveEnergy(Math.min(1, d.secEnd / totalTarget));
+        if (eEnd > eStart + 5)      d.songs.sort((a, b) => a.energy - b.energy);
+        else if (eStart > eEnd + 5) d.songs.sort((a, b) => b.energy - a.energy);
+      }
+      result.forEach(sortAlongCurve);
 
       // Pass 2: top up to totalMin
       let total = result.reduce((a, d) => a + d.actual, 0);
@@ -913,6 +985,7 @@
         const pick = closer || filler;
         if (!pick) break;
         d.songs.push(pick); d.actual += pick.dur; total += pick.dur; used.add(pick.id);
+        sortAlongCurve(d);
       }
 
       return result;
@@ -920,15 +993,19 @@
 
     // ─── RENDER RESULTS ──────────────────────────────────────────────────────────
 
-    function renderResults(data) {
+    let lastData = null;
+
+    function renderResults(data, quiet) {
+      lastData = data;
       const container = document.getElementById('results');
       const allSongs = data.flatMap(d => d.songs);
       const total = data.reduce((a, d) => a + d.actual, 0);
       const avgBpm = allSongs.length ? Math.round(allSongs.reduce((a, s) => a + s.bpm, 0) / allSongs.length) : 0;
       let n = 0;
 
+      const fu = quiet ? '' : ' fade-up';
       container.innerHTML = `
-    <div class="res-hdr fade-up">
+    <div class="res-hdr${fu}">
       <div class="res-stats">
         <div class="stat"><span class="stat-val">${allSongs.length}</span><span class="stat-lbl">songs</span></div>
         <div class="stat"><span class="stat-val">${fmt(total)}</span><span class="stat-lbl">total time</span></div>
@@ -944,7 +1021,7 @@
       </div>
     </div>
     ${data.map(({ sec, songs, target, actual }, idx) => `
-      <div class="pl-section fade-up" style="animation-delay:${(idx * 0.06) + 0.08}s">
+      <div class="pl-section${fu}"${quiet ? '' : ` style="animation-delay:${(idx * 0.06) + 0.08}s"`}>
         <div class="sec-hdr">
           <div class="sec-meta">
             <h4>${sec.label}</h4>
@@ -952,7 +1029,7 @@
           </div>
         </div>
         ${songs.map(s => `
-          <div class="song">
+          <div class="song" data-sec="${idx}" data-sid="${s.id}">
             <span class="song-n">${++n}</span>
             <div class="song-info">
               <span class="song-title">${s.title}</span>
@@ -963,6 +1040,11 @@
               <span class="song-dur">${fmt(s.dur)}</span>
             </div>
             <div class="ebar">${[1,2,3,4,5,6,7,8].map(i => `<div class="ebar-seg${i <= Math.round(s.energy * 8 / 100) ? ' on' : ''}"></div>`).join('')}</div>
+            <div class="song-swap">
+              <button class="song-swap-btn" aria-label='Swap ${s.title} for another song' data-tooltip="Swap">
+                <span class="material-symbols-sharp">swap_horiz</span>
+              </button>
+            </div>
             <div class="song-copy">
               <button class="btn-icon song-copy-btn" aria-label='Copy ${s.title} by ${s.artist}' data-tooltip="Copy">
                 <span class="material-symbols-sharp">content_copy</span>
@@ -1093,10 +1175,11 @@
       S.duration = newDur;
       updateDurSlider();
       renderCurve();
+      markSettingsChanged();
     });
     updateDurSlider();
-    setupChips('style-chips', v => { S.style = v; });
-    setupChips('mood-chips', v => { S.mood = v; });
+    setupChips('style-chips', v => { S.style = v; markSettingsChanged(); });
+    setupChips('mood-chips', v => { S.mood = v; markSettingsChanged(); });
 
     const _urlPlaylist = new URLSearchParams(window.location.search).get('id');
     if (_urlPlaylist) {
@@ -1117,6 +1200,7 @@
           S.saved = true;
           setTimeout(() => {
             renderResults(generate());
+            built = true;
             document.querySelector('.results').scrollIntoView({ behavior: 'smooth', block: 'start' });
           }, 100);
         }
@@ -1125,10 +1209,30 @@
 
     document.getElementById('reset-curve')?.addEventListener('click', () => {
       S.pts = sampleArc(S.arcKey, getKnotCount(S.duration)); renderCurve();
+      markSettingsChanged();
     });
 
 
     document.querySelector('.results').addEventListener('click', e => {
+      const swapBtn = e.target.closest('.song-swap-btn');
+      if (swapBtn && lastData) {
+        const row = swapBtn.closest('.song');
+        const secIdx = parseInt(row.dataset.sec);
+        const sid = parseInt(row.dataset.sid);
+        const d = lastData[secIdx];
+        const slot = d.songs.findIndex(x => x.id === sid);
+        if (slot === -1) return;
+        const current = d.songs[slot];
+        const used = new Set(lastData.flatMap(x => x.songs.map(y => y.id)));
+        const pick = pickForTarget(current.energy, used);
+        if (!pick) { toast('No fresh song fits here right now.'); return; }
+        d.songs[slot] = pick;
+        d.actual = d.songs.reduce((a, x) => a + x.dur, 0);
+        S.saved = false;
+        renderResults(lastData, true);
+        toast(`Swapped in: ${pick.title}`);
+        return;
+      }
       const btn = e.target.closest('.song-copy-btn');
       if (!btn) return;
       const row = btn.closest('.song');
@@ -1156,6 +1260,7 @@
       S.saved = false;
       setTimeout(() => {
         renderResults(generate());
+        built = true;
         document.getElementById('gen-btn').closest('.cta-bar').style.display = 'none';
         document.querySelector('.results').scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 550);
