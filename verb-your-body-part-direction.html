@@ -334,8 +334,16 @@
     }
     .row-actions-spacer { flex: 1; }
 
-    /* ── Cue actions ── */
-    .cue-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 28px; }
+    /* ── Cue actions — speaking it is the point ── */
+    .cue-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+    .cue-actions .btn-primary { border-radius: var(--r-cta); }
 
     /* ── Practice Out Loud overlay ── */
     .pol-overlay {
@@ -534,17 +542,29 @@
     .wb-rail {
       position: sticky;
       top: 24px;
+      /* height set by sizeRail() to exactly fit the viewport from the
+         rail's current position — never past the fold; no-JS fallback: */
       max-height: calc(100vh - 48px);
-      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       border: 1px solid rgba(var(--ink-rgb), .12);
       border-top-color: rgba(var(--ink-rgb), .22);
       background: rgba(var(--ink-rgb), .02);
       padding: 18px 20px 22px;
     }
 
+    .wb-words {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      align-content: flex-start;
+    }
+
     @media (max-width: 980px) {
       .ws-layout { display: flex; flex-direction: column; align-items: stretch; gap: 40px; }
-      .wb-rail { position: static; max-height: none; }
+      .wb-rail { position: static; height: auto; overflow: visible; }
+      .wb-words { overflow-y: visible; }
     }
 
     .wb-title {
@@ -687,20 +707,20 @@
 
     <!-- Row action buttons -->
     <div class="row-actions">
+      <button class="btn-ghost sm" id="btn-clear">Clear Worksheet</button>
+      <div class="row-actions-spacer"></div>
       <button class="btn-ghost sm" id="btn-add-row">
         <span class="material-symbols-sharp" style="font-size:15px;margin-right:4px">add</span>
         Add Row
       </button>
-      <div class="row-actions-spacer"></div>
-      <button class="btn-ghost sm" id="btn-clear">Clear Worksheet</button>
     </div>
   </div>
 
   <!-- ── CUE ACTIONS ───────────────────────────────────────────── -->
 
   <div class="cue-actions">
-    <button class="btn-ghost" id="btn-pol">
-      <span class="material-symbols-sharp" style="font-size:17px;margin-right:4px">record_voice_over</span>
+    <button class="btn-primary" id="btn-pol">
+      <span class="material-symbols-sharp" style="font-size:17px">record_voice_over</span>
       Practice Out Loud
     </button>
   </div>
@@ -958,7 +978,12 @@ document.getElementById('cue-rows').addEventListener('keydown', e => {
 });
 
 function addRow() {
-  rows.push(makeRow());
+  const next = makeRow();
+  // cueing alternates breath more often than not — prefill the opposite
+  const prev = rows[rows.length - 1];
+  if (prev && prev.inex === 'IN') next.inex = 'EX';
+  else if (prev && prev.inex === 'EX') next.inex = 'IN';
+  rows.push(next);
   renderRows();
   // Focus verb input of new row
   const allRows = document.querySelectorAll('.cue-row');
@@ -1046,10 +1071,6 @@ function renderRows() {
 }
 
 function buildRowHTML(row, i) {
-  const cue = buildCue(row);
-  const previewClass = cue ? '' : ' empty';
-  const previewText = cue || '—';
-
   const verbPh = i === 0 ? ` placeholder="${PLACEHOLDER_CUE.verb}"` : '';
   const bodyPh = i === 0 ? ` placeholder="${PLACEHOLDER_CUE.body}"` : '';
   const dirPh  = i === 0 ? ` placeholder="${PLACEHOLDER_CUE.dir}"`  : '';
@@ -1664,6 +1685,24 @@ const CUE_SH = (function () {
   });
 
   return { show, hide, hideIfStale, onKey };
+})();
+
+// the rail always ends 24px above the viewport bottom — shorter at rest,
+// full height once pinned; static (auto) in the stacked mobile layout
+(function () {
+  const rail = document.getElementById('wb-rail');
+  let raf = null;
+  function sizeRail() {
+    raf = null;
+    if (getComputedStyle(rail).position !== 'sticky') { rail.style.height = ''; return; }
+    const top = Math.max(24, rail.getBoundingClientRect().top);
+    rail.style.height = Math.max(240, window.innerHeight - top - 24) + 'px';
+  }
+  function queue() { if (!raf) raf = requestAnimationFrame(sizeRail); }
+  window.addEventListener('scroll', queue, { passive: true });
+  window.addEventListener('resize', queue, { passive: true });
+  sizeRail();
+  setTimeout(sizeRail, 300); // after fonts/layout settle
 })();
 
 (function () {

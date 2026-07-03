@@ -40,6 +40,17 @@
    5. Use .card-actions for the action row inside a tool output card
    6. Use .modal-backdrop / .modal-card for any save/load dialogs
    7. Add page-specific CSS only in a <style> block in the page head
+
+   CONTENT WIDTH — TWO REGIMES (deliberate)
+   READING pages (default): .wrap / .inner at 820px, centered. Every
+   generator, library, and reading surface lives on this grid.
+   WORKBENCH pages (two-zone: writing/working column + a tool panel
+   in the right margin) may widen their wrap — the class editor
+   (1060px) and the V/YBP/D worksheet (1140px) do. The wider page's
+   hero should match its own wrap so headline and content align
+   within the page. This width jump between page types is a chosen
+   trade-off (2026-07): the panels earn their room; don't "fix" it
+   by squeezing a panel into 820, and don't widen reading pages.
    ═══════════════════════════════════════════════════════════════ */
 
 /* Material Symbols Sharp is loaded via <link> tags in each page's <head>
@@ -316,7 +327,9 @@ body {
   flex-direction: column;
 }
 
-main { flex: 1 0 auto; }
+/* width:100% because auto margins on a flex item disable stretch —
+   pages styled as <main class="wrap"> would shrink to fit content */
+main { flex: 1 0 auto; width: 100%; }
 
 /* Global grain texture */
 body::after {
@@ -330,6 +343,14 @@ body::after {
   background-size: 256px 256px;
 }
 
+
+/* Keyboard focus — visible and consistent; mouse clicks stay quiet.
+   Components with their own focus treatment (boxed fields) opt out
+   via their explicit outline: none. */
+:focus-visible {
+  outline: 2px solid rgba(var(--ink-rgb), .55);
+  outline-offset: 2px;
+}
 
 /* ─── 3. TYPOGRAPHY ──────────────────────────────────────────── */
 
