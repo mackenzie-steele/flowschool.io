@@ -90,33 +90,11 @@
       white-space: nowrap;
     }
 
-    /* ── Detail view — reads like a post ── */
-    /* The bar stays pinned while writing or reading long stories */
-    .post-bar {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 0;
-      margin-bottom: 26px;
-      background: rgba(var(--paper-rgb), .88);
-      backdrop-filter: var(--glass);
-      -webkit-backdrop-filter: var(--glass);
-    }
-
-    .post-actions { display: flex; gap: 8px; }
+    /* ── Detail view — bar component from global.css ── */
     /* display:flex on these groups would defeat the hidden attribute */
     .post-actions [hidden],
     .post-actions[hidden],
     .post-edit-actions[hidden] { display: none; }
-
-    @media (max-width: 768px) {
-      /* stay below the floating sidebar toggle */
-      .post-bar { top: 64px; }
-    }
 
     .story-del-btn.confirm-delete-armed,
     .story-del-btn.confirm-delete-armed:hover {
@@ -179,14 +157,6 @@
       overflow: hidden;
     }
 
-    .post-edit-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .post-edit-actions .btn-primary { border-radius: var(--r-cta); }
-
     @media (max-width: 580px) {
       .story-row { gap: 14px; padding: 22px 0; }
       .story-row-date { display: none; }
@@ -235,26 +205,25 @@
 
   <!-- ── DETAIL VIEW ── -->
   <div id="detail-view" hidden>
-    <div class="wrap" style="padding-top: 56px;">
-
-      <div class="post-bar">
-        <button class="btn-ghost" id="back-btn">
-          <span class="material-symbols-sharp" style="font-size:16px;margin-right:6px">arrow_back</span>
-          Your Stories
-        </button>
-        <div class="post-actions" id="post-actions">
-          <button class="btn-icon" id="edit-btn" title="Edit story" data-tooltip="Edit">
-            <span class="material-symbols-sharp">edit</span>
-          </button>
-          <button class="btn-icon story-del-btn" id="delete-btn" title="Delete story" data-tooltip="Delete">
-            <span class="material-symbols-sharp">delete</span>
-          </button>
-        </div>
-        <div class="post-edit-actions" id="post-edit-actions" hidden>
-          <button class="btn-ghost" id="cancel-edit-btn">Cancel</button>
-          <button class="btn-primary" id="save-edit-btn">Save Changes</button>
-        </div>
+    <div class="post-bar">
+      <button class="btn-ghost" id="back-btn">
+      <span class="material-symbols-sharp" style="font-size:16px;margin-right:6px">arrow_back</span>
+      Your Stories
+      </button>
+      <div class="post-actions" id="post-actions">
+      <button class="btn-icon" id="edit-btn" title="Edit story" data-tooltip="Edit">
+        <span class="material-symbols-sharp">edit</span>
+      </button>
+      <button class="btn-icon story-del-btn" id="delete-btn" title="Delete story" data-tooltip="Delete">
+        <span class="material-symbols-sharp">delete</span>
+      </button>
       </div>
+      <div class="post-edit-actions" id="post-edit-actions" hidden>
+      <button class="btn-ghost" id="cancel-edit-btn">Cancel</button>
+      <button class="btn-primary" id="save-edit-btn">Save Changes</button>
+      </div>
+    </div>
+    <div class="wrap" style="padding-top: 0;">
 
       <article class="post">
         <p class="post-kicker label-1" id="post-kicker">Your Starter</p>

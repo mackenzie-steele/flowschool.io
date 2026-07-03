@@ -2245,6 +2245,40 @@ body.has-sidebar {
 .library-empty-ghost-row:nth-child(3) i + i         { width: 27%; }
 
 
+/* ── Sticky editor/reading bar — full content width, glass ────
+   Sits OUTSIDE the centered .wrap so back sits at the content
+   area's true upper-left and actions at the upper-right. */
+
+.post-bar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  /* matches the sidebar's logo header exactly (80px + hairline,
+     border-box) — the bottom line reads as one continuous seam */
+  height: 81px;
+  padding: 0 24px;
+  margin-bottom: 40px;
+  background: rgba(var(--paper-rgb), .52);
+  backdrop-filter: blur(52px) saturate(180%);
+  -webkit-backdrop-filter: blur(52px) saturate(180%);
+  border-bottom: 1px solid rgba(var(--ink-rgb), .09);
+}
+
+.post-actions { display: flex; gap: 8px; }
+
+.post-edit-actions { display: flex; align-items: center; gap: 14px; }
+.post-edit-actions .btn-primary { border-radius: var(--r-cta); }
+
+@media (max-width: 768px) {
+  /* stay below the floating sidebar toggle; natural height on mobile */
+  .post-bar { top: 64px; height: auto; padding: 12px 24px; }
+}
+
+
 /* ── Search field — icon + input (+ optional clear button) ──── */
 
 .search-wrap {

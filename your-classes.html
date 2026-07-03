@@ -69,6 +69,15 @@
 
     .class-row:hover .class-row-title { opacity: .65; }
 
+    /* favorited marker — same volt state language as the rest of the site */
+    .class-row-fav {
+      font-size: 13px;
+      color: var(--volt);
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      margin-left: 9px;
+      vertical-align: 1px;
+    }
+
     .class-row-meta {
       font-family: var(--font-mono);
       font-size: 11px;
@@ -85,38 +94,90 @@
       white-space: nowrap;
     }
 
-    /* ── Shared top bar (matches Your Stories) ── */
-    .post-bar {
-      position: sticky;
-      top: 0;
-      z-index: 2;
+    /* ── Top bar — component from global.css ── */
+
+    /* autosave indicator — same state language as the V/YBP/D worksheet */
+    .cw-autosave-indicator {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-3);
+      user-select: none;
+    }
+
+    .cw-autosave-indicator.visible { display: flex; }
+
+    .cw-autosave-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--volt);
+      flex-shrink: 0;
+      animation: cw-autosave-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes cw-autosave-pulse {
+      0%, 100% { opacity: .35; transform: scale(.85); }
+      50%      { opacity: 1;   transform: scale(1); }
+    }
+
+    /* actions menu — occasional actions live behind one button */
+    .post-actions { position: relative; }
+
+    .tv-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      z-index: 6;
+      min-width: 214px;
+      display: flex;
+      flex-direction: column;
+      background: var(--paper-solid);
+      border: 1px solid rgba(var(--ink-rgb), .16);
+      border-top-color: rgba(var(--ink-rgb), .30);
+      box-shadow: 0 4px 24px rgba(var(--ink-rgb), .10);
+      animation: fadeUp .14s ease both;
+    }
+
+    .tv-menu-item {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 0;
-      margin-bottom: 26px;
-      background: rgba(var(--paper-rgb), .88);
-      backdrop-filter: var(--glass);
-      -webkit-backdrop-filter: var(--glass);
+      gap: 10px;
+      padding: 10px 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: var(--text-ui);
+      color: var(--text-2);
+      text-align: left;
+      transition: background var(--transition-fast), color var(--transition-fast);
     }
 
-    .post-actions { display: flex; gap: 8px; }
+    .tv-menu-item:hover { background: rgba(var(--ink-rgb), .05); color: var(--text-1); }
+    .tv-menu-item .material-symbols-sharp { font-size: 16px; color: var(--text-3); }
+    .tv-menu-item:hover .material-symbols-sharp { color: var(--text-2); }
 
-    .post-edit-actions { display: flex; align-items: center; gap: 10px; }
-    .post-edit-actions .btn-primary { border-radius: var(--r-cta); }
-
-    .class-del-btn.confirm-delete-armed,
-    .class-del-btn.confirm-delete-armed:hover {
-      color: var(--danger);
-      border-color: var(--danger);
-      background: rgba(224, 82, 82, .10);
+    /* favorited state — filled volt heart, matching the list marker */
+    .tv-menu-item .material-symbols-sharp.filled {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      color: var(--volt);
     }
+
+    .tv-menu-item:hover .material-symbols-sharp.filled { color: var(--volt); }
+
+    .tv-menu-item.armed,
+    .tv-menu-item.armed:hover { color: var(--danger); }
+    .tv-menu-item.armed .material-symbols-sharp,
+    .tv-menu-item.armed:hover .material-symbols-sharp { color: var(--danger); }
 
     @media (max-width: 768px) {
-      .post-bar { top: 64px; }
-      /* section labels pin below the bar (64px offset + ~68px bar) */
-      .tv-label { top: 132px; }
+      /* section labels pin below the bar (64px offset + ~64px bar) */
+      .tv-label { top: 128px; }
     }
 
     /* ── Editor ── */
@@ -250,48 +311,58 @@
 
     .cw-story-chip-rm:hover { color: var(--danger); }
 
-    /* playlist row — name + a link to wherever the playlist lives */
+    /* playlist — name + link, boxed like the section slots */
     .cw-playlist {
-      display: flex;
-      align-items: baseline;
-      gap: 16px;
-      padding: 4px 0 18px;
-      border-bottom: 1px solid var(--border-light);
+      padding: 14px 0 18px;
+    }
+
+    .cw-playlist .label-1 {
+      display: block;
+      margin-bottom: 10px;
     }
 
     .cw-playlist-fields {
-      flex: 1;
       display: flex;
-      flex-direction: column;
       gap: 8px;
+    }
+
+    .cw-playlist-input,
+    .cw-playlist-url {
+      flex: 1;
       min-width: 0;
+      background: rgba(var(--ink-rgb), .04);
+      border: none;
+      box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .12);
+      border-radius: var(--r);
+      padding: 11px 14px;
+      outline: none;
+      transition: box-shadow var(--transition-base), background var(--transition-base);
     }
 
     .cw-playlist-input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      outline: none;
-      padding: 0;
       color: var(--text-1);
       font-family: var(--font);
       font-size: var(--text-body-sm);
     }
 
     .cw-playlist-url {
-      width: 100%;
-      background: transparent;
-      border: none;
-      outline: none;
-      padding: 0;
-      color: var(--text-2);
-      font-family: var(--font-mono);
-      font-size: 12px;
-      letter-spacing: .02em;
+      color: var(--text-1);
+      font-family: var(--font);
+      font-size: var(--text-body-sm);
+    }
+
+    .cw-playlist-input:focus,
+    .cw-playlist-url:focus {
+      background: rgba(var(--ink-rgb), .06);
+      box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .30);
     }
 
     .cw-playlist-input::placeholder,
     .cw-playlist-url::placeholder { color: rgba(var(--ink-rgb), .30); }
+
+    @media (max-width: 580px) {
+      .cw-playlist-fields { flex-direction: column; }
+    }
 
     /* class length row */
     .cw-length {
@@ -300,7 +371,6 @@
       justify-content: space-between;
       gap: 12px;
       padding: 14px 0 18px;
-      border-bottom: 1px solid var(--border-light);
     }
 
     .cw-length-btns {
@@ -311,11 +381,8 @@
 
     /* sections */
     .cw-section {
-      padding: 24px 0;
-      border-bottom: 1px solid var(--border-light);
+      padding: 20px 0;
     }
-
-    .cw-section:last-of-type { border-bottom: none; }
 
     .cw-section-head {
       margin-bottom: 10px;
@@ -323,11 +390,13 @@
 
     .cw-area {
       width: 100%;
-      min-height: 30px;
+      min-height: 52px;
       display: block;
-      background: transparent;
+      background: rgba(var(--ink-rgb), .04);
       border: none;
-      padding: 0;
+      box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .12);
+      border-radius: var(--r);
+      padding: 14px 16px;
       color: var(--text-1);
       font-family: var(--font);
       font-size: var(--fs-body);
@@ -335,6 +404,12 @@
       outline: none;
       resize: none;
       overflow: hidden;
+      transition: box-shadow var(--transition-base), background var(--transition-base);
+    }
+
+    .cw-area:focus {
+      background: rgba(var(--ink-rgb), .06);
+      box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .30);
     }
 
     .cw-area::placeholder { color: rgba(var(--ink-rgb), .30); }
@@ -359,6 +434,15 @@
       line-height: var(--lh-heading);
       color: var(--text-1);
       margin-bottom: 6px;
+    }
+
+    /* favorited marker beside the title */
+    .tv-title-fav {
+      font-size: 17px;
+      color: var(--volt);
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      margin-left: 11px;
+      vertical-align: 3px;
     }
 
     .tv-meta {
@@ -422,7 +506,7 @@
 
     .tv-label {
       position: sticky;
-      top: 68px; /* below the pinned bar */
+      top: 81px; /* below the pinned bar (80px + hairline) */
       z-index: 1;
       padding: 6px 0;
       background: rgba(var(--paper-rgb), .92);
@@ -629,14 +713,13 @@
 
   <!-- ── TEACHING VIEW ── -->
   <div id="teach-view" hidden>
+    <div class="post-bar">
+      <button class="btn-ghost" id="back-btn">
+      <span class="material-symbols-sharp" style="font-size:16px;margin-right:6px">arrow_back</span>
+      Classes
+      </button>
+    </div>
     <div class="wrap" style="padding-top: 0;">
-
-      <div class="post-bar">
-        <button class="btn-ghost" id="back-btn">
-          <span class="material-symbols-sharp" style="font-size:16px;margin-right:6px">arrow_back</span>
-          Classes
-        </button>
-      </div>
 
       <div class="tv">
         <div class="tv-head">
@@ -646,18 +729,16 @@
             <p class="tv-playlist" id="tv-playlist" hidden><span class="material-symbols-sharp">music_note</span><span id="tv-playlist-body"></span></p>
           </div>
           <div class="post-actions">
-            <button class="btn-icon" id="pin-btn" title="Pin to dashboard" data-tooltip="Pin to dashboard">
-              <span class="material-symbols-sharp">keep</span>
+            <button class="btn-icon" id="edit-btn" title="Edit class" data-tooltip="Edit">
+              <span class="material-symbols-sharp">edit</span>
             </button>
             <button class="btn-icon" id="wake-btn" title="Keep screen awake while teaching" data-tooltip="Keep screen awake" hidden>
               <span class="material-symbols-sharp">visibility_lock</span>
             </button>
-            <button class="btn-icon" id="edit-btn" title="Edit class" data-tooltip="Edit">
-              <span class="material-symbols-sharp">edit</span>
+            <button class="btn-icon" id="more-btn" title="More actions" data-tooltip="More">
+              <span class="material-symbols-sharp">more_horiz</span>
             </button>
-            <button class="btn-icon class-del-btn" id="delete-btn" title="Delete class" data-tooltip="Delete">
-              <span class="material-symbols-sharp">delete</span>
-            </button>
+            <div class="tv-menu" id="tv-menu" hidden></div>
           </div>
         </div>
         <div id="tv-stories"></div>
@@ -676,14 +757,17 @@
 
   <!-- ── EDIT VIEW ── -->
   <div id="edit-view" hidden>
-    <div class="wrap" style="padding-top: 0;">
-
-      <div class="post-bar">
-        <button class="btn-ghost" id="cancel-btn">Cancel</button>
-        <div class="post-edit-actions">
-          <button class="btn-primary" id="save-btn">Save to Your Library</button>
-        </div>
+    <div class="post-bar">
+      <button class="btn-ghost" id="cancel-btn">Cancel</button>
+      <div class="post-edit-actions">
+      <span class="cw-autosave-indicator" id="cw-autosave">
+        <span class="cw-autosave-dot"></span>
+        Draft Saved
+      </span>
+      <button class="btn-primary" id="save-btn">Save to Your Library</button>
       </div>
+    </div>
+    <div class="wrap" style="padding-top: 0;">
 
       <div class="cw-editor">
         <input type="text" class="cw-title-input" id="cw-title" placeholder="Name your class&#8230;" maxlength="120">
@@ -868,7 +952,9 @@
         if (c.storyIds && c.storyIds.length) bits.push(c.storyIds.length === 1 ? '1 story' : c.storyIds.length + ' stories');
         return '<a href="your-classes.html?id=' + c.id + '" class="class-row" data-id="' + c.id + '">' +
           '<span class="class-row-main">' +
-            '<span class="class-row-title">' + esc(c.title || 'Untitled Class') + '</span>' +
+            '<span class="class-row-title">' + esc(c.title || 'Untitled Class') +
+              (c.pinned ? '<span class="material-symbols-sharp class-row-fav">favorite</span>' : '') +
+            '</span>' +
             '<span class="class-row-meta">' + bits.join(' · ') + '</span>' +
           '</span>' +
           '<span class="class-row-date">' + fmtDate(c.id) + '</span>' +
@@ -883,12 +969,7 @@
       if (!c) { showList(); return; }
       currentId = id;
 
-      document.getElementById('tv-title').textContent = c.title || 'Untitled Class';
-
-      // pin state
-      var pinBtn = document.getElementById('pin-btn');
-      pinBtn.classList.toggle('saved', !!c.pinned);
-      pinBtn.setAttribute('data-tooltip', c.pinned ? 'Unpin' : 'Pin to dashboard');
+      renderTitleFav(c);
       var meta = (c.length || 60) + ' min · Saved ' + fmtDate(c.id);
       if (c.editedAt) meta += ' · Edited ' + fmtDate(c.editedAt);
       document.getElementById('tv-meta').textContent = meta;
@@ -958,6 +1039,12 @@
       });
     }
 
+    function renderTitleFav(c) {
+      document.getElementById('tv-title').innerHTML =
+        esc(c.title || 'Untitled Class') +
+        (c.pinned ? '<span class="material-symbols-sharp tv-title-fav">favorite</span>' : '');
+    }
+
     // ─── EDITOR ──────────────────────────────────────────────────────────────────
 
     function buildEditor() {
@@ -983,7 +1070,7 @@
 
     document.getElementById('cw-length-btns').addEventListener('click', function (e) {
       var btn = e.target.closest('.time-btn');
-      if (btn) setLength(parseInt(btn.dataset.len));
+      if (btn) { setLength(parseInt(btn.dataset.len)); scheduleDraft(); }
     });
 
     function renderStoryChips() {
@@ -1020,10 +1107,71 @@
         autoGrow(el);
       });
 
-      document.getElementById('save-btn').textContent = c ? 'Save Changes' : 'Save to Your Library';
+      var saveBtn = document.getElementById('save-btn');
+      saveBtn.textContent = c ? 'Save Changes' : 'Save to Your Library';
+      saveBtn.disabled = false;
+      document.getElementById('cw-autosave').classList.remove('visible');
+
+      // a draft for this exact target survives reloads and back-buttons
+      var draft = loadDraft();
+      if (draft && draft.editingId === (id != null ? id : null)) {
+        document.getElementById('cw-title').value = draft.title || '';
+        document.getElementById('cw-playlist').value = draft.playlist || '';
+        document.getElementById('cw-playlist-url').value = draft.playlistUrl || '';
+        attachedIds = (draft.storyIds || []).slice();
+        renderStoryChips();
+        setLength(draft.length || 60);
+        document.querySelectorAll('.cw-area').forEach(function (el) {
+          el.value = (draft.sections && draft.sections[el.dataset.key]) || '';
+          autoGrow(el);
+        });
+        document.getElementById('cw-autosave').classList.add('visible');
+        toast('Draft restored.');
+      }
+
       if (push) history.pushState({}, '', c ? 'your-classes.html?edit=' + id : 'your-classes.html?new=1');
       window.scrollTo(0, 0);
       if (!c) document.getElementById('cw-title').focus();
+    }
+
+    // ─── DRAFT PROTECTION ────────────────────────────────────────────────────────
+    // Everything typed in the editor persists continuously to a single draft
+    // slot. Save commits and clears it; Cancel discards it explicitly; a
+    // closed tab or back-button loses nothing.
+
+    var DRAFT_KEY = 'flowschool_class_draft';
+    var draftTimer = null;
+
+    function collectDraft() {
+      return {
+        editingId: editingId,
+        title: document.getElementById('cw-title').value,
+        sections: collectSections(),
+        storyIds: attachedIds.slice(),
+        playlist: document.getElementById('cw-playlist').value,
+        playlistUrl: document.getElementById('cw-playlist-url').value,
+        length: editLength,
+        ts: Date.now(),
+      };
+    }
+
+    function scheduleDraft() {
+      if (document.getElementById('edit-view').hidden) return;
+      clearTimeout(draftTimer);
+      draftTimer = setTimeout(function () {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(collectDraft()));
+        document.getElementById('cw-autosave').classList.add('visible');
+      }, 600);
+    }
+
+    function loadDraft() {
+      try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (_) { return null; }
+    }
+
+    function clearDraft() {
+      clearTimeout(draftTimer);
+      localStorage.removeItem(DRAFT_KEY);
+      document.getElementById('cw-autosave').classList.remove('visible');
     }
 
     function playlistUrlValue() {
@@ -1082,8 +1230,8 @@
       function caretXY(el) {
         var m = document.createElement('div');
         var cs = getComputedStyle(el);
-        m.style.cssText = 'position:absolute;visibility:hidden;white-space:pre-wrap;word-wrap:break-word;' +
-          'width:' + el.clientWidth + 'px;font:' + cs.font + ';line-height:' + cs.lineHeight + ';letter-spacing:' + cs.letterSpacing + ';';
+        m.style.cssText = 'position:absolute;visibility:hidden;white-space:pre-wrap;word-wrap:break-word;box-sizing:border-box;' +
+          'width:' + el.clientWidth + 'px;padding:' + cs.padding + ';font:' + cs.font + ';line-height:' + cs.lineHeight + ';letter-spacing:' + cs.letterSpacing + ';';
         m.textContent = el.value.slice(0, el.selectionStart);
         var mark = document.createElement('span');
         mark.textContent = '\u200b';
@@ -1191,7 +1339,11 @@
 
     document.getElementById('cw-sections').addEventListener('input', function (ev) {
       if (ev.target.classList.contains('cw-area')) SH.show(ev.target);
+      scheduleDraft();
     });
+    document.getElementById('cw-title').addEventListener('input', scheduleDraft);
+    document.getElementById('cw-playlist').addEventListener('input', scheduleDraft);
+    document.getElementById('cw-playlist-url').addEventListener('input', scheduleDraft);
     document.getElementById('cw-sections').addEventListener('keydown', function (ev) {
       if (ev.target.classList.contains('cw-area')) SH.onKey(ev);
     });
@@ -1291,22 +1443,98 @@
       showList(true);
     });
 
-    document.getElementById('pin-btn').addEventListener('click', function () {
+    // ─── ACTIONS MENU — pin / duplicate / delete ─────────────────────────────────
+
+    var menuEl = document.getElementById('tv-menu');
+    var menuArmTimer = null;
+
+    function closeMenu() {
+      menuEl.hidden = true;
+      clearTimeout(menuArmTimer);
+      menuArmTimer = null;
+    }
+
+    function openMenu() {
       var c = byId(currentId);
       if (!c) return;
-      c.pinned = !c.pinned;
-      persist();
-      var btn = document.getElementById('pin-btn');
-      btn.classList.toggle('saved', c.pinned);
-      btn.setAttribute('data-tooltip', c.pinned ? 'Unpin' : 'Pin to dashboard');
-      toast(c.pinned ? 'Pinned to your dashboard.' : 'Unpinned.');
+      menuEl.innerHTML =
+        '<button class="tv-menu-item" data-act="pin"><span class="material-symbols-sharp' + (c.pinned ? ' filled' : '') + '">favorite</span>' +
+          (c.pinned ? 'Remove from favorites' : 'Add to favorites') + '</button>' +
+        '<button class="tv-menu-item" data-act="dup"><span class="material-symbols-sharp">content_copy</span>Duplicate</button>' +
+        '<button class="tv-menu-item" data-act="del"><span class="material-symbols-sharp">delete</span>Delete class</button>';
+      menuEl.hidden = false;
+    }
+
+    document.getElementById('more-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (menuEl.hidden) openMenu(); else closeMenu();
+    });
+
+    menuEl.addEventListener('click', function (e) {
+      var item = e.target.closest('.tv-menu-item');
+      if (!item) return;
+      e.stopPropagation();
+      var c = byId(currentId);
+      if (!c) return;
+
+      if (item.dataset.act === 'pin') {
+        c.pinned = !c.pinned;
+        persist();
+        renderTitleFav(c);
+        toast(c.pinned ? 'Added to your favorites.' : 'Removed from favorites.');
+        closeMenu();
+      } else if (item.dataset.act === 'dup') {
+        closeMenu();
+        duplicateCurrent();
+      } else if (item.dataset.act === 'del') {
+        // two-step delete, armed inside the menu
+        if (item.classList.contains('armed')) {
+          closeMenu();
+          classes = classes.filter(function (x) { return x.id !== currentId; });
+          persist();
+          toast('Class removed.');
+          showList(true);
+        } else {
+          item.classList.add('armed');
+          item.innerHTML = '<span class="material-symbols-sharp">delete</span>Click again to delete';
+          clearTimeout(menuArmTimer);
+          menuArmTimer = setTimeout(function () {
+            if (!menuEl.hidden) openMenu();
+          }, 2200);
+        }
+      }
+    });
+
+    document.addEventListener('click', function () { if (!menuEl.hidden) closeMenu(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !menuEl.hidden) closeMenu();
     });
 
     document.getElementById('edit-btn').addEventListener('click', function () {
       showEdit(currentId, true);
     });
 
+    function duplicateCurrent() {
+      var c = byId(currentId);
+      if (!c) return;
+      clearDraft();
+      showEdit(null, true);
+      document.getElementById('cw-title').value = (c.title || 'Untitled Class') + ' — copy';
+      document.getElementById('cw-playlist').value = c.playlist || '';
+      document.getElementById('cw-playlist-url').value = c.playlistUrl || '';
+      attachedIds = (c.storyIds || []).slice();
+      renderStoryChips();
+      setLength(c.length || 60);
+      document.querySelectorAll('.cw-area').forEach(function (el) {
+        el.value = (c.sections && c.sections[el.dataset.key]) || '';
+        autoGrow(el);
+      });
+      scheduleDraft();
+      toast('Copy ready \u2014 make it yours.');
+    }
+
     document.getElementById('cancel-btn').addEventListener('click', function () {
+      clearDraft();
       if (editingId != null) { showTeach(editingId, true); }
       else { showList(true); }
     });
@@ -1316,6 +1544,13 @@
       var hasContent = SECTIONS.some(function (s) { return sections[s.key]; });
       var title = document.getElementById('cw-title').value.trim();
       if (!title && !hasContent) { toast('Give it a name or a flow first.'); return; }
+
+      var saveBtn = document.getElementById('save-btn');
+      function savedBeat(then) {
+        saveBtn.textContent = 'Saved';
+        saveBtn.disabled = true;
+        setTimeout(then, 450);
+      }
 
       if (editingId != null) {
         var c = byId(editingId);
@@ -1328,8 +1563,8 @@
         c.length = editLength;
         c.editedAt = Date.now();
         persist();
-        toast('Class updated.');
-        showTeach(editingId, true);
+        clearDraft();
+        savedBeat(function () { showTeach(editingId, true); });
       } else {
         var entry = {
           id: Date.now(),
@@ -1343,9 +1578,11 @@
         };
         classes.push(entry);
         persist();
-        toast('Class saved.');
-        history.replaceState({}, '', 'your-classes.html?id=' + entry.id);
-        showTeach(entry.id);
+        clearDraft();
+        savedBeat(function () {
+          history.replaceState({}, '', 'your-classes.html?id=' + entry.id);
+          showTeach(entry.id);
+        });
       }
     });
 
@@ -1368,13 +1605,6 @@
         }
         persist();
       }, 500);
-    });
-
-    wireConfirmDelete(document.getElementById('delete-btn'), function () {
-      classes = classes.filter(function (c) { return c.id !== currentId; });
-      persist();
-      toast('Class removed.');
-      showList(true);
     });
 
     // ─── STORY PICKER ────────────────────────────────────────────────────────────
@@ -1416,6 +1646,7 @@
     document.getElementById('story-modal-done').addEventListener('click', function () {
       document.getElementById('story-modal').hidden = true;
       renderStoryChips();
+      scheduleDraft();
     });
 
     document.getElementById('story-modal').addEventListener('click', function (e) {
@@ -1431,6 +1662,7 @@
       var sid = parseInt(rm.dataset.id);
       attachedIds = attachedIds.filter(function (x) { return x !== sid; });
       renderStoryChips();
+      scheduleDraft();
     });
 
     // ─── INIT ────────────────────────────────────────────────────────────────────
