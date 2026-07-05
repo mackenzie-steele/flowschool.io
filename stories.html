@@ -96,18 +96,21 @@
     .post-actions[hidden],
     .post-edit-actions[hidden] { display: none; }
 
-    .story-del-btn.confirm-delete-armed,
-    .story-del-btn.confirm-delete-armed:hover {
-      color: var(--danger);
-      border-color: var(--danger);
-      background: rgba(224, 82, 82, .10);
-    }
+    .post-head .post-actions { position: relative; }
 
     .post {
       max-width: 640px;
     }
 
-    .post-kicker { margin-bottom: 14px; }
+    .post-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .post-head-main { min-width: 0; }
+    .post-head .post-actions { flex-shrink: 0; margin-top: -4px; }
 
     .post-title {
       font-size: var(--fs-h4);
@@ -115,8 +118,33 @@
       letter-spacing: -.01em;
       line-height: var(--lh-heading);
       color: var(--text-1);
-      margin-bottom: 28px;
+      margin-bottom: 10px;
     }
+
+    /* the starter is provenance, not the headline */
+    .post-starter-line {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .04em;
+      color: var(--text-3);
+      margin-bottom: 6px;
+    }
+
+    .post-title-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 0 0 16px;
+      color: var(--text-1);
+      font-family: var(--font);
+      font-size: var(--fs-h4);
+      font-weight: var(--weight-regular);
+      letter-spacing: -.01em;
+      line-height: var(--lh-heading);
+    }
+
+    .post-title-input::placeholder { color: var(--text-3); }
 
     .post-body p {
       font-size: var(--text-body-lg);
@@ -128,13 +156,11 @@
     .post-body p:last-child { margin-bottom: 0; }
 
     .post-meta {
-      margin-top: 36px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-light);
       font-family: var(--font-mono);
       font-size: 11px;
       letter-spacing: .04em;
       color: var(--text-3);
+      margin-bottom: 24px;
     }
 
     /* ── Edit mode — a forever page, not a form field ──
@@ -171,6 +197,7 @@
   <script src="data/story-starters.js"></script>
   <script src="lib/toast.js"></script>
   <script src="lib/confirm-delete.js"></script>
+  <script src="lib/library.js"></script>
   <div class="toast" id="toast"></div>
 
   <main>
@@ -199,6 +226,17 @@
           New Story
         </button>
       </div>
+      <div class="sort-row" id="sort-row">
+        <button class="btn-ghost sm" id="sort-btn" title="Toggle sort order" data-tooltip="Sort by">
+          <span class="material-symbols-sharp" style="font-size:15px;margin-right:5px">swap_vert</span>
+          <span id="sort-label">Recently Edited</span>
+        </button>
+        <button class="btn-ghost sm fav-filter" id="fav-filter-btn" title="Only favorites" data-tooltip="Only favorites">
+          <span class="material-symbols-sharp" style="font-size:15px;margin-right:5px">favorite</span>
+          Favorites
+        </button>
+        <span class="result-count" id="result-count"></span>
+      </div>
       <div class="story-index" id="story-index"></div>
     </div>
   </div>
@@ -210,14 +248,6 @@
       <span class="material-symbols-sharp" style="font-size:16px;margin-right:6px">arrow_back</span>
       Your Stories
       </button>
-      <div class="post-actions" id="post-actions">
-      <button class="btn-icon" id="edit-btn" title="Edit story" data-tooltip="Edit">
-        <span class="material-symbols-sharp">edit</span>
-      </button>
-      <button class="btn-icon story-del-btn" id="delete-btn" title="Delete story" data-tooltip="Delete">
-        <span class="material-symbols-sharp">delete</span>
-      </button>
-      </div>
       <div class="post-edit-actions" id="post-edit-actions" hidden>
       <button class="btn-ghost" id="cancel-edit-btn">Cancel</button>
       <button class="btn-primary" id="save-edit-btn">Save Changes</button>
@@ -226,18 +256,42 @@
     <div class="wrap" style="padding-top: 0;">
 
       <article class="post">
-        <p class="post-kicker label-1" id="post-kicker">Your Starter</p>
-        <h4 class="post-title" id="post-title"></h4>
+        <div class="post-head">
+          <div class="post-head-main">
+            <h4 class="post-title" id="post-title"></h4>
+            <p class="post-starter-line" id="post-starter-line" hidden></p>
+            <p class="post-meta" id="post-meta" hidden></p>
+          </div>
+          <div class="post-actions" id="post-actions">
+            <button class="btn-icon" id="edit-btn" title="Edit story" data-tooltip="Edit">
+              <span class="material-symbols-sharp">edit</span>
+            </button>
+            <button class="btn-icon" id="story-more-btn" title="More actions" data-tooltip="More">
+              <span class="material-symbols-sharp">more_horiz</span>
+            </button>
+            <div class="st-menu" id="st-menu" hidden></div>
+          </div>
+        </div>
 
         <div class="post-body" id="post-body"></div>
 
         <div id="post-edit" hidden>
+          <input type="text" class="post-title-input" id="post-title-input" placeholder="Title your story&#8230;" maxlength="120" autocomplete="off">
           <textarea class="post-edit-area" id="post-edit-area" placeholder="Write it like you&#8217;d tell it in class&#8230;"></textarea>
         </div>
-
-        <p class="post-meta" id="post-meta"></p>
       </article>
 
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="discard-modal" hidden>
+    <div class="modal-card">
+      <h3>Discard changes?</h3>
+      <p class="modal-hint">Your edits haven&#8217;t been saved.</p>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="discard-keep">Keep Editing</button>
+        <button class="btn-primary" id="discard-yes">Discard</button>
+      </div>
     </div>
   </div>
 
@@ -264,19 +318,19 @@
 
     // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-    var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    function fmtDate(ts) {
-      if (!ts) return '';
-      var d = new Date(ts);
-      return MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
-    }
 
-    function esc(s) {
-      var div = document.createElement('div');
-      div.textContent = s;
-      return div.innerHTML;
-    }
+    // ─── SORT — per-category preference, edited-first by default ─────────────────
+    var SORT_KEY = 'fs-sort-stories';
+    function sortMode() { return fsSortMode(SORT_KEY); }
+    var sorterFor = fsSorterFor;
+    function renderSortBtn() { fsRenderSortLabel(sortMode()); }
+
+    // ─── DATE STAMPS — Created ↔ Edited, apple-notes style ──────────────────────
+    // Clicking a stamp flips the mode; the choice persists site-wide.
+    var dateMode = fsDateMode, toggleDateMode = fsToggleDateMode, stampFor = fsStampFor;
+
+    var fmtDate = fsFmtDate, esc = fsEsc;
 
     function firstLine(text) {
       var line = (text || '').split('\n')[0].trim();
@@ -292,6 +346,7 @@
 
       if (!stories.length) {
         bar.hidden = true;
+        document.getElementById('sort-row').hidden = true;
         index.innerHTML =
           '<div class="library-empty">' +
           '<h4 class="library-empty-title">The stories only you can tell.</h4>' +
@@ -300,11 +355,7 @@
           '<button class="btn-primary" id="empty-new-btn">Write a Story</button>' +
           '</div>' +
           '<a href="story-starters.html" class="library-empty-link">Get Inspired <span class="material-symbols-sharp" style="font-size:13px;vertical-align:-2px">arrow_forward</span></a>' +
-          '<div class="library-empty-ghost" aria-hidden="true">' +
-          '<div class="library-empty-ghost-row"><i></i><i></i></div>' +
-          '<div class="library-empty-ghost-row"><i></i><i></i></div>' +
-          '<div class="library-empty-ghost-row"><i></i><i></i></div>' +
-          '</div>' +
+          fsGhostRows() +
           '</div>';
         document.getElementById('empty-new-btn').addEventListener('click', function () {
           showCompose(null, true);
@@ -313,26 +364,39 @@
       }
 
       bar.hidden = false;
-      var list = stories.slice().sort(function (a, b) { return b.id - a.id; });
+      document.getElementById('sort-row').hidden = false;
+      renderSortBtn();
+      var list = stories.slice().sort(sorterFor(sortMode()));
+      if (favOnly) list = list.filter(function (x) { return x.pinned; });
       if (q) {
         list = list.filter(function (s) {
           return (s.text || '').toLowerCase().indexOf(q) !== -1
+              || (s.title || '').toLowerCase().indexOf(q) !== -1
               || (s.starter || '').toLowerCase().indexOf(q) !== -1;
         });
       }
 
       if (!list.length) {
-        index.innerHTML = '<div class="library-empty"><p class="library-empty-sub">Nothing matches &#8220;' + esc(filter) + '&#8221;.</p></div>';
+        document.getElementById('result-count').textContent = '0 results';
+        index.innerHTML = '<div class="library-empty"><p class="library-empty-sub">' +
+          (q ? 'Nothing matches &#8220;' + esc(filter) + '&#8221;.'
+             : 'No favorites yet &#8212; use the &#8943; menu on a story.') +
+          '</p></div>';
         return;
       }
+
+      document.getElementById('result-count').textContent =
+        list.length + ' result' + (list.length !== 1 ? 's' : '');
 
       index.innerHTML = list.map(function (s) {
         return '<a href="stories.html?id=' + s.id + '" class="story-row" data-id="' + s.id + '">' +
           '<span class="story-row-main">' +
-            '<span class="story-row-title">' + esc(firstLine(s.text)) + '</span>' +
+            '<span class="story-row-title">' + esc(s.title || firstLine(s.text)) +
+              (s.pinned ? '<span class="material-symbols-sharp fav-mark">favorite</span>' : '') +
+            '</span>' +
             (s.starter ? '<span class="story-row-meta">' + esc(s.starter) + '</span>' : '') +
           '</span>' +
-          '<span class="story-row-date">' + fmtDate(s.id) + '</span>' +
+          '<span class="story-row-date">' + fmtDate(stampFor(s).ts) + '</span>' +
         '</a>';
       }).join('');
     }
@@ -347,20 +411,32 @@
       composing = false;
       composeStarter = null;
       document.getElementById('post-meta').hidden = false;
-      document.getElementById('delete-btn').hidden = false;
       document.getElementById('save-edit-btn').textContent = 'Save Changes';
-      document.getElementById('post-kicker').hidden = !s.starter;
-      document.getElementById('post-title').hidden = !s.starter;
-      document.getElementById('post-title').textContent = s.starter || '';
+      renderTitleWithFav(s);
+      var sl = document.getElementById('post-starter-line');
+      sl.hidden = !s.starter;
+      sl.textContent = s.starter || '';
       document.getElementById('post-body').innerHTML = (s.text || '')
         .split(/\n+/)
         .filter(function (p) { return p.trim(); })
         .map(function (p) { return '<p>' + esc(p) + '</p>'; })
         .join('');
-      var meta = 'Saved ' + fmtDate(s.id);
-      if (s.editedAt) meta += ' &nbsp;&#183;&nbsp; Edited ' + fmtDate(s.editedAt);
-      document.getElementById('post-meta').innerHTML = meta;
+      renderPostMeta(s);
       setEditing(false);
+    }
+
+    function renderTitleWithFav(s) {
+      var el = document.getElementById('post-title');
+      el.hidden = !s.title;
+      el.innerHTML = esc(s.title || '') +
+        (s.pinned && s.title ? '<span class="material-symbols-sharp fav-mark lg">favorite</span>' : '');
+    }
+
+    function renderPostMeta(s) {
+      var st = stampFor(s);
+      document.getElementById('post-meta').innerHTML =
+        '<span class="date-toggle" title="Show ' + (dateMode() === 'edited' ? 'created' : 'edited') + ' date">' +
+        st.label + ' ' + fmtDate(st.ts) + '</span>';
     }
 
     function setEditing(on) {
@@ -369,15 +445,22 @@
       document.getElementById('post-edit').hidden = !on;
       document.getElementById('post-actions').hidden = on;
       document.getElementById('post-edit-actions').hidden = !on;
+      document.getElementById('post-title').hidden = on || !currentTitle();
       if (on && !composing) {
         var s = stories.find(function (x) { return x.id === currentId; });
         var area = document.getElementById('post-edit-area');
         area.value = s ? s.text : '';
-        editBaseline = area.value;
+        document.getElementById('post-title-input').value = s ? (s.title || '') : '';
+        editBaseline = baselineNow();
         updateSaveEnabled();
         autoGrow();
         area.focus();
       }
+    }
+
+    function currentTitle() {
+      var s = stories.find(function (x) { return x.id === currentId; });
+      return s ? (s.title || '') : '';
     }
 
     // ─── COMPOSE (new story from a drawn starter) ────────────────────────────────
@@ -392,19 +475,21 @@
       currentId = null;
       document.getElementById('list-view').hidden = true;
       document.getElementById('detail-view').hidden = false;
-      document.getElementById('post-kicker').hidden = !st;
-      document.getElementById('post-title').hidden = !st;
-      document.getElementById('post-title').textContent = st ? st.text : '';
+      document.getElementById('post-title').hidden = true;
+      var csl = document.getElementById('post-starter-line');
+      csl.hidden = !st;
+      csl.textContent = st ? st.text : '';
       document.getElementById('post-body').innerHTML = '';
       document.getElementById('post-meta').hidden = true;
       document.getElementById('save-edit-btn').textContent = 'Save to Your Library';
       setEditing(true);
       var area = document.getElementById('post-edit-area');
       area.value = '';
-      editBaseline = '';
+      document.getElementById('post-title-input').value = '';
+      editBaseline = baselineNow();
       updateSaveEnabled();
       autoGrow();
-      area.focus();
+      document.getElementById('post-title-input').focus();
       if (push) history.pushState({}, '', st ? 'stories.html?new=' + starterId : 'stories.html?new=blank');
       window.scrollTo(0, 0);
     }
@@ -434,6 +519,12 @@
       var params = new URLSearchParams(window.location.search);
       var nid = params.get('new');
       if (nid) { showCompose(nid === 'blank' ? null : parseInt(nid)); return; }
+      var eid = params.get('edit');
+      if (eid && stories.some(function (s) { return String(s.id) === eid; })) {
+        showDetail(parseInt(eid));
+        setEditing(true);
+        return;
+      }
       var id = params.get('id');
       if (id && stories.some(function (s) { return String(s.id) === id; })) {
         showDetail(parseInt(id));
@@ -442,21 +533,33 @@
       }
     }
 
-    window.addEventListener('popstate', route);
+    window.addEventListener('popstate', function () {
+      if (isStoryDirty()) {
+        confirmDiscard(function (yes) {
+          if (yes) { editing = false; composing = false; route(); }
+          else {
+            history.pushState({}, '', composing
+              ? 'stories.html?new=' + (composeStarter ? composeStarter.id : 'blank')
+              : 'stories.html?edit=' + currentId);
+          }
+        });
+      } else {
+        route();
+      }
+    });
 
     // ─── EVENTS ──────────────────────────────────────────────────────────────────
 
     var editArea = document.getElementById('post-edit-area');
-    function autoGrow() {
-      editArea.style.height = 'auto';
-      editArea.style.height = editArea.scrollHeight + 'px';
-    }
+    function autoGrow() { fsAutoGrow(editArea); }
 
-    // save enables only when the text differs from what's stored
+    // save enables only when title or text differs from what's stored
     var editBaseline = '';
+    function baselineNow() {
+      return document.getElementById('post-title-input').value.trim() + '\u0000' + editArea.value.trim();
+    }
     function updateSaveEnabled() {
-      document.getElementById('save-edit-btn').disabled =
-        editArea.value.trim() === editBaseline.trim();
+      document.getElementById('save-edit-btn').disabled = baselineNow() === editBaseline;
     }
 
     editArea.addEventListener('input', function () {
@@ -464,8 +567,22 @@
       updateSaveEnabled();
     });
 
+    document.getElementById('post-title-input').addEventListener('input', updateSaveEnabled);
+
     document.getElementById('stories-search').addEventListener('input', function (e) {
       renderList(e.target.value);
+    });
+
+    var favOnly = false;
+    document.getElementById('fav-filter-btn').addEventListener('click', function () {
+      favOnly = !favOnly;
+      this.classList.toggle('on', favOnly);
+      renderList(document.getElementById('stories-search').value);
+    });
+
+    document.getElementById('sort-btn').addEventListener('click', function () {
+      localStorage.setItem(SORT_KEY, sortMode() === 'edited' ? 'created' : 'edited');
+      renderList(document.getElementById('stories-search').value);
     });
 
     document.getElementById('new-story-btn').addEventListener('click', function () {
@@ -480,17 +597,45 @@
       showDetail(parseInt(row.dataset.id), true);
     });
 
+    // ─── UNSAVED-CHANGES GUARD ───────────────────────────────────────────────────
+
+    function isStoryDirty() {
+      return (editing || composing) && baselineNow() !== editBaseline;
+    }
+
+    var confirmDiscard = fsWireDiscardModal();
+
+    window.addEventListener('beforeunload', function (e) {
+      if (isStoryDirty()) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    function stopEditing(push) {
+      editing = false;
+      composing = false;
+      setEditing(false);
+      if (push) history.pushState({}, '', 'stories.html?id=' + currentId);
+    }
+
     document.getElementById('back-btn').addEventListener('click', function () {
-      showList(true);
+      if (isStoryDirty()) {
+        confirmDiscard(function (yes) { if (yes) { editing = false; composing = false; showList(true); } });
+      } else {
+        showList(true);
+      }
     });
 
     document.getElementById('edit-btn').addEventListener('click', function () {
       setEditing(true);
+      history.pushState({}, '', 'stories.html?edit=' + currentId);
     });
 
     document.getElementById('cancel-edit-btn').addEventListener('click', function () {
-      if (composing) { showList(true); return; }
-      setEditing(false);
+      function leave() {
+        if (composing) { composing = false; editing = false; showList(true); }
+        else { stopEditing(true); }
+      }
+      if (isStoryDirty()) { confirmDiscard(function (yes) { if (yes) leave(); }); }
+      else { leave(); }
     });
 
     document.getElementById('save-edit-btn').addEventListener('click', function () {
@@ -501,6 +646,7 @@
           id: Date.now(),
           starterId: composeStarter ? composeStarter.id : null,
           starter: composeStarter ? composeStarter.text : '',
+          title: document.getElementById('post-title-input').value.trim(),
           text: text,
         };
         stories.push(entry);
@@ -513,17 +659,96 @@
       var s = stories.find(function (x) { return x.id === currentId; });
       if (!s) return;
       s.text = text;
+      s.title = document.getElementById('post-title-input').value.trim();
       s.editedAt = Date.now();
       persist(stories);
       renderDetail(currentId);
+      history.replaceState({}, '', 'stories.html?id=' + currentId);
       toast('Story updated.');
     });
 
-    wireConfirmDelete(document.getElementById('delete-btn'), function () {
-      stories = stories.filter(function (x) { return x.id !== currentId; });
-      persist(stories);
-      toast('Story removed.');
-      showList(true);
+    document.getElementById('post-meta').addEventListener('click', function (e) {
+      if (!e.target.closest('.date-toggle')) return;
+      toggleDateMode();
+      var s = stories.find(function (x) { return x.id === currentId; });
+      if (s) renderPostMeta(s);
+    });
+
+    // ─── ACTIONS MENU — duplicate / delete ───────────────────────────────────────
+
+    var menuEl = document.getElementById('st-menu');
+    var menuArmTimer = null;
+
+    function closeMenu() {
+      menuEl.hidden = true;
+      clearTimeout(menuArmTimer);
+    }
+
+    function renderMenu() {
+      var src = stories.find(function (x) { return x.id === currentId; });
+      var pinned = src && src.pinned;
+      menuEl.innerHTML =
+        '<button class="st-menu-item" data-act="pin"><span class="material-symbols-sharp' + (pinned ? ' fav-mark" style="margin:0;vertical-align:0;font-size:16px' : '') + '">favorite</span>' +
+          (pinned ? 'Remove from favorites' : 'Add to favorites') + '</button>' +
+        '<button class="st-menu-item" data-act="dup"><span class="material-symbols-sharp">content_copy</span>Duplicate</button>' +
+        '<button class="st-menu-item" data-act="del"><span class="material-symbols-sharp">delete</span>Delete story</button>';
+    }
+
+    document.getElementById('story-more-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (menuEl.hidden) { renderMenu(); menuEl.hidden = false; }
+      else closeMenu();
+    });
+
+    menuEl.addEventListener('click', function (e) {
+      var item = e.target.closest('.st-menu-item');
+      if (!item) return;
+      e.stopPropagation();
+      var src = stories.find(function (x) { return x.id === currentId; });
+      if (!src) { closeMenu(); return; }
+
+      if (item.dataset.act === 'pin') {
+        src.pinned = !src.pinned;
+        persist(stories);
+        renderTitleWithFav(src);
+        toast(src.pinned ? 'Added to your favorites.' : 'Removed from favorites.');
+        closeMenu();
+      } else if (item.dataset.act === 'dup') {
+        closeMenu();
+        // opens unsaved — nothing exists until they save the retelling
+        showCompose(null, true);
+        composeStarter = src.starter ? { id: src.starterId || null, text: src.starter } : null;
+        var csl = document.getElementById('post-starter-line');
+        csl.hidden = !src.starter;
+        csl.textContent = src.starter || '';
+        document.getElementById('post-title-input').value = (src.title || 'Untitled Story') + ' \u2014 copy';
+        var area = document.getElementById('post-edit-area');
+        area.value = src.text || '';
+        editBaseline = '\u0000never';
+        updateSaveEnabled();
+        autoGrow();
+        toast('Copy ready \u2014 make it yours.');
+      } else if (item.dataset.act === 'del') {
+        if (item.classList.contains('armed')) {
+          closeMenu();
+          stories = stories.filter(function (x) { return x.id !== currentId; });
+          persist(stories);
+          toast('Story removed.');
+          showList(true);
+        } else {
+          item.classList.add('armed');
+          item.innerHTML = '<span class="material-symbols-sharp">delete</span>Click again to delete';
+          clearTimeout(menuArmTimer);
+          menuArmTimer = setTimeout(function () {
+            if (!menuEl.hidden) renderMenu();
+          }, 2200);
+        }
+      }
+    });
+
+    document.addEventListener('click', function () { if (!menuEl.hidden) closeMenu(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !menuEl.hidden) closeMenu();
     });
 
     // ─── INIT ────────────────────────────────────────────────────────────────────

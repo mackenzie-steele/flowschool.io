@@ -99,40 +99,6 @@
     /* actions menu — occasional actions live behind one button */
     .post-actions { position: relative; }
 
-    .tv-menu {
-      position: absolute;
-      top: calc(100% + 6px);
-      right: 0;
-      z-index: 6;
-      min-width: 214px;
-      display: flex;
-      flex-direction: column;
-      background: var(--paper-solid);
-      border: 1px solid rgba(var(--ink-rgb), .16);
-      border-top-color: rgba(var(--ink-rgb), .30);
-      box-shadow: 0 4px 24px rgba(var(--ink-rgb), .10);
-      animation: fadeUp .14s ease both;
-    }
-
-    .tv-menu-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: var(--font);
-      font-size: var(--text-ui);
-      color: var(--text-2);
-      text-align: left;
-      transition: background var(--transition-fast), color var(--transition-fast);
-    }
-
-    .tv-menu-item:hover { background: rgba(var(--ink-rgb), .05); color: var(--text-1); }
-    .tv-menu-item .material-symbols-sharp { font-size: 16px; color: var(--text-3); }
-    .tv-menu-item:hover .material-symbols-sharp { color: var(--text-2); }
-
     /* favorited state — filled volt heart, matching the list marker */
     .tv-menu-item .material-symbols-sharp.filled {
       font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
@@ -140,11 +106,6 @@
     }
 
     .tv-menu-item:hover .material-symbols-sharp.filled { color: var(--volt); }
-
-    .tv-menu-item.armed,
-    .tv-menu-item.armed:hover { color: var(--danger); }
-    .tv-menu-item.armed .material-symbols-sharp,
-    .tv-menu-item.armed:hover .material-symbols-sharp { color: var(--danger); }
 
     @media (max-width: 768px) {
       /* section labels pin below the bar (64px offset + ~64px bar) */
@@ -171,18 +132,27 @@
       border: 1px solid rgba(var(--ink-rgb), .12);
       border-top-color: rgba(var(--ink-rgb), .22);
       background: rgba(var(--ink-rgb), .02);
-      padding: 20px 22px 24px;
+      padding: 22px;
     }
 
-    /* bands compact inside the panel */
-    .cw-spec .cw-stories { margin: 0; padding: 0 0 18px; border: none; }
-    .cw-spec .cw-playlist { padding: 0 0 18px; }
-    .cw-spec .cw-playlist-fields { flex-direction: column; }
-    .cw-spec .cw-length {
-      display: block;
+    /* bands compact inside the panel — one rhythm: 22px between bands,
+       symmetric padding at the panel's top and bottom */
+    .cw-spec .cw-type,
+    .cw-spec .cw-length,
+    .cw-spec .cw-props,
+    .cw-spec .cw-stories,
+    .cw-spec .cw-playlist {
+      margin: 0 0 22px;
       padding: 0;
+      border: none;
     }
+
+    .cw-spec > :last-child { margin-bottom: 0; }
+
+    .cw-spec .cw-playlist-fields { flex-direction: column; }
+    .cw-spec .cw-length { display: block; }
     .cw-spec .cw-length .label-1 { display: block; margin-bottom: 10px; }
+    .cw-spec .cw-props .label-1 { display: block; margin-bottom: 10px; }
     .cw-spec .cw-length-btns { flex-wrap: wrap; }
 
     @media (max-width: 980px) {
@@ -278,6 +248,46 @@
       gap: 12px;
     }
 
+    /* story module in the writing column — a linked artifact */
+    .cw-story-block { padding: 12px 0 20px; }
+    .cw-story-block .cw-add-row { display: inline-flex; }
+
+    .cw-story-item {
+      background: rgba(var(--ink-rgb), .025);
+      box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .09);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      margin-top: 12px;
+    }
+
+    .cw-story-item:first-child { margin-top: 0; }
+
+    .cw-story-item-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .cw-story-item-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .04em;
+      color: var(--text-3);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .cw-story-item-text {
+      font-size: var(--text-body-sm);
+      line-height: 1.7;
+      color: var(--text-1);
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+
     .cw-story-chips {
       display: flex;
       flex-direction: column;
@@ -346,6 +356,159 @@
       outline: none;
       transition: box-shadow var(--transition-base), background var(--transition-base);
     }
+
+    /* class length — decided state shows only the choice */
+    .cw-length-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cw-length-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-2);
+      border: 1px solid rgba(var(--ink-rgb), .18);
+      padding: 3px 8px;
+      user-select: none;
+    }
+
+    .cw-change-btn {
+      background: none;
+      border: none;
+      padding: 2px 0;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: var(--text-small);
+      color: var(--text-3);
+      transition: color var(--transition-base);
+    }
+
+    .cw-change-btn:hover { color: var(--text-1); }
+
+    /* props — decided state shows only what's needed */
+    .cw-props-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .cw-props-tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .cw-props-tags:empty { display: none; }
+
+    .cw-props-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-2);
+      border: 1px solid rgba(var(--ink-rgb), .18);
+      padding: 3px 8px;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .cw-blocks-count {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .cw-blocks-label {
+      font-size: var(--text-small);
+      color: var(--text-3);
+      white-space: nowrap;
+    }
+
+    .cw-props-done { margin-top: 12px; }
+
+    .cw-blocks-input {
+      width: 64px;
+      background: rgba(var(--ink-rgb), .04);
+      border: none;
+      box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .12);
+      border-radius: var(--r);
+      padding: 8px 10px;
+      outline: none;
+      color: var(--text-1);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      text-align: center;
+      transition: box-shadow var(--transition-base), background var(--transition-base);
+    }
+
+    .cw-blocks-input:focus {
+      background: rgba(var(--ink-rgb), .06);
+      box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .30);
+    }
+
+    /* class type — free text with a menu of your saved types */
+    .cw-type { padding: 0 0 18px; }
+    .cw-type .label-1 { display: block; margin-bottom: 10px; }
+    .cw-type-wrap { position: relative; }
+
+    .cw-type-input {
+      width: 100%;
+      background: rgba(var(--ink-rgb), .04);
+      border: none;
+      box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .12);
+      border-radius: var(--r);
+      padding: 11px 14px;
+      outline: none;
+      color: var(--text-1);
+      font-family: var(--font);
+      font-size: var(--text-body-sm);
+      transition: box-shadow var(--transition-base), background var(--transition-base);
+    }
+
+    .cw-type-input:focus {
+      background: rgba(var(--ink-rgb), .06);
+      box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .30);
+    }
+
+    .cw-type-input::placeholder { color: rgba(var(--ink-rgb), .30); }
+
+    .cw-type-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 6;
+      background: var(--paper-solid);
+      border: 1px solid rgba(var(--ink-rgb), .16);
+      border-top-color: rgba(var(--ink-rgb), .30);
+      box-shadow: 0 4px 24px rgba(var(--ink-rgb), .10);
+      animation: fadeUp .14s ease both;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .cw-type-row {
+      display: block;
+      width: 100%;
+      padding: 9px 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-family: var(--font);
+      font-size: var(--text-ui);
+      color: var(--text-2);
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+
+    .cw-type-row:hover,
+    .cw-type-row.sel { background: rgba(var(--ink-rgb), .05); color: var(--text-1); }
 
     .cw-playlist-input {
       color: var(--text-1);
@@ -561,7 +724,7 @@
       gap: 16px;
     }
 
-    .tv-head-main { flex: 1; min-width: 0; }
+    .tv-head-main { flex: 1; min-width: 0; padding-bottom: 28px; }
 
     .tv-title {
       font-size: var(--fs-h4);
@@ -590,23 +753,27 @@
       margin-left: 10px;
     }
 
+    /* props stack tight under the playlist — one logistics block */
+    .tv-playlist.tv-props {
+      margin-top: 5px;
+    }
+
     .tv-meta {
       font-family: var(--font-mono);
       font-size: 11px;
       letter-spacing: .04em;
       color: var(--text-3);
-      margin-bottom: 28px;
     }
 
     .tv-playlist {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 7px;
       font-family: var(--font-mono);
       font-size: 12px;
       letter-spacing: .04em;
       color: var(--text-2);
-      margin: -18px 0 28px;
+      margin-top: 10px;
     }
 
     .tv-playlist .material-symbols-sharp { font-size: 15px; color: var(--text-3); }
@@ -842,6 +1009,7 @@
   <script src="data/shorthand.js"></script>
   <script src="lib/toast.js"></script>
   <script src="lib/confirm-delete.js"></script>
+  <script src="lib/library.js"></script>
   <div class="toast" id="toast"></div>
 
   <main>
@@ -867,6 +1035,18 @@
           New Class
         </button>
       </div>
+      <div class="filter-row" id="class-type-filter" hidden></div>
+      <div class="sort-row" id="sort-row">
+        <button class="btn-ghost sm" id="sort-btn" title="Toggle sort order" data-tooltip="Sort by">
+          <span class="material-symbols-sharp" style="font-size:15px;margin-right:5px">swap_vert</span>
+          <span id="sort-label">Recently Edited</span>
+        </button>
+        <button class="btn-ghost sm fav-filter" id="fav-filter-btn" title="Only favorites" data-tooltip="Only favorites">
+          <span class="material-symbols-sharp" style="font-size:15px;margin-right:5px">favorite</span>
+          Favorites
+        </button>
+        <span class="result-count" id="result-count"></span>
+      </div>
       <div class="class-index" id="class-index"></div>
     </div>
   </div>
@@ -887,6 +1067,7 @@
             <h4 class="tv-title" id="tv-title"></h4>
             <p class="tv-meta" id="tv-meta"></p>
             <p class="tv-playlist" id="tv-playlist" hidden><span class="material-symbols-sharp">music_note</span><span id="tv-playlist-body"></span></p>
+            <p class="tv-playlist tv-props" id="tv-props" hidden><span class="material-symbols-sharp">widgets</span><span id="tv-props-body"></span></p>
           </div>
           <div class="post-actions">
             <button class="btn-icon" id="edit-btn" title="Edit class" data-tooltip="Edit">
@@ -928,7 +1109,7 @@
     <div class="post-bar">
       <button class="btn-ghost" id="editor-back-btn">
         <span class="material-symbols-sharp" style="font-size:16px;margin-right:6px">arrow_back</span>
-        Your Classes
+        <span id="editor-back-label" style="max-width:240px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Your Classes</span>
       </button>
       <div class="post-edit-actions">
         <button class="btn-ghost" id="cancel-btn">Cancel</button>
@@ -940,19 +1121,72 @@
       <div class="cw-layout">
         <div class="cw-editor">
           <input type="text" class="cw-title-input" id="cw-title" placeholder="Name your class&#8230;" maxlength="120">
+
+          <div class="cw-section cw-story-block">
+            <button type="button" class="cw-add-row" id="story-add-row">
+              <span class="material-symbols-sharp">add</span>Story
+            </button>
+            <div id="cw-story-body" hidden>
+              <div class="cw-section-head">
+                <span class="label-1">Story</span>
+                <span class="cw-head-right">
+                  <button type="button" class="cw-insert-btn" id="story-change-btn">
+                    <span class="material-symbols-sharp">auto_stories</span>Change
+                  </button>
+                </span>
+              </div>
+              <div id="cw-story-list"></div>
+            </div>
+          </div>
+
           <div id="cw-sections"></div>
         </div>
 
         <aside class="cw-spec">
-          <div class="cw-stories" style="border-bottom: none;">
-            <div class="cw-stories-head">
-              <span class="label-1">Story</span>
-              <button class="btn-ghost sm" id="attach-story-btn">
-                <span class="material-symbols-sharp" style="font-size:14px;margin-right:5px">add</span>
-                Attach a story
-              </button>
+          <div class="cw-type">
+            <span class="label-1">Class Type</span>
+            <div class="cw-type-wrap">
+              <input type="text" class="cw-type-input" id="cw-class-type" placeholder="Vinyasa, Slow Flow, Yin&#8230;" maxlength="60" autocomplete="off">
+              <div class="cw-type-menu" id="cw-type-menu" hidden></div>
             </div>
-            <div class="cw-story-chips" id="cw-story-chips"></div>
+          </div>
+
+          <div class="cw-length">
+            <span class="label-1">Class Length</span>
+            <div class="cw-length-bar" id="cw-length-bar">
+              <span class="cw-length-tag" id="cw-length-tag">60 min</span>
+              <button type="button" class="cw-change-btn" id="cw-length-change">Change</button>
+            </div>
+            <div class="chips cw-length-btns" id="cw-length-btns" hidden>
+              <button type="button" class="chip" data-len="30">30 min</button>
+              <button type="button" class="chip" data-len="45">45 min</button>
+              <button type="button" class="chip on" data-len="60">60 min</button>
+              <button type="button" class="chip" data-len="75">75 min</button>
+              <button type="button" class="chip" data-len="90">90 min</button>
+            </div>
+          </div>
+
+          <div class="cw-props">
+            <span class="label-1">Props</span>
+            <div class="cw-props-bar" id="cw-props-bar">
+              <span class="cw-props-tags" id="cw-props-tags"></span>
+              <button type="button" class="cw-change-btn" id="cw-props-change">Add Props</button>
+            </div>
+            <div id="cw-props-open" hidden>
+              <div class="chips" id="cw-props-chips">
+                <button type="button" class="chip" data-prop="Blocks">Blocks</button>
+                <button type="button" class="chip" data-prop="Strap">Strap</button>
+                <button type="button" class="chip" data-prop="Bolster">Bolster</button>
+                <button type="button" class="chip" data-prop="Blanket">Blanket</button>
+                <button type="button" class="chip" data-prop="Wall">Wall</button>
+                <button type="button" class="chip" data-prop="Chair">Chair</button>
+              </div>
+              <div class="cw-blocks-count" id="cw-blocks-count" hidden>
+                <span class="cw-blocks-label">How many blocks?</span>
+                <input type="number" class="cw-blocks-input" id="cw-blocks-input" min="1" max="99" step="1" value="2" inputmode="numeric">
+              </div>
+              <button type="button" class="cw-change-btn cw-props-done" id="cw-props-done">Done</button>
+            </div>
           </div>
 
           <div class="cw-playlist">
@@ -960,17 +1194,6 @@
             <div class="cw-playlist-fields">
               <input type="text" class="cw-playlist-input" id="cw-playlist" placeholder="Playlist title" maxlength="120">
               <input type="url" class="cw-playlist-url" id="cw-playlist-url" placeholder="Playlist link" maxlength="500">
-            </div>
-          </div>
-
-          <div class="cw-length">
-            <span class="label-1">Class Length</span>
-            <div class="cw-length-btns" id="cw-length-btns">
-              <button class="time-btn" data-len="30">30 min</button>
-              <button class="time-btn" data-len="45">45 min</button>
-              <button class="time-btn active" data-len="60">60 min</button>
-              <button class="time-btn" data-len="75">75 min</button>
-              <button class="time-btn" data-len="90">90 min</button>
             </div>
           </div>
         </aside>
@@ -1057,19 +1280,19 @@
 
     // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-    var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    function fmtDate(ts) {
-      if (!ts) return '';
-      var d = new Date(ts);
-      return MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
-    }
 
-    function esc(s) {
-      var div = document.createElement('div');
-      div.textContent = s;
-      return div.innerHTML;
-    }
+    // ─── SORT — per-category preference, edited-first by default ─────────────────
+    var SORT_KEY = 'fs-sort-classes';
+    function sortMode() { return fsSortMode(SORT_KEY); }
+    var sorterFor = fsSorterFor;
+    function renderSortBtn() { fsRenderSortLabel(sortMode()); }
+
+    // ─── DATE STAMPS — Created ↔ Edited, apple-notes style ──────────────────────
+    // Clicking a stamp flips the mode; the choice persists site-wide.
+    var dateMode = fsDateMode, toggleDateMode = fsToggleDateMode, stampFor = fsStampFor;
+
+    var fmtDate = fsFmtDate, esc = fsEsc;
 
     function byId(id) { return classes.find(function (c) { return c.id === id; }); }
 
@@ -1077,10 +1300,7 @@
       return SECTIONS.filter(function (s) { return (c.sections[s.key] || '').trim(); }).length;
     }
 
-    function autoGrow(el) {
-      el.style.height = 'auto';
-      el.style.height = el.scrollHeight + 'px';
-    }
+    var autoGrow = fsAutoGrow;
 
     function dayStr(d) {
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -1105,6 +1325,8 @@
 
       if (!classes.length) {
         bar.hidden = true;
+        document.getElementById('sort-row').hidden = true;
+        document.getElementById('class-type-filter').hidden = true;
         index.innerHTML =
           '<div class="library-empty">' +
           '<h4 class="library-empty-title">Your first class starts at the peak.</h4>' +
@@ -1112,11 +1334,7 @@
           '<div class="library-empty-actions">' +
           '<button class="btn-primary" id="empty-new-btn">Write a Class</button>' +
           '</div>' +
-          '<div class="library-empty-ghost" aria-hidden="true">' +
-          '<div class="library-empty-ghost-row"><i></i><i></i></div>' +
-          '<div class="library-empty-ghost-row"><i></i><i></i></div>' +
-          '<div class="library-empty-ghost-row"><i></i><i></i></div>' +
-          '</div>' +
+          fsGhostRows() +
           '</div>';
         document.getElementById('empty-new-btn').addEventListener('click', function () {
           showEdit(null, true);
@@ -1125,7 +1343,14 @@
       }
 
       bar.hidden = false;
-      var list = classes.slice().sort(function (a, b) { return b.id - a.id; });
+      document.getElementById('sort-row').hidden = false;
+      renderSortBtn();
+      renderTypeFilter();
+      var list = classes.slice().sort(sorterFor(sortMode()));
+      if (favOnly) list = list.filter(function (c) { return c.pinned; });
+      if (typeFilter !== 'all') {
+        list = list.filter(function (c) { return (c.classType || '').toLowerCase() === typeFilter; });
+      }
       if (q) {
         list = list.filter(function (c) {
           if ((c.title || '').toLowerCase().indexOf(q) !== -1) return true;
@@ -1137,13 +1362,22 @@
       }
 
       if (!list.length) {
-        index.innerHTML = '<div class="library-empty"><p class="library-empty-sub">Nothing matches &#8220;' + esc(filter) + '&#8221;.</p></div>';
+        document.getElementById('result-count').textContent = '0 results';
+        index.innerHTML = '<div class="library-empty"><p class="library-empty-sub">' +
+          (q ? 'Nothing matches &#8220;' + esc(filter) + '&#8221;.'
+             : (favOnly ? 'No favorites yet &#8212; use the &#8943; menu on a class.'
+                        : 'No classes of this type yet.')) +
+          '</p></div>';
         return;
       }
+
+      document.getElementById('result-count').textContent =
+        list.length + ' result' + (list.length !== 1 ? 's' : '');
 
       index.innerHTML = list.map(function (c) {
         var n = sectionCount(c);
         var bits = [(c.length || 60) + ' min', n + (n === 1 ? ' section' : ' sections')];
+        if (c.classType) bits.unshift(esc(c.classType));
         if (c.storyIds && c.storyIds.length) bits.push(c.storyIds.length === 1 ? '1 story' : c.storyIds.length + ' stories');
         return '<a href="your-classes.html?id=' + c.id + '" class="class-row" data-id="' + c.id + '">' +
           '<span class="class-row-main">' +
@@ -1152,7 +1386,7 @@
             '</span>' +
             '<span class="class-row-meta">' + bits.join(' · ') + '</span>' +
           '</span>' +
-          '<span class="class-row-date">' + fmtDate(c.id) + '</span>' +
+          '<span class="class-row-date">' + fmtDate(stampFor(c).ts) + '</span>' +
         '</a>';
       }).join('');
     }
@@ -1165,9 +1399,7 @@
       currentId = id;
 
       renderTitleFav(c);
-      var meta = (c.length || 60) + ' min · Saved ' + fmtDate(c.id);
-      if (c.editedAt) meta += ' · Edited ' + fmtDate(c.editedAt);
-      document.getElementById('tv-meta').textContent = meta;
+      renderTvMeta(c);
 
       // playlist — a link when one exists, plain text otherwise
       var plName = (c.playlist || '').trim();
@@ -1207,6 +1439,15 @@
         '</div>';
       }).join('');
 
+      // props — what to grab before the room fills
+      var props = sortProps(c.props || []).map(function (p) {
+        if (p !== 'Blocks') return p;
+        var n = c.blockCount || 2;
+        return n + (n === 1 ? ' Block' : ' Blocks');
+      });
+      document.getElementById('tv-props').hidden = !props.length;
+      document.getElementById('tv-props-body').textContent = props.join(' \u00B7 ');
+
       // teaching log — today's note is open; past teaches stack below
       normalizeNotes(c);
       document.getElementById('tv-note-composer').hidden = true;
@@ -1236,6 +1477,15 @@
           toast('Note removed.');
         });
       });
+    }
+
+    function renderTvMeta(c) {
+      var st = stampFor(c);
+      document.getElementById('tv-meta').innerHTML =
+        (c.classType ? esc(c.classType) + ' \u00B7 ' : '') +
+        esc((c.length || 60) + ' min') + ' \u00B7 ' +
+        '<span class="date-toggle" title="Show ' + (dateMode() === 'edited' ? 'created' : 'edited') + ' date">' +
+        st.label + ' ' + fmtDate(st.ts) + '</span>';
     }
 
     function renderTitleFav(c) {
@@ -1291,32 +1541,49 @@
       });
     }
 
+    function setLengthCollapsed(collapsed) {
+      document.getElementById('cw-length-bar').hidden = !collapsed;
+      document.getElementById('cw-length-btns').hidden = collapsed;
+    }
+
     function setLength(mins) {
+      document.getElementById('cw-length-tag').textContent = mins + ' min';
       editLength = mins;
-      document.querySelectorAll('#cw-length-btns .time-btn').forEach(function (b) {
-        b.classList.toggle('active', parseInt(b.dataset.len) === mins);
+      document.querySelectorAll('#cw-length-btns .chip').forEach(function (b) {
+        b.classList.toggle('on', parseInt(b.dataset.len) === mins);
       });
     }
 
-    document.getElementById('cw-length-btns').addEventListener('click', function (e) {
-      var btn = e.target.closest('.time-btn');
-      if (btn) { setLength(parseInt(btn.dataset.len)); markDirty(); }
+    document.getElementById('cw-length-change').addEventListener('click', function () {
+      setLengthCollapsed(false);
     });
 
+    document.getElementById('cw-length-btns').addEventListener('click', function (e) {
+      var btn = e.target.closest('.chip');
+      if (btn) { setLength(parseInt(btn.dataset.len)); setLengthCollapsed(true); markDirty(); }
+    });
+
+    // the attached story lives in the writing column, read live from
+    // the library — like a linked flow, its parent is the truth
     function renderStoryChips() {
       var stories = loadStories();
-      var el = document.getElementById('cw-story-chips');
-      el.innerHTML = attachedIds.map(function (sid) {
-        var s = stories.find(function (x) { return x.id === sid; });
-        if (!s) return '';
-        // the teacher's own words identify the story better than its prompt
-        var words = (s.text || '').trim().split(/\s+/).filter(Boolean);
-        var label = words.length
-          ? words.slice(0, 6).join(' ') + (words.length > 6 ? '\u2026' : '')
-          : (s.starter || 'Untitled story');
-        return '<div class="cw-story-chip">' +
-          '<span class="cw-story-chip-text">' + esc(label) + '</span>' +
-          '<button class="cw-story-chip-rm" data-id="' + sid + '" title="Detach">&#10005;</button>' +
+      var items = attachedIds
+        .map(function (sid) { return stories.find(function (x) { return x.id === sid; }); })
+        .filter(Boolean);
+
+      document.getElementById('story-add-row').hidden = !!items.length;
+      document.getElementById('cw-story-body').hidden = !items.length;
+
+      document.getElementById('cw-story-list').innerHTML = items.map(function (st) {
+        var label = st.title || st.starter || 'Untitled Story';
+        return '<div class="cw-story-item">' +
+          '<div class="cw-story-item-head">' +
+            '<span class="cw-story-item-title">' + esc(label) + '</span>' +
+            '<button type="button" class="cw-remove-btn" data-rmstory="' + st.id + '" title="Detach story" data-tooltip="Detach">' +
+              '<span class="material-symbols-sharp">close</span>' +
+            '</button>' +
+          '</div>' +
+          '<div class="cw-story-item-text">' + esc(st.text || '') + '</div>' +
         '</div>';
       }).join('');
     }
@@ -1331,6 +1598,13 @@
 
       document.getElementById('cw-title').value = c ? (c.title || '') : '';
       document.getElementById('cw-playlist').value = c ? (c.playlist || '') : '';
+      document.getElementById('cw-class-type').value = c ? (c.classType || '') : '';
+      hideTypeMenu();
+      editProps = c && c.props ? c.props.slice() : [];
+      editBlockCount = c && c.blockCount ? c.blockCount : 2;
+      renderPropChips();
+      setPropsCollapsed(true);
+      setLengthCollapsed(true);
       document.getElementById('cw-playlist-url').value = c ? (c.playlistUrl || '') : '';
       setLength(c && c.length ? c.length : 60);
       attachedIds = c && c.storyIds ? c.storyIds.slice() : [];
@@ -1344,6 +1618,8 @@
       editMeta = c && c.sectionMeta ? JSON.parse(JSON.stringify(c.sectionMeta)) : {};
       updateSectionLinks();
 
+      document.getElementById('editor-back-label').textContent =
+        c ? (c.title || 'Untitled Class') : 'Your Classes';
       dirty = false;
       // an untouched existing class IS saved; a fresh one has nothing to save yet
       setSaveButton(c ? 'saved' : 'idle');
@@ -1360,8 +1636,6 @@
     // until the next change.
 
     var dirty = false;
-    var pendingDiscard = null;
-
     // legacy cleanup from the earlier draft-slot approach
     try { localStorage.removeItem('flowschool_class_draft'); } catch (_) {}
 
@@ -1393,30 +1667,7 @@
       dirty = true;
     }
 
-    function confirmDiscard(cb) {
-      pendingDiscard = cb;
-      document.getElementById('discard-modal').hidden = false;
-    }
-
-    document.getElementById('discard-yes').addEventListener('click', function () {
-      document.getElementById('discard-modal').hidden = true;
-      var cb = pendingDiscard; pendingDiscard = null;
-      if (cb) cb(true);
-    });
-
-    document.getElementById('discard-keep').addEventListener('click', function () {
-      document.getElementById('discard-modal').hidden = true;
-      var cb = pendingDiscard; pendingDiscard = null;
-      if (cb) cb(false);
-    });
-
-    document.getElementById('discard-modal').addEventListener('click', function (e) {
-      if (e.target === e.currentTarget) {
-        e.currentTarget.hidden = true;
-        var cb = pendingDiscard; pendingDiscard = null;
-        if (cb) cb(false);
-      }
-    });
+    var confirmDiscard = fsWireDiscardModal();
 
     window.addEventListener('beforeunload', function (e) {
       if (isEditing() && dirty) {
@@ -1424,6 +1675,162 @@
         e.returnValue = '';
       }
     });
+
+    // ─── PROPS — decided by default; choices appear on demand ────────────────────
+
+    var PROP_ORDER = ['Blocks', 'Strap', 'Bolster', 'Blanket', 'Wall', 'Chair'];
+
+    function sortProps(list) {
+      return list.slice().sort(function (a, b) {
+        return PROP_ORDER.indexOf(a) - PROP_ORDER.indexOf(b);
+      });
+    }
+
+    var editProps = [];
+    var editBlockCount = 2;
+
+    function propTagText(p) {
+      if (p !== 'Blocks') return p;
+      return editBlockCount + (editBlockCount === 1 ? ' Block' : ' Blocks');
+    }
+
+    function propTagList() {
+      return sortProps(editProps).map(propTagText);
+    }
+
+    function renderPropChips() {
+      document.querySelectorAll('#cw-props-chips .chip').forEach(function (chip) {
+        chip.classList.toggle('on', editProps.indexOf(chip.dataset.prop) !== -1);
+      });
+      var hasBlocks = editProps.indexOf('Blocks') !== -1;
+      document.getElementById('cw-blocks-count').hidden = !hasBlocks;
+      document.getElementById('cw-blocks-input').value = editBlockCount;
+    }
+
+    function renderPropsBar() {
+      document.getElementById('cw-props-tags').innerHTML =
+        propTagList().map(function (t) { return '<span class="cw-props-tag">' + esc(t) + '</span>'; }).join('');
+      document.getElementById('cw-props-change').textContent = editProps.length ? 'Change' : 'Add Props';
+    }
+
+    function setPropsCollapsed(collapsed) {
+      document.getElementById('cw-props-bar').hidden = !collapsed;
+      document.getElementById('cw-props-open').hidden = collapsed;
+      if (collapsed) renderPropsBar();
+    }
+
+    document.getElementById('cw-props-change').addEventListener('click', function () {
+      renderPropChips();
+      setPropsCollapsed(false);
+    });
+
+    document.getElementById('cw-props-done').addEventListener('click', function () {
+      setPropsCollapsed(true);
+    });
+
+    document.getElementById('cw-props-chips').addEventListener('click', function (e) {
+      var chip = e.target.closest('.chip');
+      if (!chip) return;
+      var p = chip.dataset.prop;
+      var i = editProps.indexOf(p);
+      if (i === -1) editProps.push(p); else editProps.splice(i, 1);
+      renderPropChips();
+      markDirty();
+    });
+
+    document.getElementById('cw-blocks-input').addEventListener('input', function () {
+      var n = parseInt(this.value, 10);
+      if (isNaN(n)) return; // mid-typing; clamp on blur
+      editBlockCount = Math.min(99, Math.max(1, n));
+      markDirty();
+    });
+
+    document.getElementById('cw-blocks-input').addEventListener('blur', function () {
+      var n = parseInt(this.value, 10);
+      editBlockCount = isNaN(n) ? 2 : Math.min(99, Math.max(1, n));
+      this.value = editBlockCount;
+    });
+
+    // ─── CLASS TYPE — combo: type freely, or pick a type you've used ─────────────
+
+    function knownClassTypes() {
+      var seen = {}, out = [];
+      classes.forEach(function (c) {
+        var t = (c.classType || '').trim();
+        if (!t) return;
+        var k = t.toLowerCase();
+        if (!seen[k]) { seen[k] = 1; out.push(t); }
+      });
+      return out.sort(function (a, b) { return a.localeCompare(b); });
+    }
+
+    var typeSel = -1;
+
+    function renderTypeMenu() {
+      var input = document.getElementById('cw-class-type');
+      var menu = document.getElementById('cw-type-menu');
+      var q = input.value.trim().toLowerCase();
+      var items = knownClassTypes().filter(function (t) {
+        return !q || (t.toLowerCase().indexOf(q) !== -1 && t.toLowerCase() !== q);
+      });
+      if (!items.length) { menu.hidden = true; typeSel = -1; return; }
+      typeSel = Math.min(typeSel, items.length - 1);
+      menu.innerHTML = items.map(function (t, i) {
+        return '<button type="button" class="cw-type-row' + (i === typeSel ? ' sel' : '') + '" data-v="' + esc(t) + '">' + esc(t) + '</button>';
+      }).join('');
+      menu.hidden = false;
+    }
+
+    function hideTypeMenu() {
+      document.getElementById('cw-type-menu').hidden = true;
+      typeSel = -1;
+    }
+
+    (function () {
+      var input = document.getElementById('cw-class-type');
+      var menu = document.getElementById('cw-type-menu');
+
+      input.addEventListener('focus', renderTypeMenu);
+      input.addEventListener('input', function () {
+        typeSel = -1;
+        renderTypeMenu();
+        markDirty();
+      });
+      input.addEventListener('blur', function () {
+        setTimeout(hideTypeMenu, 120);
+      });
+
+      input.addEventListener('keydown', function (e) {
+        if (menu.hidden) return;
+        var rows = menu.querySelectorAll('.cw-type-row');
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          typeSel = (typeSel + 1) % rows.length;
+          renderTypeMenu();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          typeSel = typeSel <= 0 ? rows.length - 1 : typeSel - 1;
+          renderTypeMenu();
+        } else if (e.key === 'Enter' && typeSel !== -1) {
+          e.preventDefault();
+          input.value = rows[typeSel].dataset.v;
+          hideTypeMenu();
+          markDirty();
+        } else if (e.key === 'Escape') {
+          hideTypeMenu();
+        }
+      });
+
+      menu.addEventListener('mousedown', function (e) {
+        var row = e.target.closest('.cw-type-row');
+        if (!row) return;
+        e.preventDefault();
+        input.value = row.dataset.v;
+        hideTypeMenu();
+        markDirty();
+        input.focus();
+      });
+    })();
 
     function playlistUrlValue() {
       var v = document.getElementById('cw-playlist-url').value.trim();
@@ -1473,9 +1880,7 @@
       localStorage.setItem('flowschool_flows', JSON.stringify(list));
     }
 
-    function flowPoseCount(text) {
-      return (text || '').split(/[\/\n]/).map(function (x) { return x.trim(); }).filter(Boolean).length;
-    }
+    var flowPoseCount = fsPoseCount;
 
     function resolveFlow(id) {
       return loadFlowLib().find(function (f) { return f.id === id; });
@@ -1924,6 +2329,46 @@
       renderList(e.target.value);
     });
 
+    var favOnly = false;
+    var typeFilter = 'all';
+
+    function renderTypeFilter() {
+      var el = document.getElementById('class-type-filter');
+      var types = knownClassTypes();
+      if (!types.length) {
+        el.hidden = true;
+        typeFilter = 'all';
+        return;
+      }
+      // a vanished type (last class of it deleted/retyped) resets the filter
+      if (typeFilter !== 'all' && types.map(function (t) { return t.toLowerCase(); }).indexOf(typeFilter) === -1) {
+        typeFilter = 'all';
+      }
+      el.hidden = false;
+      el.innerHTML = '<button class="filter-chip' + (typeFilter === 'all' ? ' active' : '') + '" data-t="all">All</button>' +
+        types.map(function (t) {
+          var key = t.toLowerCase();
+          return '<button class="filter-chip' + (typeFilter === key ? ' active' : '') + '" data-t="' + esc(key) + '">' + esc(t) + '</button>';
+        }).join('');
+    }
+
+    document.getElementById('class-type-filter').addEventListener('click', function (e) {
+      var chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      typeFilter = chip.dataset.t;
+      renderList(document.getElementById('class-search').value);
+    });
+    document.getElementById('fav-filter-btn').addEventListener('click', function () {
+      favOnly = !favOnly;
+      this.classList.toggle('on', favOnly);
+      renderList(document.getElementById('class-search').value);
+    });
+
+    document.getElementById('sort-btn').addEventListener('click', function () {
+      localStorage.setItem(SORT_KEY, sortMode() === 'edited' ? 'created' : 'edited');
+      renderList(document.getElementById('classes-search') ? document.getElementById('classes-search').value : '');
+    });
+
     document.getElementById('new-class-btn').addEventListener('click', function () {
       showEdit(null, true);
     });
@@ -1937,6 +2382,13 @@
 
     document.getElementById('back-btn').addEventListener('click', function () {
       showList(true);
+    });
+
+    document.getElementById('tv-meta').addEventListener('click', function (e) {
+      if (!e.target.closest('.date-toggle')) return;
+      toggleDateMode();
+      var c = byId(currentId);
+      if (c) renderTvMeta(c);
     });
 
     // ─── ACTIONS MENU — pin / duplicate / delete ─────────────────────────────────
@@ -2017,6 +2469,11 @@
       document.getElementById('cw-title').value = (c.title || 'Untitled Class') + ' — copy';
       document.getElementById('cw-playlist').value = c.playlist || '';
       document.getElementById('cw-playlist-url').value = c.playlistUrl || '';
+      document.getElementById('cw-class-type').value = c.classType || '';
+      editProps = c.props ? c.props.slice() : [];
+      editBlockCount = c.blockCount || 2;
+      renderPropChips();
+      setPropsCollapsed(true);
       attachedIds = (c.storyIds || []).slice();
       renderStoryChips();
       setLength(c.length || 60);
@@ -2044,7 +2501,7 @@
     }
 
     document.getElementById('cancel-btn').addEventListener('click', function () { leaveEditor('auto'); });
-    document.getElementById('editor-back-btn').addEventListener('click', function () { leaveEditor('list'); });
+    document.getElementById('editor-back-btn').addEventListener('click', function () { leaveEditor('auto'); });
 
     document.getElementById('save-btn').addEventListener('click', function () {
       var sections = collectSections();
@@ -2060,12 +2517,14 @@
         c.sectionMeta = editMeta;
         c.storyIds = attachedIds.slice();
         c.playlist = document.getElementById('cw-playlist').value.trim();
+        c.classType = document.getElementById('cw-class-type').value.trim();
+        c.props = sortProps(editProps);
+        c.blockCount = editBlockCount;
         c.playlistUrl = playlistUrlValue();
         c.length = editLength;
         c.editedAt = Date.now();
         persist();
-        dirty = false;
-        setSaveButton('saved');
+        refreshEditor();
       } else {
         var entry = {
           id: Date.now(),
@@ -2074,19 +2533,29 @@
           sectionMeta: editMeta,
           storyIds: attachedIds.slice(),
           playlist: document.getElementById('cw-playlist').value.trim(),
+          classType: document.getElementById('cw-class-type').value.trim(),
+          props: sortProps(editProps),
+          blockCount: editBlockCount,
           playlistUrl: playlistUrlValue(),
           length: editLength,
           notesLog: [],
         };
         classes.push(entry);
         persist();
-        dirty = false;
         // the editor now edits the class it just created
         editingId = entry.id;
         history.replaceState({}, '', 'your-classes.html?edit=' + entry.id);
-        setSaveButton('saved');
+        refreshEditor();
       }
     });
+
+    // after a save, the editor re-renders from the saved class — every
+    // panel control settles back into its decided state
+    function refreshEditor() {
+      var sy = window.scrollY;
+      showEdit(editingId, false);
+      window.scrollTo(0, sy);
+    }
 
     // teaching notes — deliberate entries, appended to the log
     document.getElementById('tv-notes-area').addEventListener('input', function (e) {
@@ -2134,7 +2603,7 @@
         var on = attachedIds.indexOf(s.id) !== -1;
         return '<div class="story-pick-item' + (on ? ' on' : '') + '" data-id="' + s.id + '">' +
           '<div class="story-pick-info">' +
-            '<div class="story-pick-title">' + esc(s.text.split('\n')[0]) + '</div>' +
+            '<div class="story-pick-title">' + esc(s.title || s.text.split('\n')[0]) + '</div>' +
             (s.starter ? '<div class="story-pick-starter">' + esc(s.starter) + '</div>' : '') +
           '</div>' +
           '<span class="material-symbols-sharp story-pick-check">check</span>' +
@@ -2142,10 +2611,13 @@
       }).join('');
     }
 
-    document.getElementById('attach-story-btn').addEventListener('click', function () {
+    function openStoryPicker() {
       renderStoryPicker();
       document.getElementById('story-modal').hidden = false;
-    });
+    }
+
+    document.getElementById('story-add-row').addEventListener('click', openStoryPicker);
+    document.getElementById('story-change-btn').addEventListener('click', openStoryPicker);
 
     document.getElementById('story-pick-list').addEventListener('click', function (e) {
       var item = e.target.closest('.story-pick-item');
@@ -2166,13 +2638,14 @@
       if (e.target === e.currentTarget) {
         e.currentTarget.hidden = true;
         renderStoryChips();
+        markDirty();
       }
     });
 
-    document.getElementById('cw-story-chips').addEventListener('click', function (e) {
-      var rm = e.target.closest('.cw-story-chip-rm');
+    document.getElementById('cw-story-list').addEventListener('click', function (e) {
+      var rm = e.target.closest('.cw-remove-btn');
       if (!rm) return;
-      var sid = parseInt(rm.dataset.id);
+      var sid = parseInt(rm.dataset.rmstory);
       attachedIds = attachedIds.filter(function (x) { return x !== sid; });
       renderStoryChips();
       markDirty();

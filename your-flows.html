@@ -36,28 +36,6 @@
     }
 
     /* ── Index — one list, typed by tags ── */
-    /* ── Filter row — same pattern as the shorthand library ── */
-    .filter-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 2px;
-      scrollbar-width: none;
-    }
-
-    .filter-row::-webkit-scrollbar { display: none; }
-
-    .result-count {
-      margin-left: auto;
-      font-size: var(--text-small);
-      color: var(--text-3);
-      font-weight: var(--weight-semibold);
-      white-space: nowrap;
-    }
-
     .flow-filter-empty {
       padding: 44px 0;
       text-align: center;
@@ -148,44 +126,54 @@
       padding-top: 12px;
     }
 
-    .fl-menu {
-      position: absolute;
-      top: 46px;
-      right: 12px;
-      z-index: 6;
-      min-width: 200px;
+    /* ── Detail view — the class pattern: preview first ── */
+    .fd { max-width: 640px; }
+
+    .fd-head {
       display: flex;
-      flex-direction: column;
-      background: var(--paper-solid);
-      border: 1px solid rgba(var(--ink-rgb), .16);
-      border-top-color: rgba(var(--ink-rgb), .30);
-      box-shadow: 0 4px 24px rgba(var(--ink-rgb), .10);
-      animation: fadeUp .14s ease both;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 32px;
     }
 
-    .fl-menu-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: var(--font);
-      font-size: var(--text-ui);
-      color: var(--text-2);
-      text-align: left;
-      transition: background var(--transition-fast), color var(--transition-fast);
+    .fd-head-main { min-width: 0; }
+
+    .fd-title {
+      font-size: var(--fs-h4);
+      font-weight: var(--weight-regular);
+      letter-spacing: -.01em;
+      line-height: var(--lh-heading);
+      color: var(--text-1);
+      margin-bottom: 8px;
     }
 
-    .fl-menu-item:hover { background: rgba(var(--ink-rgb), .05); color: var(--text-1); }
-    .fl-menu-item .material-symbols-sharp { font-size: 16px; color: var(--text-3); }
-    .fl-menu-item:hover .material-symbols-sharp { color: var(--text-2); }
+    .fd-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .04em;
+      color: var(--text-3);
+    }
 
-    .fl-menu-item.armed,
-    .fl-menu-item.armed:hover { color: var(--danger); }
-    .fl-menu-item.armed .material-symbols-sharp,
-    .fl-menu-item.armed:hover .material-symbols-sharp { color: var(--danger); }
+    .fd-actions { position: relative; flex-shrink: 0; }
+
+    /* exactly as written — the teaching-view treatment */
+    .fd-flow {
+      font-size: var(--fs-h6);
+      font-weight: var(--weight-regular);
+      line-height: 1.6;
+      color: var(--text-1);
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      margin-bottom: 44px;
+    }
+
+    .fd-usedin {
+      border-top: 1px solid var(--border-light);
+      padding-top: 24px;
+    }
+
+    .fd-usedin .label-1 { display: block; margin-bottom: 6px; }
 
     /* ── Editor ── */
     .fl-editor { max-width: 640px; position: relative; }
@@ -400,6 +388,7 @@
   <script src="data/shorthand.js"></script>
   <script src="lib/toast.js"></script>
   <script src="lib/confirm-delete.js"></script>
+  <script src="lib/library.js"></script>
   <div class="toast" id="toast"></div>
 
   <main>
@@ -427,7 +416,54 @@
         </button>
       </div>
       <div class="filter-row" id="flow-filter"></div>
+      <div class="sort-row" id="sort-row">
+        <button class="btn-ghost sm" id="sort-btn" title="Toggle sort order" data-tooltip="Sort by">
+          <span class="material-symbols-sharp" style="font-size:15px;margin-right:5px">swap_vert</span>
+          <span id="sort-label">Recently Edited</span>
+        </button>
+        <button class="btn-ghost sm fav-filter" id="fav-filter-btn" title="Only favorites" data-tooltip="Only favorites">
+          <span class="material-symbols-sharp" style="font-size:15px;margin-right:5px">favorite</span>
+          Favorites
+        </button>
+      </div>
       <div id="flow-index"></div>
+    </div>
+  </div>
+
+  <!-- ── DETAIL VIEW ── -->
+  <div id="detail-view" hidden>
+    <div class="post-bar">
+      <button class="btn-ghost" id="detail-back-btn">
+        <span class="material-symbols-sharp" style="font-size:16px;margin-right:6px">arrow_back</span>
+        Your Flows
+      </button>
+    </div>
+    <div class="wrap" style="padding-top: 0;">
+
+      <div class="fd">
+        <div class="fd-head">
+          <div class="fd-head-main">
+            <h4 class="fd-title" id="fd-title"></h4>
+            <p class="fd-meta" id="fd-meta"></p>
+          </div>
+          <div class="post-actions fd-actions" id="fd-actions">
+            <button class="btn-icon" id="fd-edit-btn" title="Edit flow" data-tooltip="Edit">
+              <span class="material-symbols-sharp">edit</span>
+            </button>
+            <button class="btn-icon" id="fd-more-btn" title="More actions" data-tooltip="More">
+              <span class="material-symbols-sharp">more_horiz</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="fd-flow" id="fd-flow"></div>
+
+        <div class="fd-usedin">
+          <span class="label-1">In Your Classes</span>
+          <div id="fd-usedin-list"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -436,7 +472,7 @@
     <div class="post-bar">
       <button class="btn-ghost" id="editor-back-btn">
         <span class="material-symbols-sharp" style="font-size:16px;margin-right:6px">arrow_back</span>
-        Your Flows
+        <span id="editor-back-label" style="max-width:240px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Your Flows</span>
       </button>
       <div class="post-edit-actions">
         <button class="btn-ghost" id="cancel-btn">Cancel</button>
@@ -466,10 +502,6 @@
           <textarea class="fl-area" id="fl-area" rows="3" placeholder="SEATED TWIST / BOAT / LOW BOAT / TWIST BOAT"></textarea>
         </div>
 
-        <div class="fl-section" id="fl-usedin" hidden>
-          <span class="label-1">In Your Classes</span>
-          <div id="fl-usedin-list"></div>
-        </div>
       </div>
 
     </div>
@@ -522,24 +554,27 @@
       return flows.find(function (f) { return f.id === id; });
     }
 
-    function esc(str) {
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
+    var esc = fsEsc, poseCount = fsPoseCount;
 
-    function poseCount(text) {
-      return (text || '').split(/[\/\n]/).map(function (p) { return p.trim(); }).filter(Boolean).length;
-    }
 
-    function fmtDate(ts) {
-      return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    }
+    // ─── SORT — per-category preference, edited-first by default ─────────────────
+    var SORT_KEY = 'fs-sort-flows';
+    function sortMode() { return fsSortMode(SORT_KEY); }
+    var sorterFor = fsSorterFor;
+    function renderSortBtn() { fsRenderSortLabel(sortMode()); }
+
+    // ─── DATE STAMPS — Created ↔ Edited, apple-notes style ──────────────────────
+    // Clicking a stamp flips the mode; the choice persists site-wide.
+    var dateMode = fsDateMode, toggleDateMode = fsToggleDateMode, stampFor = fsStampFor;
+
+    var fmtDate = fsFmtDate;
 
     // ─── STATE ───────────────────────────────────────────────────────────────────
 
     var editingId = null;
+    var currentId = null;
     var editType = null;
     var dirty = false;
-    var pendingDiscard = null;
 
     // ─── LIST ────────────────────────────────────────────────────────────────────
 
@@ -563,6 +598,7 @@
       document.getElementById('flow-filter').hidden = !flows.length;
       if (!flows.length) {
         bar.hidden = true;
+        document.getElementById('sort-row').hidden = true;
         searchQ = '';
         index.innerHTML =
           '<div class="library-empty">' +
@@ -571,11 +607,7 @@
           '<div class="library-empty-actions">' +
           '<button class="btn-primary" id="empty-new-btn">Write a Flow</button>' +
           '</div>' +
-          '<div class="library-empty-ghost" aria-hidden="true">' +
-          '<div class="library-empty-ghost-row"><i></i><i></i></div>' +
-          '<div class="library-empty-ghost-row"><i></i><i></i></div>' +
-          '<div class="library-empty-ghost-row"><i></i><i></i></div>' +
-          '</div>' +
+          fsGhostRows() +
           '</div>';
         var btn = document.getElementById('empty-new-btn');
         if (btn) btn.addEventListener('click', function () { showEdit(null, true); });
@@ -583,9 +615,11 @@
       }
 
       bar.hidden = false;
+      document.getElementById('sort-row').hidden = false;
 
       var q = searchQ.trim().toLowerCase();
       var list = flows
+        .filter(function (f) { return !favOnly || f.pinned; })
         .filter(function (f) { return listFilter === 'all' || f.type === listFilter; })
         .filter(function (f) {
           if (!q) return true;
@@ -593,13 +627,17 @@
                  (f.text || '').toLowerCase().indexOf(q) !== -1 ||
                  (TAG_NAMES[f.type] || '').toLowerCase().indexOf(q) !== -1;
         })
-        .sort(function (a, b) { return (b.editedAt || b.id) - (a.editedAt || a.id); });
+        .sort(sorterFor(sortMode()));
 
+      renderSortBtn();
       renderFilter(list.length);
 
       if (!list.length) {
-        if (q) {
-          index.innerHTML = '<div class="flow-filter-empty"><p>Nothing matches &#8220;' + esc(searchQ.trim()) + '&#8221;.</p></div>';
+        if (q || favOnly) {
+          index.innerHTML = '<div class="flow-filter-empty"><p>' +
+            (q ? 'Nothing matches &#8220;' + esc(searchQ.trim()) + '&#8221;.'
+               : 'No favorites here yet &#8212; use the &#8943; menu on a flow.') +
+            '</p></div>';
           return;
         }
         var t = typeOf(listFilter);
@@ -618,27 +656,17 @@
         return '<div class="flow-card" data-id="' + f.id + '">' +
           '<div class="fc-top">' +
             '<span class="flow-tag">' + (TAG_NAMES[f.type] || f.type) + '</span>' +
-            '<button class="btn-icon flow-more-btn" data-id="' + f.id + '" title="More actions" data-tooltip="More">' +
-              '<span class="material-symbols-sharp">more_horiz</span>' +
-            '</button>' +
+            (f.pinned ? '<span class="material-symbols-sharp fav-mark" style="margin-left:auto">favorite</span>' : '') +
           '</div>' +
           '<span class="fc-title">' + esc(f.name || 'Untitled Flow') + '</span>' +
           '<span class="fc-text">' + esc(f.text || '') + '</span>' +
-          '<span class="fc-meta">' + n + (n === 1 ? ' pose' : ' poses') + ' &#183; ' + fmtDate(f.editedAt || f.id) + '</span>' +
+          '<span class="fc-meta">' + n + (n === 1 ? ' pose' : ' poses') + ' &#183; ' + fmtDate(stampFor(f).ts) + '</span>' +
         '</div>';
       }).join('') + '</div>';
 
       index.querySelectorAll('.flow-card').forEach(function (el) {
-        el.addEventListener('click', function (e) {
-          if (e.target.closest('.flow-more-btn') || e.target.closest('.fl-menu')) return;
-          showEdit(parseInt(el.dataset.id, 10), true);
-        });
-      });
-
-      index.querySelectorAll('.flow-more-btn').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          openRowMenu(btn);
+        el.addEventListener('click', function () {
+          showDetail(parseInt(el.dataset.id, 10), true);
         });
       });
     }
@@ -659,18 +687,20 @@
     }
 
     function renderRowMenu() {
+      var src = byId(menuId);
+      var pinned = src && src.pinned;
       menuEl.innerHTML =
+        '<button class="fl-menu-item" data-act="pin"><span class="material-symbols-sharp' + (pinned ? ' fav-mark" style="margin:0;vertical-align:0;font-size:16px' : '') + '">favorite</span>' +
+          (pinned ? 'Remove from favorites' : 'Add to favorites') + '</button>' +
         '<button class="fl-menu-item" data-act="dup"><span class="material-symbols-sharp">content_copy</span>Duplicate</button>' +
         '<button class="fl-menu-item" data-act="del"><span class="material-symbols-sharp">delete</span>Delete flow</button>';
     }
 
-    function openRowMenu(btn) {
-      var row = btn.closest('.flow-card');
-      if (menuId === parseInt(btn.dataset.id, 10) && !menuEl.hidden) { closeRowMenu(); return; }
-      closeRowMenu();
-      menuId = parseInt(btn.dataset.id, 10);
+    function openDetailMenu() {
+      if (!menuEl.hidden) { closeRowMenu(); return; }
+      menuId = currentId;
       renderRowMenu();
-      row.appendChild(menuEl);
+      document.getElementById('fd-actions').appendChild(menuEl);
       menuEl.hidden = false;
     }
 
@@ -681,7 +711,13 @@
       var f = byId(menuId);
       if (!f) { closeRowMenu(); return; }
 
-      if (item.dataset.act === 'dup') {
+      if (item.dataset.act === 'pin') {
+        f.pinned = !f.pinned;
+        persist();
+        renderFdTitle(f);
+        toast(f.pinned ? 'Added to your favorites.' : 'Removed from favorites.');
+        closeRowMenu();
+      } else if (item.dataset.act === 'dup') {
         closeRowMenu();
         // opens unsaved — nothing exists until they save the variant
         showEdit(null, true, f.type);
@@ -699,7 +735,7 @@
           flows = flows.filter(function (x) { return x.id !== id; });
           persist();
           toast('Flow removed.');
-          renderList();
+          showList(true);
         } else {
           item.classList.add('armed');
           item.innerHTML = '<span class="material-symbols-sharp">delete</span>Click again to delete';
@@ -743,40 +779,7 @@
       el.textContent = n + (n === 1 ? ' pose' : ' poses');
     }
 
-    // classes this flow lives in — sectionMeta links (the coming
-    // class-editor integration) or literal text containment
-    function renderUsedIn() {
-      var wrap = document.getElementById('fl-usedin');
-      if (editingId == null) { wrap.hidden = true; return; }
-      var f = byId(editingId);
-      if (!f) { wrap.hidden = true; return; }
-      var classes = [];
-      try { classes = JSON.parse(localStorage.getItem('flowschool_classes') || '[]'); } catch (_) {}
-      var text = (f.text || '').trim();
-      var hits = classes.filter(function (c) {
-        var metaHit = c.sectionMeta && Object.keys(c.sectionMeta).some(function (k) {
-          return c.sectionMeta[k] && c.sectionMeta[k].flowId === f.id;
-        });
-        var textHit = text.length > 12 && Object.keys(c.sections || {}).some(function (k) {
-          return (c.sections[k] || '').indexOf(text) !== -1;
-        });
-        return metaHit || textHit;
-      });
-      wrap.hidden = false;
-      document.getElementById('fl-usedin-list').innerHTML = hits.length
-        ? hits.map(function (c) {
-            return '<a class="fl-class-row" href="your-classes.html?id=' + c.id + '">' +
-              '<span class="fl-class-title">' + esc(c.title || 'Untitled Class') + '</span>' +
-              '<span class="fl-class-meta">' + (c.length || 60) + ' min</span>' +
-            '</a>';
-          }).join('')
-        : '<p class="fl-usedin-empty">Not part of a class yet.</p>';
-    }
-
-    function autoGrow(el) {
-      el.style.height = 'auto';
-      el.style.height = el.scrollHeight + 'px';
-    }
+    var autoGrow = fsAutoGrow;
 
     // 'saved' → committed · 'idle' → nothing to save yet · 'ready' → unsaved changes
     function setSaveButton(state) {
@@ -806,10 +809,67 @@
 
     function showList(push) {
       document.getElementById('edit-view').hidden = true;
+      document.getElementById('detail-view').hidden = true;
       document.getElementById('list-view').hidden = false;
       renderList();
       if (push) history.pushState({}, '', 'your-flows.html');
       window.scrollTo(0, 0);
+    }
+
+    function renderUsedIn(f, listEl) {
+      var classes = [];
+      try { classes = JSON.parse(localStorage.getItem('flowschool_classes') || '[]'); } catch (_) {}
+      var text = (f.text || '').trim();
+      var hits = classes.filter(function (c) {
+        var metaHit = c.sectionMeta && Object.keys(c.sectionMeta).some(function (k) {
+          return c.sectionMeta[k] && c.sectionMeta[k].flowId === f.id;
+        });
+        var textHit = text.length > 12 && Object.keys(c.sections || {}).some(function (k) {
+          return (c.sections[k] || '').indexOf(text) !== -1;
+        });
+        return metaHit || textHit;
+      });
+      listEl.innerHTML = hits.length
+        ? hits.map(function (c) {
+            return '<a class="fl-class-row" href="your-classes.html?id=' + c.id + '">' +
+              '<span class="fl-class-title">' + esc(c.title || 'Untitled Class') + '</span>' +
+              '<span class="fl-class-meta">' + (c.length || 60) + ' min</span>' +
+            '</a>';
+          }).join('')
+        : '<p class="fl-usedin-empty">Not part of a class yet.</p>';
+    }
+
+    function showDetail(id, push) {
+      var f = byId(id);
+      if (!f) { showList(); return; }
+      currentId = id;
+
+      document.getElementById('list-view').hidden = true;
+      document.getElementById('edit-view').hidden = true;
+      document.getElementById('detail-view').hidden = false;
+
+      renderFdTitle(f);
+      renderFdMeta(f);
+      document.getElementById('fd-flow').textContent = f.text || '';
+      renderUsedIn(f, document.getElementById('fd-usedin-list'));
+
+      if (push) history.pushState({}, '', 'your-flows.html?id=' + id);
+      window.scrollTo(0, 0);
+    }
+
+    function renderFdTitle(f) {
+      document.getElementById('fd-title').innerHTML =
+        esc(f.name || 'Untitled Flow') +
+        (f.pinned ? '<span class="material-symbols-sharp fav-mark lg">favorite</span>' : '');
+    }
+
+    function renderFdMeta(f) {
+      var n = poseCount(f.text);
+      var st = stampFor(f);
+      document.getElementById('fd-meta').innerHTML =
+        esc((TAG_NAMES[f.type] || f.type)) + ' \u00B7 ' + n + (n === 1 ? ' pose' : ' poses') + ' \u00B7 ' +
+        '<span class="date-toggle" title="Show ' + (dateMode() === 'edited' ? 'created' : 'edited') + ' date">' +
+        st.label + ' ' + fmtDate(st.ts) + '</span>';
     }
 
     function showEdit(id, push, presetType) {
@@ -819,7 +879,10 @@
       editType = f ? f.type : (presetType || null);
 
       document.getElementById('list-view').hidden = true;
+      document.getElementById('detail-view').hidden = true;
       document.getElementById('edit-view').hidden = false;
+      document.getElementById('editor-back-label').textContent =
+        f ? (f.name || 'Untitled Flow') : 'Your Flows';
 
       document.getElementById('fl-title').value = f ? (f.name || '') : '';
       var area = document.getElementById('fl-area');
@@ -827,7 +890,6 @@
       renderTypes();
       setTypeCollapsed(!!editType);
       renderCount();
-      renderUsedIn();
       autoGrow(area);
 
       dirty = false;
@@ -840,37 +902,18 @@
 
     // ─── GUARDS ──────────────────────────────────────────────────────────────────
 
-    function confirmDiscard(cb) {
-      pendingDiscard = cb;
-      document.getElementById('discard-modal').hidden = false;
-    }
-
-    document.getElementById('discard-yes').addEventListener('click', function () {
-      document.getElementById('discard-modal').hidden = true;
-      var cb = pendingDiscard; pendingDiscard = null;
-      if (cb) cb(true);
-    });
-
-    document.getElementById('discard-keep').addEventListener('click', function () {
-      document.getElementById('discard-modal').hidden = true;
-      var cb = pendingDiscard; pendingDiscard = null;
-      if (cb) cb(false);
-    });
-
-    document.getElementById('discard-modal').addEventListener('click', function (e) {
-      if (e.target === e.currentTarget) {
-        e.currentTarget.hidden = true;
-        var cb = pendingDiscard; pendingDiscard = null;
-        if (cb) cb(false);
-      }
-    });
+    var confirmDiscard = fsWireDiscardModal();
 
     window.addEventListener('beforeunload', function (e) {
       if (isEditing() && dirty) { e.preventDefault(); e.returnValue = ''; }
     });
 
     function leaveEditor() {
-      function leave() { dirty = false; showList(true); }
+      function leave() {
+        dirty = false;
+        if (editingId != null) { showDetail(editingId, true); }
+        else { showList(true); }
+      }
       if (dirty) { confirmDiscard(function (yes) { if (yes) leave(); }); }
       else { leave(); }
     }
@@ -912,8 +955,40 @@
 
     // ─── EVENTS ──────────────────────────────────────────────────────────────────
 
+    var favOnly = false;
+    document.getElementById('fav-filter-btn').addEventListener('click', function () {
+      favOnly = !favOnly;
+      this.classList.toggle('on', favOnly);
+      renderList();
+    });
+
+    document.getElementById('sort-btn').addEventListener('click', function () {
+      localStorage.setItem(SORT_KEY, sortMode() === 'edited' ? 'created' : 'edited');
+      renderList();
+    });
+
     document.getElementById('new-flow-btn').addEventListener('click', function () {
       showEdit(null, true);
+    });
+
+    document.getElementById('fd-meta').addEventListener('click', function (e) {
+      if (!e.target.closest('.date-toggle')) return;
+      toggleDateMode();
+      var f = byId(currentId);
+      if (f) renderFdMeta(f);
+    });
+
+    document.getElementById('detail-back-btn').addEventListener('click', function () {
+      showList(true);
+    });
+
+    document.getElementById('fd-edit-btn').addEventListener('click', function () {
+      showEdit(currentId, true);
+    });
+
+    document.getElementById('fd-more-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      openDetailMenu();
     });
 
     document.getElementById('flow-filter').addEventListener('click', function (e) {
@@ -1115,6 +1190,8 @@
       var params = new URLSearchParams(window.location.search);
       if (params.get('edit')) {
         showEdit(parseInt(params.get('edit'), 10));
+      } else if (params.get('id')) {
+        showDetail(parseInt(params.get('id'), 10));
       } else if (params.get('new')) {
         showEdit(null, false, params.get('type') || null);
       } else {

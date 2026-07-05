@@ -35,11 +35,18 @@
    HOW TO ADD A NEW TOOL PAGE
    1. Copy the page shell from any existing tool (e.g. arbitrary-rule-generator.html)
    2. Include: global.css → lib/nav.js → lib/toast.js → lib/tracker.js
+      (library pages also: lib/confirm-delete.js → lib/library.js —
+      shared esc/fmtDate/sort/date-stamp/discard-modal helpers)
    3. Use <main> to wrap hero + content
    4. Use .controls-bar for filter/action row, .ctl-label for control labels
    5. Use .card-actions for the action row inside a tool output card
    6. Use .modal-backdrop / .modal-card for any save/load dialogs
    7. Add page-specific CSS only in a <style> block in the page head
+
+   URL VOCABULARY (library pages)
+   ?id=<n>    view an item        ?edit=<n>   edit an item
+   ?new=1     compose (flows: &type=<key>; stories: ?new=<starterId|blank>)
+   pushState on view changes; replaceState after create/save.
 
    CONTENT WIDTH — TWO REGIMES (deliberate)
    READING pages (default): .wrap / .inner at 820px, centered. Every
@@ -826,6 +833,59 @@ button svg {
 
 
 /* ─── 9. CHIPS / TOGGLE SELECTORS ────────────────────────────── */
+
+/* filter chips row — horizontal, scrolls on overflow */
+.filter-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.filter-row::-webkit-scrollbar { display: none; }
+
+/* sort toggle sits on its own quiet row; a result count may ride right */
+.sort-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+/* favorited marker — filled volt heart beside a title */
+.fav-mark {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  color: var(--volt);
+  font-size: 13px;
+  margin-left: 9px;
+  vertical-align: 1px;
+}
+
+.fav-mark.lg {
+  font-size: 17px;
+  margin-left: 11px;
+  vertical-align: 3px;
+}
+
+/* favorites-only filter toggle */
+.fav-filter.on { color: var(--text-1); }
+.fav-filter.on .material-symbols-sharp {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  color: var(--volt);
+}
+
+.result-count {
+  margin-left: auto;
+  font-size: var(--text-small);
+  color: var(--text-3);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
 
 /* the row that holds a set of chips */
 .chips {
@@ -2280,6 +2340,75 @@ body.has-sidebar {
 .library-empty-ghost-row:nth-child(3) i:first-child { width: 38%; }
 .library-empty-ghost-row:nth-child(3) i + i         { width: 27%; }
 
+
+/* ── Item action menu (⋯) — the tv-/fl-/st- prefixes are per-page
+      wiring; the look is one component ── */
+.tv-menu, .fl-menu, .st-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 6;
+  min-width: 214px;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-solid);
+  border: 1px solid rgba(var(--ink-rgb), .16);
+  border-top-color: rgba(var(--ink-rgb), .30);
+  box-shadow: 0 4px 24px rgba(var(--ink-rgb), .10);
+  animation: fadeUp .14s ease both;
+}
+
+.tv-menu-item, .fl-menu-item, .st-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: var(--text-ui);
+  color: var(--text-2);
+  text-align: left;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.tv-menu-item:hover, .fl-menu-item:hover, .st-menu-item:hover {
+  background: rgba(var(--ink-rgb), .05);
+  color: var(--text-1);
+}
+
+.tv-menu-item .material-symbols-sharp,
+.fl-menu-item .material-symbols-sharp,
+.st-menu-item .material-symbols-sharp { font-size: 16px; color: var(--text-3); }
+
+.tv-menu-item:hover .material-symbols-sharp,
+.fl-menu-item:hover .material-symbols-sharp,
+.st-menu-item:hover .material-symbols-sharp { color: var(--text-2); }
+
+.tv-menu-item.armed, .tv-menu-item.armed:hover,
+.fl-menu-item.armed, .fl-menu-item.armed:hover,
+.st-menu-item.armed, .st-menu-item.armed:hover { color: var(--danger); }
+
+.tv-menu-item.armed .material-symbols-sharp,
+.tv-menu-item.armed:hover .material-symbols-sharp,
+.fl-menu-item.armed .material-symbols-sharp,
+.fl-menu-item.armed:hover .material-symbols-sharp,
+.st-menu-item.armed .material-symbols-sharp,
+.st-menu-item.armed:hover .material-symbols-sharp { color: var(--danger); }
+
+/* ── Date stamp toggle — click flips Created ↔ Edited (persisted) ── */
+.date-toggle {
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast);
+}
+
+.date-toggle:hover {
+  color: var(--text-2);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
 
 /* ── Sticky editor/reading bar — full content width, glass ────
    Sits OUTSIDE the centered .wrap so back sits at the content
