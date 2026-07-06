@@ -1384,7 +1384,7 @@
       var drawCls = shapeHasDrawn ? '' : ' class="db-shape-draw"';
       var allPoly = empty ? '' :
         '<polygon' + drawCls + ' pathLength="1" points="' + axes.map(function (a, i) { return pt(a.allTime, i).join(','); }).join(' ') + '"' +
-        ' fill="rgba(var(--ink-rgb),.07)" stroke="var(--volt)" stroke-width="1.5"/>' +
+        ' fill="rgba(var(--volt-rgb),.08)" stroke="var(--volt)" stroke-width="1.5"/>' +
         axes.map(function (a, i) {
           if (!a.allTime) return '';
           var p = pt(a.allTime, i);

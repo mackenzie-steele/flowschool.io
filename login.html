@@ -18,13 +18,13 @@ body { display: flex; flex-direction: column; min-height: 100vh; opacity: 0; tra
 <body>
 
 
-<header class="auth-hdr">
-  <div class="hdr-logo-wrap"><a href="index.html" class="hdr-logo">Flow School</a><span class="beta-tag">Beta</span></div>
-</header>
-
 <main class="auth-main">
   <div class="card auth-card">
-    <span class="auth-eyebrow">Flow School</span>
+    <a href="index.html">
+      <img src="img/flow-school-logo_black.png" class="auth-wordmark logo-light" alt="Flow School">
+      <img src="img/flow-school-logo_white.png" class="auth-wordmark logo-dark" alt="Flow School">
+    </a>
+    <span class="auth-eyebrow">The creative studio for yoga teachers</span>
     <h1 class="auth-title">Welcome back.</h1>
 
     <form class="auth-form" id="auth-form" novalidate>
@@ -107,6 +107,6 @@ document.getElementById('auth-form').addEventListener('submit', async e => {
 });
 
 </script>
-  <footer class="site-footer">Flow School &#183; Tools for Yoga Teachers &#183; v1.14.10</footer>
+  <footer class="site-footer">Flow School &#183; Tools for Yoga Teachers &#183; v1.14.11</footer>
 </body>
 </html>

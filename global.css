@@ -342,6 +342,18 @@
 /* every counter, timer, and stat keeps its column — no jiggle */
 html { font-variant-numeric: tabular-nums; }
 
+/* text selection wears the highlight — volt on ink in the dark,
+   cobalt behind ink in the light */
+::selection {
+  background: rgba(var(--volt-rgb), .30);
+  color: var(--text-1);
+}
+
+[data-theme="dark"] ::selection {
+  background: var(--volt);
+  color: var(--paper-solid); /* near-black on volt */
+}
+
 *,
 *::before,
 *::after {
@@ -1670,6 +1682,22 @@ input[type=range].range-slider:disabled {
   z-index: 1;
 }
 
+.auth-submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.auth-footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light);
+  font-size: var(--text-small);
+  color: var(--text-3);
+}
+
+.auth-footer a { color: var(--text-1); }
+
 
 /* ─── 20. APP SHELL / SIDEBAR ────────────────────────────────── */
 
@@ -2036,35 +2064,47 @@ body.has-sidebar {
 /* ─── 21. AUTH FORM ──────────────────────────────────────────── */
 
 .auth-card {
+  /* chromeless — the form sits on the paper itself */
   width: 100%;
-  max-width: 420px;
-  padding: 40px 48px;
+  max-width: 400px;
+  border: none;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.auth-wordmark {
+  height: 32px;
+  width: auto;
+  display: block;
+  margin-bottom: 48px;
 }
 
 .auth-eyebrow {
   display: block;
-  font-size: var(--text-label);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--ls-label);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--text-3);
   margin-bottom: 12px;
 }
 
 .auth-title {
-  font-size: clamp(1.6rem, 4vw, 2rem);
+  font-size: var(--fs-h3);
   font-weight: var(--weight-regular);
-  letter-spacing: var(--ls-tight);
-  line-height: 1.15;
+  letter-spacing: -.015em;
+  line-height: var(--lh-heading);
   color: var(--text-1);
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 .auth-subtitle {
   font-size: var(--text-body-sm);
   color: var(--text-3);
-  margin-bottom: 28px;
-  line-height: 1.5;
+  margin: -28px 0 40px;
+  line-height: 1.6;
+  max-width: 34ch;
 }
 
 .auth-form {

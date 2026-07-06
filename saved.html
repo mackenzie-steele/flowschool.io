@@ -108,9 +108,11 @@
 
     .sv-time {
       display: block;
-      font-size: var(--text-small);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .04em;
       color: var(--text-3);
-      margin-top: 1px;
+      margin-top: 2px;
     }
 
     .sv-arrow {
@@ -342,7 +344,8 @@
       if (d < 7)  return d + 'd ago';
       var wk = Math.floor(d / 7);
       if (wk < 5) return wk + 'w ago';
-      return Math.floor(d / 30) + 'mo ago';
+      // older than a season: the date says more than “14mo ago”
+      return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
     function esc(s) {
@@ -368,7 +371,7 @@
       },
       {
         key: 'cue-flows',
-        label: 'Verb / Your Body Part / Direction Flows',
+        label: 'Cue Sheets',
         icon: 'edit_note',
         load: function () {
           try {
