@@ -1,33 +1,6 @@
-// MOCK DATA — replace with Supabase query to `user_skill_progress` when ready.
-// Score formula: Math.min(100, Math.round(minutes / 1200 * 100))
-// 20 hours = 1,200 minutes = 100%
-var SKILL_MAP_DATA = [
-  { skill: 'Sequencing',      minutes: 420, score: 35 },
-  { skill: 'Cueing',          minutes: 240, score: 20 },
-  { skill: 'Class Structure', minutes: 180, score: 15 },
-  { skill: 'Storytelling',    minutes:  90, score:  8 },
-];
-
-// Tool-to-skill mapping — attributes session time to skill categories.
-// Future: store in Supabase table `tool_skill_mappings`.
-var TOOL_SKILL_MAP = {
-  'arbitrary-rules.html':      ['Sequencing'],
-  'movement-experiments.html': ['Sequencing'],
-  'pose-library.html':                  ['Sequencing', 'Class Structure'],
-  'verb-your-body-part-direction.html': ['Cueing'],
-  'breath-pace.html':           ['Cueing'],
-  'playlist-builder.html':              ['Class Structure'],
-  'story-starters.html':                ['Storytelling'],
-  'your-classes.html':                  ['Sequencing', 'Class Structure'],
-};
-
-// Suggested next action per weakest skill — includes link to the relevant tool
-var SKILL_SUGGESTIONS = {
-  'Sequencing':      { pre: 'Try 10 minutes with ', tool: 'Arbitrary Rules', post: ' to grow Sequencing.',     href: 'arbitrary-rules.html' },
-  'Cueing':          { pre: 'Try 10 minutes in ',   tool: 'Verb / Your Body Part / Direction', post: ' to build cueing skills.', href: 'verb-your-body-part-direction.html' },
-  'Class Structure': { pre: 'Try 10 minutes in ',   tool: 'the Playlist Builder',     post: ' to grow Class Structure.', href: 'playlist-builder.html'          },
-  'Storytelling':    { pre: 'Shape a class arc in the ', tool: 'Playlist Builder', post: ' — controlling energy over time is the foundation of storytelling.', href: 'playlist-builder.html' },
-};
+// (The old SKILL_MAP_DATA / TOOL_SKILL_MAP / SKILL_SUGGESTIONS mock
+// blocks were retired July 2026 — the dashboard's Shape of Your
+// Practice computes from real artifacts via fsPracticeShape().)
 
 var NEXT_STEPS = [
   {

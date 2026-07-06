@@ -338,6 +338,10 @@ body {
    pages styled as <main class="wrap"> would shrink to fit content */
 main { flex: 1 0 auto; width: 100%; }
 
+/* nothing outside the viewport is pannable — internal scrollers
+   (filter rows, tables) keep their own overflow */
+html, body { overflow-x: clip; }
+
 /* Global grain texture */
 body::after {
   content: '';
@@ -800,11 +804,14 @@ button svg {
   transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
 
-.btn-icon[data-tooltip] {
+/* bare glyph buttons (song swap) join the tooltip component */
+.btn-icon[data-tooltip],
+.song-swap-btn[data-tooltip] {
   position: relative;
 }
 
-.btn-icon[data-tooltip]::before {
+.btn-icon[data-tooltip]::before,
+.song-swap-btn[data-tooltip]::before {
   content: attr(data-tooltip);
   position: absolute;
   bottom: calc(100% + 7px);
@@ -825,7 +832,8 @@ button svg {
   z-index: var(--z-sticky);
 }
 
-.btn-icon[data-tooltip]:hover::before {
+.btn-icon[data-tooltip]:hover::before,
+.song-swap-btn[data-tooltip]:hover::before {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
   transition-delay: 350ms;
@@ -1879,20 +1887,21 @@ input[type=range].range-slider:disabled {
   color: rgba(var(--ink-rgb), .72);
 }
 
-/* ── Mobile sidebar toggle ── */
+/* ── Mobile sidebar toggle — floats bottom-left, thumb territory ── */
 .sidebar-toggle {
   display: none;
   position: fixed;
-  top: 14px;
-  left: 14px;
+  bottom: 18px;
+  left: 16px;
   z-index: var(--z-fab);
   background: rgba(var(--paper-rgb), .92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(var(--ink-rgb), .14);
-  border-radius: var(--r);
-  width: 38px;
-  height: 38px;
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(var(--ink-rgb), .18);
+  border-radius: var(--r-cta);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .18);
+  width: 46px;
+  height: 46px;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -1924,7 +1933,8 @@ body.has-sidebar {
 @media (max-width: 768px) {
   body.has-sidebar {
     padding-left: 0;
-    padding-top: 64px;
+    /* the toggle lives bottom-left now — no top clearance needed */
+    padding-top: 0;
   }
 
   body.has-sidebar .cta-bar {
@@ -1952,6 +1962,10 @@ body.has-sidebar {
   body.sidebar-open .sidebar-toggle {
     left: 232px;
   }
+
+  /* bottom CTA bars clear the floating toggle — outranks page-local
+     padding on the bar */
+  body .cta-bar { padding-left: 76px; }
 
   .wrap {
     padding-top: 24px;
@@ -2528,8 +2542,37 @@ body.has-sidebar {
 }
 
 @media (max-width: 768px) {
-  /* stay below the floating sidebar toggle; natural height on mobile */
-  .post-bar { top: 64px; height: auto; padding: 12px 24px; }
+  /* the toggle floats bottom-left now, so the bar owns the top edge.
+     20px padding = the page content grid; the leading ghost button's
+     own padding is pulled back so its glyph sits on the grid line */
+  .post-bar { top: 0; height: auto; padding: 12px 20px; }
+  .post-bar > .btn-ghost:first-child { margin-left: -12px; }
+}
+
+@media (max-width: 480px) {
+  /* narrow phones: the back label yields entirely — arrow only */
+  .post-bar .post-back-label { display: none; }
+}
+
+/* ── Mobile: standalone primary CTAs span their container ──────────
+   Buttons that share a row (bars, modal actions, composers) opt back
+   out — full width is for buttons that own their line. */
+@media (max-width: 640px) {
+  .btn-primary,
+  .generate-btn,
+  .shuffle-btn,
+  .start-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .post-bar .btn-primary,
+  .modal-actions .btn-primary,
+  .post-edit-actions .btn-primary,
+  .lg-composer-actions .btn-primary,
+  .tv-note-composer-actions .btn-primary {
+    width: auto;
+  }
 }
 
 

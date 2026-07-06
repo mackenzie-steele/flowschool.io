@@ -119,8 +119,8 @@
     }
 
     @media (max-width: 768px) {
-      /* section labels pin below the bar (64px offset + ~64px bar) */
-      .tv-label { top: 128px; }
+      /* section labels pin below the bar (bar sits at the top edge now) */
+      .tv-label { top: 64px; }
       /* the class name yields so Cancel + Save stay on screen */
       #editor-back-label { max-width: 84px; }
     }
@@ -1105,7 +1105,7 @@
     <div class="post-bar">
       <button class="btn-ghost" id="editor-back-btn">
         <span class="material-symbols-sharp" style="font-size:16px;margin-right:6px">arrow_back</span>
-        <span id="editor-back-label">Your Classes</span>
+        <span class="post-back-label" id="editor-back-label">Your Classes</span>
       </button>
       <div class="post-edit-actions">
         <button class="btn-ghost" id="cancel-btn">Cancel</button>

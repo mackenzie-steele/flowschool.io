@@ -26,6 +26,110 @@
       margin: 0 auto; /* centered in the content area, like every other page */
     }
 
+    /* ── Yoga Strong — episode modules, the whole card is the link ── */
+    .db-pod-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .db-pod {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(var(--ink-rgb), .13);
+      padding: 18px 20px 16px;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      transition: border-color var(--transition-base);
+    }
+
+    .db-pod:hover { border-color: rgba(var(--ink-rgb), .32); }
+
+    .db-pod-num {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      color: var(--text-3);
+      margin-bottom: 10px;
+    }
+
+    .db-pod-title {
+      font-size: var(--fs-h6);
+      font-weight: var(--weight-regular);
+      letter-spacing: -.01em;
+      line-height: var(--lh-heading);
+      color: var(--text-1);
+      margin-bottom: 10px;
+    }
+
+    .db-pod-blurb {
+      font-size: var(--text-body-sm);
+      color: var(--text-2);
+      line-height: 1.6;
+      margin-bottom: 16px;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .db-pod-meta {
+      margin-top: auto;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .05em;
+      color: var(--text-3);
+      border-top: 1px solid var(--border-light);
+      padding-top: 12px;
+    }
+
+    /* hide an episode — the site's armed two-step, no claims made.
+       Idle: a quiet ✕ in the corner on hover. First tap arms it into
+       words; the second tap commits. It disarms on its own. */
+    .db-pod { position: relative; }
+
+    .db-pod-x {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: none;
+      border: none;
+      padding: 4px 6px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .05em;
+      line-height: 1;
+      color: var(--text-3);
+      opacity: 0;
+      transition: opacity var(--transition-base), color var(--transition-base);
+    }
+
+    .db-pod:hover .db-pod-x { opacity: 1; }
+    .db-pod-x:hover { color: var(--text-1); }
+
+    .db-pod-x.armed {
+      opacity: 1;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-1);
+    }
+
+    @media (hover: none) {
+      .db-pod-x { opacity: 1; }
+    }
+
+    .db-pod.leaving {
+      opacity: 0;
+      transition: opacity .22s ease;
+    }
+
+    @media (max-width: 900px) {
+      .db-pod-grid { grid-template-columns: 1fr; }
+    }
+
     /* ── Cards ───────────────────────────────────────────── */
     .db-card {
       border: 1px solid var(--border-light);
@@ -448,6 +552,63 @@
     }
 
     /* ── Skill Map ───────────────────────────────────────── */
+    .db-shape-svg {
+      display: block;
+      width: 100%;
+      max-width: 352px;
+      margin: 6px auto 2px;
+      overflow: visible;
+    }
+
+    .db-shape-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: .08em;
+      fill: var(--text-3);
+      cursor: pointer;
+      transition: fill var(--transition-base);
+    }
+
+    .db-shape-label:hover { fill: var(--text-1); }
+    .db-shape-label.open { fill: var(--volt); }
+
+    .db-shape-receipts {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .db-shape-receipts-title {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: .08em;
+      color: var(--text-3);
+      margin-bottom: 8px;
+    }
+
+    .db-shape-receipt-n { color: var(--text-1); }
+
+    .db-shape-receipt-go {
+      float: right;
+      color: var(--text-3);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    a.db-shape-receipt:hover .db-shape-receipt-go { opacity: 1; }
+
+    .db-shape-receipt {
+      display: block;
+      font-size: var(--text-small);
+      color: var(--text-2);
+      line-height: 1.7;
+      text-decoration: none;
+      transition: color var(--transition-base);
+    }
+
+    a.db-shape-receipt:hover { color: var(--text-1); }
+
     .db-skillmap-sub {
       font-size: var(--text-body-sm);
       color: var(--text-2);
@@ -720,6 +881,7 @@
 <body class="has-sidebar">
 
   <script src="lib/nav.js"></script>
+  <script src="lib/library.js"></script>
 
   <main>
   <div class="db-wrap">
@@ -793,7 +955,7 @@
         <div class="db-row db-row-2">
 
           <div class="db-card" id="db-score-card">
-            <span class="db-eyebrow">Skill Map</span>
+            <span class="db-eyebrow">The Shape of Your Practice</span>
           </div>
 
           <div class="db-card db-next-step" id="db-next-card">
@@ -824,6 +986,13 @@
           <div id="db-month-body"></div>
         </div>
 
+        <!-- 8. Yoga Strong — Bonnie's podcast: three per month, drawn
+             from the last 100 episodes; listened ones never resurface -->
+        <div class="db-card">
+          <span class="db-eyebrow">Yoga Strong &#8212; the Podcast</span>
+          <div class="db-pod-grid" id="db-pod-grid"></div>
+        </div>
+
 
       </div>
   </main>
@@ -832,6 +1001,7 @@
   <script src="data/dashboard-daily-quotes.js"></script>
   <script src="data/dashboard-weekly-prompts.js"></script>
   <script src="data/dashboard-data.js"></script>
+  <script src="data/yoga-strong-episodes.js"></script>
   <script>
   (function () {
 
@@ -882,6 +1052,93 @@
       document.getElementById('db-greeting').textContent = name ? greeting + ', ' + name + '.' : greeting + '.';
       document.getElementById('db-subline').textContent  = DAILY_SUBLINES[dayOfYear() % DAILY_SUBLINES.length];
     }
+
+    // ── Yoga Strong — three per month from the pool, listened ones
+    //    never resurface. The month seeds the shuffle, so everyone's
+    //    dashboard holds steady until the calendar turns. ──
+    (function () {
+      var HEARD_KEY = 'fs-podcast-heard';
+      var el = document.getElementById('db-pod-grid');
+      if (!el || typeof YOGA_STRONG_EPISODES === 'undefined') return;
+
+      function escP(t) {
+        return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function heard() {
+        try { return JSON.parse(localStorage.getItem(HEARD_KEY) || '[]'); } catch (_) { return []; }
+      }
+
+      // deterministic per-month shuffle rank for each episode
+      function monthRank(num) {
+        var seed = new Date().getFullYear() + '-' + new Date().getMonth() + '-' + num;
+        var h = 0;
+        for (var i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+        // avalanche so near-identical seeds land far apart
+        h = Math.imul(h ^ (h >>> 16), 2246822507) >>> 0;
+        h = Math.imul(h ^ (h >>> 13), 3266489909) >>> 0;
+        return (h ^ (h >>> 16)) >>> 0;
+      }
+
+      function renderPods() {
+        var gone = heard();
+        var pool = YOGA_STRONG_EPISODES.filter(function (e) { return gone.indexOf(e.num) === -1; });
+        pool.sort(function (a, b) { return monthRank(a.num) - monthRank(b.num); });
+        var picks = pool.slice(0, 3);
+
+        if (!picks.length) {
+          el.innerHTML = '<p class="db-pod-blurb" style="margin:0">You\u2019ve heard the last 100 episodes. That\u2019s the whole shelf \u2014 well done.</p>';
+          return;
+        }
+
+        el.innerHTML = picks.map(function (e) {
+          return '<a class="db-pod" href="' + escP(e.url) + '" target="_blank" rel="noopener">' +
+            '<button type="button" class="db-pod-x" data-num="' + e.num + '" title="Hide this episode">&#10005;</button>' +
+            '<span class="db-pod-num">EP ' + e.num + '</span>' +
+            '<span class="db-pod-title">' + escP(e.title) + '</span>' +
+            '<span class="db-pod-blurb">' + escP(e.blurb) + '</span>' +
+            '<span class="db-pod-meta">' + escP(e.dur) + ' &#183; ' + escP(e.date) + '</span>' +
+          '</a>';
+        }).join('');
+      }
+
+      // two deliberate taps: ✕ arms into words, tapping the words commits
+      var podArmTimer = null;
+
+      function disarmPods() {
+        clearTimeout(podArmTimer);
+        el.querySelectorAll('.db-pod-x.armed').forEach(function (b) {
+          b.classList.remove('armed');
+          b.innerHTML = '&#10005;';
+        });
+      }
+
+      el.addEventListener('click', function (ev) {
+        var btn = ev.target.closest('.db-pod-x');
+        if (!btn) { disarmPods(); return; }
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        if (!btn.classList.contains('armed')) {
+          disarmPods();
+          btn.classList.add('armed');
+          btn.textContent = "Don't show again?";
+          clearTimeout(podArmTimer);
+          podArmTimer = setTimeout(disarmPods, 2600);
+          return;
+        }
+
+        var gone = heard();
+        var num = parseInt(btn.dataset.num, 10);
+        if (gone.indexOf(num) === -1) gone.push(num);
+        localStorage.setItem(HEARD_KEY, JSON.stringify(gone));
+        var card = btn.closest('.db-pod');
+        card.classList.add('leaving');
+        setTimeout(renderPods, 230); // the pool backfills after the card fades
+      });
+
+      renderPods();
+    })();
 
     // ── Your Favorite Classes — pinned for quick access ──
     function renderOnDeck() {
@@ -1023,13 +1280,36 @@
       }).join('');
     }
 
+    // one gentle suggestion per axis, in Bonnie's register
+    var AXIS_STEPS = {
+      play:     { title: 'Deal yourself a rule',      desc: 'Play is your quietest edge. One arbitrary constraint is the fastest way back into curiosity.', href: 'arbitrary-rules.html', label: 'Draw a Rule' },
+      sequence: { title: 'Name one small flow',        desc: 'Sequence has room to grow. Take a chain you already love and give it a name in Your Flows.', href: 'your-flows.html?new=1', label: 'Build a Flow' },
+      cue:      { title: 'Find the words',             desc: 'Cue is your quietest edge. Ten minutes of Verb / Your Body Part / Direction sharpens everything you say.', href: 'verb-your-body-part-direction.html', label: 'Write Cues' },
+      story:    { title: 'Tell one story',             desc: 'Story is waiting. Draw a starter and tell it the way you\u2019d tell it in class.', href: 'story-starters.html', label: 'Draw a Starter' },
+      sound:    { title: 'Score one class',            desc: 'Sound is your quietest edge. Build a playlist for a class you already teach.', href: 'playlist-builder.html', label: 'Build a Playlist' },
+      reflect:  { title: 'Close the loop',             desc: 'Reflect is the missing beat. One honest note after your next class is all it takes.', href: 'teaching-log.html', label: 'Add a Note' },
+    };
+
     function renderNextStep() {
-      var recent = [];
-      try { recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch (_) {}
-      var lastPage = recent.length ? recent[0].href : 'default';
       var step = null;
-      for (var i = 0; i < NEXT_STEPS.length; i++) {
-        if (NEXT_STEPS[i].trigger === lastPage) { step = NEXT_STEPS[i]; break; }
+
+      // the shape speaks first — but only when an axis is honestly
+      // far behind the rest (never nags an even or early practice)
+      var axes = fsPracticeShape();
+      if (!axes.every(function (a) { return a.allTime === 0; })) {
+        var low = axes.reduce(function (a, b) { return b.allTime < a.allTime ? b : a; });
+        var others = axes.filter(function (a) { return a.key !== low.key; });
+        var avg = others.reduce(function (t, a) { return t + a.allTime; }, 0) / others.length;
+        if (low.allTime + 15 <= avg) step = AXIS_STEPS[low.key];
+      }
+
+      if (!step) {
+        var recent = [];
+        try { recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch (_) {}
+        var lastPage = recent.length ? recent[0].href : 'default';
+        for (var i = 0; i < NEXT_STEPS.length; i++) {
+          if (NEXT_STEPS[i].trigger === lastPage) { step = NEXT_STEPS[i]; break; }
+        }
       }
       if (!step) {
         for (var j = 0; j < NEXT_STEPS.length; j++) {
@@ -1044,68 +1324,87 @@
         '<a href="' + step.href + '" class="btn-primary" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px">' + step.label + '<span class="material-symbols-sharp" style="font-size:14px">arrow_forward</span></a>';
     }
 
-    // ── Skill Map renderer ──────────────────────────────────────────
-    // When Supabase is ready: replace SKILL_MAP_DATA with a query to
-    // `user_skill_progress` filtered by user_id, then call renderSkillMap().
-    function renderSkillMap() {
-      var data = SKILL_MAP_DATA;
-      var cx = 160, cy = 130, r = 80;
-      var n = data.length;
+    // ── The Shape of Your Practice — a portrait from real artifacts ──
+    // Two polygons: all-time in quiet ink, the last 30 days in volt.
+    // Tap an axis for its receipts. Data: fsPracticeShape() — no mock.
+    var shapeOpenAxis = null;
+
+    function renderPracticeShape() {
+      var axes = fsPracticeShape();
+      var card = document.getElementById('db-score-card');
+      var cx = 160, cy = 118, r = 78;
+      var n = axes.length;
 
       function angle(i) { return (i / n) * 2 * Math.PI - Math.PI / 2; }
-
       function pt(pct, i) {
         var a = angle(i);
         return [+(cx + (pct / 100) * r * Math.cos(a)).toFixed(1), +(cy + (pct / 100) * r * Math.sin(a)).toFixed(1)];
       }
+      function ring(pct) {
+        return axes.map(function (_, i) { return pt(pct, i).join(','); }).join(' ');
+      }
 
-      var gridSVG = [25, 50, 75, 100].map(function (pct, gi) {
-        var pts = data.map(function (_, i) { var p = pt(pct, i); return p[0] + ',' + p[1]; }).join(' ');
-        return '<polygon points="' + pts + '" fill="none" stroke="rgba(var(--ink-rgb),' + (0.06 + gi * 0.03).toFixed(3) + ')" stroke-width="0.75"/>';
-      }).join('');
-
-      var axisSVG = data.map(function (_, i) {
+      var web = [33, 66].map(function (pct) {
+        return '<polygon points="' + ring(pct) + '" fill="none" stroke="rgba(var(--ink-rgb),.08)" stroke-width="1"/>';
+      }).join('') +
+      '<polygon points="' + ring(100) + '" fill="none" stroke="rgba(var(--ink-rgb),.16)" stroke-width="1"/>';
+      var spokes = axes.map(function (_, i) {
         var p = pt(100, i);
-        return '<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="rgba(var(--ink-rgb),.12)" stroke-width="0.75"/>';
+        return '<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="rgba(var(--ink-rgb),.10)" stroke-width="1"/>';
       }).join('');
 
-      /* var(--volt) + opacity attributes — the radar re-themes live with the toggle */
-      var dataPts = data.map(function (d, i) { var p = pt(d.score, i); return p[0] + ',' + p[1]; }).join(' ');
-      var dataSVG = '<polygon points="' + dataPts + '" fill="var(--volt)" fill-opacity=".15" stroke="var(--volt)" stroke-opacity=".70" stroke-width="1.5" stroke-linejoin="round"/>';
+      var empty = axes.every(function (a) { return a.allTime === 0; });
 
-      var dotsSVG = data.map(function (d, i) {
-        var p = pt(d.score, i);
-        return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.5" fill="var(--volt)" fill-opacity=".90"/>';
+      var allPoly = empty ? '' :
+        '<polygon points="' + axes.map(function (a, i) { return pt(a.allTime, i).join(','); }).join(' ') + '"' +
+        ' fill="rgba(var(--ink-rgb),.07)" stroke="var(--volt)" stroke-width="1.5"/>' +
+        axes.map(function (a, i) {
+          if (!a.allTime) return '';
+          var p = pt(a.allTime, i);
+          return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.4" fill="var(--volt)"/>';
+        }).join('');
+
+      var labels = axes.map(function (a, i) {
+        var p = pt(124, i);
+        var anchor = Math.abs(p[0] - cx) < 6 ? 'middle' : (p[0] > cx ? 'start' : 'end');
+        return '<text x="' + p[0] + '" y="' + (+p[1] + 3) + '" text-anchor="' + anchor + '"' +
+          ' class="db-shape-label' + (shapeOpenAxis === a.key ? ' open' : '') + '" data-axis="' + a.key + '">' +
+          a.label.toUpperCase() + '</text>';
       }).join('');
 
-      var LABEL_OFFSET = 20;
-      var labelsSVG = data.map(function (d, i) {
-        var a = angle(i);
-        var lx = +(cx + (r + LABEL_OFFSET) * Math.cos(a)).toFixed(1);
-        var ly = +(cy + (r + LABEL_OFFSET) * Math.sin(a)).toFixed(1);
-        var words = d.skill.split(' ');
-        var anchor = i === 1 ? 'start' : i === 3 ? 'end' : 'middle';
-        var dyAdj  = (i === 1 || i === 3) ? 3 : 0;
-        if (words.length === 1) {
-          return '<text x="' + lx + '" y="' + (ly + dyAdj) + '" text-anchor="' + anchor + '" fill="rgba(var(--ink-rgb),.45)" font-size="9" font-family="inherit" letter-spacing=".04em">' + d.skill + '</text>';
-        }
-        return '<text x="' + lx + '" text-anchor="' + anchor + '" fill="rgba(var(--ink-rgb),.45)" font-size="9" font-family="inherit" letter-spacing=".04em">' +
-          '<tspan x="' + lx + '" y="' + (ly - 4) + '">' + words[0] + '</tspan>' +
-          '<tspan x="' + lx + '" y="' + (ly + 8) + '">' + words.slice(1).join(' ') + '</tspan>' +
-          '</text>';
-      }).join('');
+      var receiptsHTML = '';
+      if (shapeOpenAxis) {
+        var ax = axes.filter(function (a) { return a.key === shapeOpenAxis; })[0];
+        receiptsHTML = '<div class="db-shape-receipts">' +
+          '<span class="db-shape-receipts-title">' + ax.label.toUpperCase() + '</span>' +
+          (ax.receipts.length
+            ? ax.receipts.map(function (r) {
+                var m = r.text.match(/^(\d+)\s+(.*)$/);
+                var body = m ? '<span class="db-shape-receipt-n">' + m[1] + '</span> ' + m[2] : r.text;
+                return '<a class="db-shape-receipt" href="' + r.href + '">' + body +
+                  '<span class="db-shape-receipt-go">&#8594;</span></a>';
+              }).join('')
+            : '<span class="db-shape-receipt">Nothing here yet \u2014 the tools are waiting.</span>') +
+        '</div>';
+      }
 
-      var strongest = data.reduce(function (a, b) { return a.score > b.score ? a : b; });
-      var weakest   = data.reduce(function (a, b) { return a.score < b.score ? a : b; });
-      var card = document.getElementById('db-score-card');
+
       card.innerHTML =
-        '<span class="db-eyebrow">Your Skill Map</span>' +
-        '<h3 class="db-next-title">Your skills</h3>' +
-        '<p class="db-skillmap-sub">Your map grows as you practice across Flow School tools.</p>' +
-        '<svg viewBox="0 0 320 260" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">' +
-          axisSVG + gridSVG + dataSVG + dotsSVG + labelsSVG +
+        '<span class="db-eyebrow">The Shape of Your Practice</span>' +
+        '<svg viewBox="0 0 320 236" xmlns="http://www.w3.org/2000/svg" class="db-shape-svg">' +
+          spokes + web + allPoly + labels +
         '</svg>' +
-        '';
+        (empty
+          ? '<p class="db-skillmap-sub">Your shape appears as you make things.</p>'
+          : '') +
+        receiptsHTML;
+
+      card.querySelectorAll('.db-shape-label').forEach(function (el) {
+        el.addEventListener('click', function () {
+          shapeOpenAxis = shapeOpenAxis === el.dataset.axis ? null : el.dataset.axis;
+          renderPracticeShape();
+        });
+      });
     }
 
     function renderSaved() {
@@ -1260,7 +1559,7 @@
       renderPrompt();
       renderContinue();
       renderNextStep();
-      renderSkillMap();
+      renderPracticeShape();
       renderSaved();
       renderEvents();
       renderDrop();

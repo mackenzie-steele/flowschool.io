@@ -162,6 +162,7 @@
 
 
   <script src="lib/nav.js"></script>
+<script src="lib/library.js"></script>
 
   <main>
   <section class="hero">
@@ -235,6 +236,7 @@
     const settings = { inhale: 4, exhale: 4, pause: 0 };
 
     let running = false;
+    let bpSessionTimer = null;
     let phaseIdx = 0;
     let elapsed = 0;
     let lastTs = null;
@@ -415,6 +417,7 @@
     document.getElementById('toggle-btn').addEventListener('click', async () => {
       if (running) {
         // Stop — full reset
+        clearTimeout(bpSessionTimer);
         running = false;
         cancelAnimationFrame(rafId);
         phaseIdx = 0;
@@ -425,7 +428,11 @@
         setControlsDisabled(false);
         setToggleState(false);
       } else {
-        // Start fresh
+        // Start fresh — it counts as a session after 60 real seconds
+        clearTimeout(bpSessionTimer);
+        bpSessionTimer = setTimeout(() => {
+          if (running && typeof fsLogSession === 'function') fsLogSession('fs-breath-sessions');
+        }, 60000);
         running = true;
         lastTs = null;
         phaseIdx = 0;

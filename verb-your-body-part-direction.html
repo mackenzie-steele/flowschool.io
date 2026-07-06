@@ -1429,7 +1429,14 @@ let polScrollPos = 0; // precise (sub-pixel) scroll position, tracked separately
                        // pixels on read, which silently swallows small
                        // per-frame increments at slow WPM speeds.
 
+let polSessionLogged = false;
+
 function startPolScroll() {
+  // one session per prompter run, logged when scrolling actually starts
+  if (!polSessionLogged && typeof fsLogSession === 'function') {
+    fsLogSession('fs-pol-sessions');
+    polSessionLogged = true;
+  }
   polTimerRunning = true;
   updatePolStartBtn();
   updatePolProgressLabel();
@@ -1529,6 +1536,7 @@ function jumpToPolLine(idx) {
 }
 
 function openPOL() {
+  polSessionLogged = false; // a fresh prompter open is a fresh session
   const cues = getCuedRows();
   if (!cues.length) { showToast('Write some cues first.'); return; }
   polIndex = 0;

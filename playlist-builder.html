@@ -93,17 +93,77 @@
 
 
     /* ── Range slider ─────────────────────────────────────────── */
-    /* major ticks at 30, 45, 60, 75, 90 → positions 1, 4, 7, 10, 13 */
-    .range-ticks span:nth-child(1),
-    .range-ticks span:nth-child(4),
-    .range-ticks span:nth-child(7),
-    .range-ticks span:nth-child(10),
-    .range-ticks span:nth-child(13) {
+    /* major ticks at 30, 45, 60, 75, 90 → positions 1, 4, 7, 10, 13
+       (duration slider only — the style sliders mark just ends + center) */
+    .range-ticks:not(.mix-ticks) span:nth-child(1),
+    .range-ticks:not(.mix-ticks) span:nth-child(4),
+    .range-ticks:not(.mix-ticks) span:nth-child(7),
+    .range-ticks:not(.mix-ticks) span:nth-child(10),
+    .range-ticks:not(.mix-ticks) span:nth-child(13) {
       background: rgba(var(--ink-rgb), .38);
       height: 10px;
     }
 
     /* ── CTA bar ──────────────────────────────────────────────── */
+    /* mix ticks: 11 stops (step 10); the ends read as majors and the
+       center — the 50/50 balance point — stands tallest */
+    .mix-ticks span:nth-child(1),
+    .mix-ticks span:nth-child(11) {
+      background: rgba(var(--ink-rgb), .38);
+      height: 10px;
+    }
+
+    .mix-ticks span:nth-child(6) {
+      background: rgba(var(--ink-rgb), .48);
+      height: 12px;
+    }
+
+    .mix-slider-wrap { margin-bottom: 22px; }
+    .mix-slider-wrap:last-of-type { margin-bottom: 0; }
+
+    /* the pole words ARE the display: slide toward one and it comes
+       forward, the other recedes — readable with no numbers at all */
+    .mix-ends {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .mix-ends span {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-1);
+      transition: opacity var(--transition-base);
+    }
+
+    /* the split shows while you're deciding, then steps back */
+    .mix-read {
+      margin-top: 10px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .05em;
+      color: var(--text-3);
+      min-height: 13px;
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+
+    .mix-read.live { opacity: 1; }
+
+    /* T1: poles and the center tick are tap targets */
+    .mix-ends span { cursor: pointer; }
+    .mix-ends span:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    .mix-ticks span:nth-child(6) {
+      cursor: pointer;
+      box-sizing: content-box;
+      padding: 0 7px 8px;
+      margin: 0 -7px;
+      background-clip: content-box;
+    }
+
     .cta-bar {
       padding: 14px 28px 18px;
       gap: 8px;
@@ -259,8 +319,10 @@
       border-bottom: 1px solid rgba(var(--ink-rgb), .08);
       margin-bottom: 2px;
     }
-    /* Base stats styles — global.css. Volt accent is page-specific. */
+    /* Base stats styles — global.css. Volt accent in light mode only;
+       dark mode keeps the numbers white. */
     .stat-val { color: var(--volt); }
+    [data-theme="dark"] .stat-val { color: var(--text-1); }
     [data-theme="dark"] #dur-val  { color: var(--text-1); }
 
     /* ── Playlist section cards ───────────────────────────────── */
@@ -447,7 +509,7 @@
 
       <div class="cfg-step">
         <div class="step-body">
-          <p class="label-1 eyebrow-label">01. Class length</p>
+          <p class="label-1 eyebrow-label">Class length</p>
           <div class="range-slider-wrap">
             <span class="range-val" id="dur-val">60 min</span>
             <input type="range" class="range-slider" id="dur-slider" min="30" max="90" step="5" value="60">
@@ -462,34 +524,27 @@
 
       <div class="cfg-step">
         <div class="step-body">
-          <p class="label-1 eyebrow-label">02. Class style</p>
-          <div class="chips" id="style-chips">
-            <button class="chip on" data-v="vinyasa">Vinyasa</button>
-            <button class="chip" data-v="hatha">Hatha</button>
-            <button class="chip" data-v="power">Power</button>
-            <button class="chip" data-v="yin">Yin</button>
-            <button class="chip" data-v="restorative">Restorative</button>
+          <p class="label-1 eyebrow-label">Style</p>
+
+          <div class="mix-slider-wrap">
+            <div class="mix-ends label-2"><span>Instrumental</span><span>Vocal</span></div>
+            <input type="range" class="range-slider" id="mix-vocal" min="0" max="100" step="10" value="50">
+            <div class="range-ticks mix-ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <p class="mix-read" id="mix-vocal-read"></p>
+          </div>
+
+          <div class="mix-slider-wrap">
+            <div class="mix-ends label-2"><span>Acoustic</span><span>Electronic</span></div>
+            <input type="range" class="range-slider" id="mix-elec" min="0" max="100" step="10" value="50">
+            <div class="range-ticks mix-ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <p class="mix-read" id="mix-elec-read"></p>
           </div>
         </div>
       </div>
 
       <div class="cfg-step">
         <div class="step-body">
-          <p class="label-1 eyebrow-label">03. Mood</p>
-          <div class="chips" id="mood-chips">
-            <button class="chip on" data-v="grounded">Grounded</button>
-            <button class="chip" data-v="flowing">Flowing</button>
-            <button class="chip" data-v="meditative">Meditative</button>
-            <button class="chip" data-v="uplifting">Uplifting</button>
-            <button class="chip" data-v="playful">Playful</button>
-            <button class="chip" data-v="ethereal">Ethereal</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="cfg-step">
-        <div class="step-body">
-          <p class="label-1 eyebrow-label">04. Energy shape</p>
+          <p class="label-1 eyebrow-label">Energy shape</p>
           <div class="arc-pills" id="arc-opts"></div>
           <div class="curve-hdr">
             <span class="curve-module-label">Curve Editor</span>
@@ -609,7 +664,6 @@
 
     // SONGS is loaded from data/songs.js
 
-    const STYLE_MULT = { vinyasa: 1.0, hatha: 0.88, power: 1.18, yin: 0.52, restorative: 0.38 };
 
     // ─── STATE ───────────────────────────────────────────────────────────────────
 
@@ -617,7 +671,7 @@
       duration: 60,
       arcKey: 'bell-curve',
       style: 'vinyasa',
-      mood: 'grounded',
+      mix: { vocal: 50, electronic: 50 },
       pts: sampleArc('bell-curve', getKnotCount(60)),
       saved: false,
       userEdited: false,
@@ -908,27 +962,68 @@
       return `${m}:${sec.toString().padStart(2, '0')}`;
     }
 
+    // ── the mix — sliders set the RATIO of the playlist, the curve
+    //    still chooses along energy. A running tally steers each pick
+    //    toward the promised proportions; at 0/100 the pole is a
+    //    hard promise, not a preference. ──
+
+    const mixState = { n: 0, vocal: 0, electronic: 0 };
+
+    function resetMix() { mixState.n = 0; mixState.vocal = 0; mixState.electronic = 0; }
+
+    function notePick(s) {
+      mixState.n++;
+      if ((s.pal || '')[0] === 'v') mixState.vocal++;
+      if ((s.pal || '')[1] === 'e') mixState.electronic++;
+    }
+
+    function unPick(s) {
+      mixState.n = Math.max(0, mixState.n - 1);
+      if ((s.pal || '')[0] === 'v') mixState.vocal = Math.max(0, mixState.vocal - 1);
+      if ((s.pal || '')[1] === 'e') mixState.electronic = Math.max(0, mixState.electronic - 1);
+    }
+
+    // hard extremes: 0 and 100 are absolute
+    function mixEligible(s) {
+      const p = s.pal || '';
+      if (S.mix.vocal === 0 && p[0] === 'v') return false;
+      if (S.mix.vocal === 100 && p[0] === 'i') return false;
+      if (S.mix.electronic === 0 && p[1] === 'e') return false;
+      if (S.mix.electronic === 100 && p[1] === 'a') return false;
+      return true;
+    }
+
+    // how far the running mix drifts from the sliders if we pick s
+    function mixCost(s) {
+      const p = s.pal || '';
+      const n = mixState.n + 1;
+      const nv = (mixState.vocal + (p[0] === 'v' ? 1 : 0)) / n;
+      const ne = (mixState.electronic + (p[1] === 'e' ? 1 : 0)) / n;
+      return Math.abs(nv - S.mix.vocal / 100) + Math.abs(ne - S.mix.electronic / 100);
+    }
+
     function pickForTarget(tgt, used, tol = 20) {
       const clamped = Math.min(100, Math.max(0, tgt));
-      const pool = [...SONGS]
-        .filter(s => !used.has(s.id) && Math.abs(s.energy - clamped) <= tol)
-        .sort((a, b) => Math.abs(a.energy - clamped) - Math.abs(b.energy - clamped));
+      const cost = s => Math.abs(s.energy - clamped) + 55 * mixCost(s);
+      const pool = SONGS
+        .filter(s => !used.has(s.id) && mixEligible(s) && Math.abs(s.energy - clamped) <= tol)
+        .sort((a, b) => cost(a) - cost(b));
       if (pool.length) {
-        // any song within 4 energy of the best match is a fair draw —
-        // real variety on regenerate without drifting off the curve
-        const best = Math.abs(pool[0].energy - clamped);
-        const near = pool.filter(s => Math.abs(s.energy - clamped) <= best + 4);
+        // near-draws stay a fair draw — variety without drifting
+        const best = cost(pool[0]);
+        const near = pool.filter(s => cost(s) <= best + 4);
         return near[Math.floor(Math.random() * near.length)];
       }
-      // widen tolerance fallback
-      return [...SONGS]
-        .filter(s => !used.has(s.id))
-        .sort((a, b) => Math.abs(a.energy - clamped) - Math.abs(b.energy - clamped))[0] || null;
+      // widen tolerance, still honoring the hard extremes
+      return SONGS
+        .filter(s => !used.has(s.id) && mixEligible(s))
+        .sort((a, b) => cost(a) - cost(b))[0] || null;
     }
 
     function generate() {
       const used = new Set();
-      const mult = STYLE_MULT[S.style] || 1;
+      const mult = 1;
+      resetMix();
       const secDurs = getSecDur(S.duration);
       const totalTarget = secDurs.reduce((a, b) => a + b, 0);
       const totalMin = totalTarget + 120;
@@ -949,7 +1044,7 @@
           const tNorm = (secStart + target * (slot + 0.5) / wantCount) / totalTarget;
           const tgt = Math.round(getCurveEnergy(tNorm) * mult);
           const pick = pickForTarget(tgt, used);
-          if (pick) { songs.push(pick); actual += pick.dur; used.add(pick.id); }
+          if (pick) { songs.push(pick); actual += pick.dur; used.add(pick.id); notePick(pick); }
         }
 
         return { sec, songs, target, actual, secStart, secEnd: cumSecs };
@@ -973,13 +1068,14 @@
         const i = result.indexOf(d);
         const secMid = (secDurs.slice(0, i).reduce((a, b) => a + b, 0) + secDurs[i] * 0.75) / totalTarget;
         const addTgt = Math.min(100, Math.round(getCurveEnergy(secMid) * mult));
-        const closer = SONGS.filter(s => !used.has(s.id) && s.dur >= remaining && total + s.dur <= totalMax)
-          .sort((a, b) => Math.abs(a.energy - addTgt) - Math.abs(b.energy - addTgt))[0];
-        const filler = SONGS.filter(s => !used.has(s.id) && s.dur < remaining && total + s.dur <= totalMax)
-          .sort((a, b) => Math.abs(a.energy - addTgt) - Math.abs(b.energy - addTgt))[0];
+        const upCost = s => Math.abs(s.energy - addTgt) + 55 * mixCost(s);
+        const closer = SONGS.filter(s => !used.has(s.id) && mixEligible(s) && s.dur >= remaining && total + s.dur <= totalMax)
+          .sort((a, b) => upCost(a) - upCost(b))[0];
+        const filler = SONGS.filter(s => !used.has(s.id) && mixEligible(s) && s.dur < remaining && total + s.dur <= totalMax)
+          .sort((a, b) => upCost(a) - upCost(b))[0];
         const pick = closer || filler;
         if (!pick) break;
-        d.songs.push(pick); d.actual += pick.dur; total += pick.dur; used.add(pick.id);
+        d.songs.push(pick); d.actual += pick.dur; total += pick.dur; used.add(pick.id); notePick(pick);
         sortAlongCurve(d);
       }
 
@@ -995,7 +1091,9 @@
       const container = document.getElementById('results');
       const allSongs = data.flatMap(d => d.songs);
       const total = data.reduce((a, d) => a + d.actual, 0);
-      const avgBpm = allSongs.length ? Math.round(allSongs.reduce((a, s) => a + s.bpm, 0) / allSongs.length) : 0;
+      const withBpm = allSongs.filter(s => s.bpm);
+      const avgBpm = withBpm.length ? Math.round(withBpm.reduce((a, s) => a + s.bpm, 0) / withBpm.length) : '\u2014';
+
       let n = 0;
 
       const fu = quiet ? '' : ' fade-up';
@@ -1059,8 +1157,7 @@
 
     function defaultTitle() {
       const arc = ARC_SHAPES[S.arcKey].name;
-      const style = S.style.charAt(0).toUpperCase() + S.style.slice(1);
-      return `${arc} · ${style} · ${S.duration}min`;
+      return `${arc} · ${S.duration}min`;
     }
 
     function openSaveModal() {
@@ -1093,8 +1190,7 @@
       const entry = {
         id: Date.now(),
         title,
-        style: S.style,
-        mood: S.mood,
+        mix: { ...S.mix },
         duration: S.duration,
         arc: S.arcKey,
         savedAt: Date.now(),
@@ -1173,21 +1269,92 @@
       markSettingsChanged();
     });
     updateDurSlider();
-    setupChips('style-chips', v => { S.style = v; markSettingsChanged(); });
-    setupChips('mood-chips', v => { S.mood = v; markSettingsChanged(); });
+
+    // balance sliders fill from the center toward the thumb
+    function paintMix(el) {
+      const v = parseInt(el.value, 10);
+      const lo = Math.min(50, v), hi = Math.max(50, v);
+      el.style.background = `linear-gradient(to right, rgba(var(--ink-rgb),.12) ${lo}%, var(--slider-fill) ${lo}%, var(--slider-fill) ${hi}%, rgba(var(--ink-rgb),.12) ${hi}%)`;
+    }
+
+    // pole words carry the state: 50/50 = both mid-ink; slide toward
+    // a word and it comes forward while the other recedes
+    function paintMeter(sliderId, val) {
+      const ends = document.getElementById(sliderId).closest('.mix-slider-wrap').querySelectorAll('.mix-ends span');
+      ends[0].style.opacity = (0.30 + 0.70 * (1 - val / 100)).toFixed(2);
+      ends[1].style.opacity = (0.30 + 0.70 * (val / 100)).toFixed(2);
+    }
+
+    function mixText(val, left, right) {
+      if (val === 0) return left + ' only';
+      if (val === 100) return right + ' only';
+      return (100 - val) + ' \u00B7 ' + val;
+    }
+
+    function renderMixReads() {
+      paintMix(document.getElementById('mix-vocal'));
+      paintMix(document.getElementById('mix-elec'));
+      paintMeter('mix-vocal', S.mix.vocal);
+      paintMeter('mix-elec', S.mix.electronic);
+      document.getElementById('mix-vocal-read').textContent = mixText(S.mix.vocal, 'Instrumental', 'Vocal');
+      document.getElementById('mix-elec-read').textContent = mixText(S.mix.electronic, 'Acoustic', 'Electronic');
+    }
+
+    // the split shows while deciding, then fades
+    const mixReadTimers = {};
+    function wakeMixRead(id) {
+      const el = document.getElementById(id);
+      el.classList.add('live');
+      clearTimeout(mixReadTimers[id]);
+      mixReadTimers[id] = setTimeout(() => el.classList.remove('live'), 1200);
+    }
+
+    // tap a pole word → all the way there; tap the center tick → 50/50
+    function slamMix(slider, v) {
+      slider.value = v;
+      slider.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    document.querySelectorAll('.mix-slider-wrap').forEach(wrap => {
+      const slider = wrap.querySelector('.range-slider');
+      const ends = wrap.querySelectorAll('.mix-ends span');
+      ends[0].title = 'Tap: ' + ends[0].textContent + ' only';
+      ends[1].title = 'Tap: ' + ends[1].textContent + ' only';
+      ends[0].addEventListener('click', () => slamMix(slider, 0));
+      ends[1].addEventListener('click', () => slamMix(slider, 100));
+      const center = wrap.querySelector('.mix-ticks span:nth-child(6)');
+      center.title = 'Tap: back to 50/50';
+      center.addEventListener('click', () => slamMix(slider, 50));
+    });
+
+    document.getElementById('mix-vocal').addEventListener('input', function () {
+      S.mix.vocal = parseInt(this.value, 10); renderMixReads(); wakeMixRead('mix-vocal-read'); markSettingsChanged();
+    });
+    document.getElementById('mix-elec').addEventListener('input', function () {
+      S.mix.electronic = parseInt(this.value, 10); renderMixReads(); wakeMixRead('mix-elec-read'); markSettingsChanged();
+    });
+    renderMixReads();
 
     const _urlPlaylist = new URLSearchParams(window.location.search).get('id');
     if (_urlPlaylist) {
       try {
         const _pl = JSON.parse(localStorage.getItem('flowschool_playlists') || '[]').find(p => String(p.id) === _urlPlaylist);
         if (_pl) {
-          S.style = _pl.style || S.style;
-          S.mood  = _pl.mood  || S.mood;
+
+          if (_pl.mix) S.mix = { vocal: 50, electronic: 50, ..._pl.mix };
+          else if (_pl.pal) {
+            // legacy palette poles map onto the sliders ('o' here is the
+            // old chip value from saved playlists, not the song code)
+            S.mix.vocal = _pl.pal.vox === 'v' ? 100 : _pl.pal.vox === 'i' ? 0 : 50;
+            S.mix.electronic = _pl.pal.src === 'e' ? 100 : _pl.pal.src === 'o' ? 0 : 50;
+          }
           S.duration = _pl.duration || S.duration;
           S.arcKey = _pl.arc || S.arcKey;
           S.pts = sampleArc(S.arcKey, getKnotCount(S.duration));
-          document.getElementById('style-chips').querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.v === S.style));
-          document.getElementById('mood-chips').querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.v === S.mood));
+
+          document.getElementById('mix-vocal').value = S.mix.vocal;
+          document.getElementById('mix-elec').value = S.mix.electronic;
+          renderMixReads();
           durSlider.value = S.duration;
           updateDurSlider();
           renderArcs();
@@ -1219,6 +1386,9 @@
         if (slot === -1) return;
         const current = d.songs[slot];
         const used = new Set(lastData.flatMap(x => x.songs.map(y => y.id)));
+        resetMix();
+        lastData.flatMap(x => x.songs).forEach(notePick);
+        unPick(current);
         const pick = pickForTarget(current.energy, used);
         if (!pick) { toast('No fresh song fits here right now.'); return; }
         d.songs[slot] = pick;
