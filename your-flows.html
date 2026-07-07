@@ -357,6 +357,9 @@
 <body class="has-sidebar">
 
   <script src="lib/nav.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/supabase.js"></script>
+  <script src="lib/sync.js"></script>
   <script src="data/shorthand.js"></script>
   <script src="lib/toast.js"></script>
   <script src="lib/confirm-delete.js"></script>
@@ -742,7 +745,7 @@
     }
 
     function editorUrl() {
-      return editingId != null ? 'your-flows.html?edit=' + editingId : 'your-flows.html?new=1';
+      return editingId != null ? 'your-flows?edit=' + editingId : 'your-flows?new=1';
     }
 
     function showList(push) {
@@ -750,7 +753,7 @@
       document.getElementById('detail-view').hidden = true;
       document.getElementById('list-view').hidden = false;
       renderList();
-      if (push) history.pushState({}, '', 'your-flows.html');
+      if (push) history.pushState({}, '', 'your-flows');
       window.scrollTo(0, 0);
     }
 
@@ -769,7 +772,7 @@
       });
       listEl.innerHTML = hits.length
         ? hits.map(function (c) {
-            return '<a class="fl-class-row" href="your-classes.html?id=' + c.id + '">' +
+            return '<a class="fl-class-row" href="your-classes?id=' + c.id + '">' +
               '<span class="fl-class-title">' + esc(c.title || 'Untitled Class') + '</span>' +
               '<span class="fl-class-meta">' + (c.length || 60) + ' min</span>' +
             '</a>';
@@ -791,7 +794,7 @@
       document.getElementById('fd-flow').textContent = f.text || '';
       renderUsedIn(f, document.getElementById('fd-usedin-list'));
 
-      if (push) history.pushState({}, '', 'your-flows.html?id=' + id);
+      if (push) history.pushState({}, '', 'your-flows?id=' + id);
       window.scrollTo(0, 0);
     }
 
@@ -833,7 +836,7 @@
       dirty = false;
       setSaveButton(f ? 'saved' : 'idle');
 
-      if (push) history.pushState({}, '', f ? 'your-flows.html?edit=' + f.id : 'your-flows.html?new=1');
+      if (push) history.pushState({}, '', f ? 'your-flows?edit=' + f.id : 'your-flows?new=1');
       window.scrollTo(0, 0);
       if (!f) document.getElementById('fl-title').focus();
     }
@@ -884,7 +887,7 @@
         };
         flows.push(entry);
         editingId = entry.id;
-        history.replaceState({}, '', 'your-flows.html?edit=' + entry.id);
+        history.replaceState({}, '', 'your-flows?edit=' + entry.id);
       }
       persist();
       dirty = false;

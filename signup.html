@@ -20,7 +20,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; opacity: 0; tra
 
 <main class="auth-main">
   <div class="card auth-card">
-    <a href="index.html">
+    <a href="dashboard">
       <img src="img/flow-school-logo_black.png" class="auth-wordmark logo-light" alt="Flow School">
       <img src="img/flow-school-logo_white.png" class="auth-wordmark logo-dark" alt="Flow School">
     </a>
@@ -53,7 +53,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; opacity: 0; tra
     </form>
 
     <div class="auth-footer">
-      Already have an account? <a href="login.html">Sign in</a>
+      Already have an account? <a href="login">Sign in</a>
     </div>
   </div>
 </main>
@@ -65,7 +65,7 @@ body { display: flex; flex-direction: column; min-height: 100vh; opacity: 0; tra
 // Redirect if already logged in
 (async () => {
   const { data: { user } } = await db.auth.getUser();
-  if (user) { window.location.href = 'index.html'; return; }
+  if (user) { window.location.href = 'dashboard'; return; }
   document.body.style.opacity = '1';
 })();
 
@@ -109,8 +109,15 @@ document.getElementById('auth-form').addEventListener('submit', async e => {
     btn.disabled = false;
     btn.textContent = 'Create account';
   } else if (data.session) {
-    // Email confirmation off — logged straight in
-    window.location.href = 'index.html';
+    // Email confirmation off — logged straight in. Warm the (empty, for a new
+    // account) cache the same way login does, for consistency.
+    try {
+      const { data: rows } = await db.from('user_data').select('collection,payload');
+      (rows || []).forEach(r => {
+        try { localStorage.setItem(r.collection, JSON.stringify(r.payload == null ? [] : r.payload)); } catch (_) {}
+      });
+    } catch (_) {}
+    window.location.href = 'dashboard';
   } else {
     // Email confirmation on
     sucEl.textContent = 'Check your email to confirm your account, then sign in.';

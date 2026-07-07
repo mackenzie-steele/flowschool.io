@@ -906,6 +906,9 @@
 <body class="has-sidebar">
 
   <script src="lib/nav.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/supabase.js"></script>
+  <script src="lib/sync.js"></script>
   <script src="lib/library.js"></script>
 
   <main>
@@ -1000,7 +1003,7 @@
           <div class="db-card">
             <span class="db-eyebrow">Recently Saved</span>
             <div id="db-saved-list"></div>
-            <a href="saved.html" class="db-view-all">View all saved <span class="material-symbols-sharp i-sm" style="vertical-align:-2px">arrow_forward</span></a>
+            <a href="saved" class="db-view-all">View all saved <span class="material-symbols-sharp i-sm" style="vertical-align:-2px">arrow_forward</span></a>
           </div>
 
         </div>
@@ -1179,7 +1182,7 @@
       document.getElementById('db-deck-scroll').innerHTML = pinned.map(function (c) {
         var meta = [(c.length || 60) + ' min'];
         if (c.playlist) meta.push('\u266A ' + c.playlist);
-        return '<a class="db-deck-card" href="your-classes.html?id=' + c.id + '">' +
+        return '<a class="db-deck-card" href="your-classes?id=' + c.id + '">' +
           '<span class="db-deck-title">' + escHTML(c.title || 'Untitled Class') + '</span>' +
           '<span class="db-deck-meta">' + escHTML(meta.join(' · ')) + '</span>' +
         '</a>';
@@ -1230,7 +1233,7 @@
       }
       el.innerHTML = entries.map(function (e) {
         var d = new Date(e.ts);
-        return '<a class="db-log-item" href="your-classes.html?id=' + e.id + '">' +
+        return '<a class="db-log-item" href="your-classes?id=' + e.id + '">' +
           '<span class="db-log-head">' +
             '<span class="db-log-class">' + escHTML(e.title) + '</span>' +
             '<span class="db-log-date">' + MO[d.getMonth()] + ' ' + d.getDate() + '</span>' +
@@ -1258,17 +1261,17 @@
       var el = document.getElementById('db-continue-scroll');
       var recent = [];
       try { recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch (_) {}
-      var GONE = ['story-structure.html', 'movement-planes-lab.html', 'elements-of-flow-lab.html', 'dashboard.html'];
+      var GONE = ['story-structure.html', 'movement-planes-lab.html', 'elements-of-flow-lab.html'];
       recent = recent.filter(function (r) { return GONE.indexOf(r.href) === -1; });
       // renamed pages keep their history
       recent.forEach(function (r) {
-        if (r.href === 'shorthand-library.html') { r.href = 'pose-library.html'; r.name = 'Pose Library'; }
+        if (r.href === 'shorthand-library.html') { r.href = 'pose-library'; r.name = 'Pose Library'; }
       });
       if (!recent.length) {
         document.getElementById('db-continue-eyebrow').textContent = 'Start Here';
         el.innerHTML =
           '<div class="db-start">' +
-            '<a class="db-start-step" href="movement-experiments.html">' +
+            '<a class="db-start-step" href="movement-experiments">' +
               '<span class="db-start-n label-2">01</span>' +
               '<span class="db-start-main">' +
                 '<span class="db-start-title">Play before you plan</span>' +
@@ -1276,7 +1279,7 @@
               '</span>' +
               '<span class="material-symbols-sharp db-start-arrow">arrow_forward</span>' +
             '</a>' +
-            '<a class="db-start-step" href="arbitrary-rules.html">' +
+            '<a class="db-start-step" href="arbitrary-rules">' +
               '<span class="db-start-n label-2">02</span>' +
               '<span class="db-start-main">' +
                 '<span class="db-start-title">Add a constraint</span>' +
@@ -1284,7 +1287,7 @@
               '</span>' +
               '<span class="material-symbols-sharp db-start-arrow">arrow_forward</span>' +
             '</a>' +
-            '<a class="db-start-step" href="your-classes.html">' +
+            '<a class="db-start-step" href="your-classes">' +
               '<span class="db-start-n label-2">03</span>' +
               '<span class="db-start-main">' +
                 '<span class="db-start-title">Write your first class</span>' +
@@ -1297,7 +1300,7 @@
       }
       document.getElementById('db-continue-eyebrow').textContent = 'Continue Where You Left Off';
       el.innerHTML = recent.map(function (r) {
-        return '<a href="' + r.href + '" class="db-continue-card">' +
+        return '<a href="' + String(r.href).replace(/\.html$/, '') + '" class="db-continue-card">' +
           '<div class="db-cc-icon"><span class="material-symbols-sharp">' + r.icon + '</span></div>' +
           '<div class="db-cc-name">' + r.name + '</div>' +
           '<div class="db-cc-time">' + timeAgo(r.time) + '</div>' +
@@ -1307,12 +1310,12 @@
 
     // one gentle suggestion per axis, in Bonnie's register
     var AXIS_STEPS = {
-      play:     { title: 'Deal yourself a rule',      desc: 'Play is your quietest edge. One arbitrary constraint is the fastest way back into curiosity.', href: 'arbitrary-rules.html', label: 'Draw a Rule' },
-      sequence: { title: 'Name one small flow',        desc: 'Sequence has room to grow. Take a chain you already love and give it a name in Your Flows.', href: 'your-flows.html?new=1', label: 'Build a Flow' },
-      cue:      { title: 'Find the words',             desc: 'Cue is your quietest edge. Ten minutes of Verb / Your Body Part / Direction sharpens everything you say.', href: 'verb-your-body-part-direction.html', label: 'Write Cues' },
-      story:    { title: 'Tell one story',             desc: 'Story is waiting. Draw a starter and tell it the way you\u2019d tell it in class.', href: 'story-starters.html', label: 'Draw a Starter' },
-      sound:    { title: 'Score one class',            desc: 'Sound is your quietest edge. Build a playlist for a class you already teach.', href: 'playlist-builder.html', label: 'Build a Playlist' },
-      reflect:  { title: 'Close the loop',             desc: 'Reflect is the missing beat. One honest note after your next class is all it takes.', href: 'teaching-log.html', label: 'Add a Note' },
+      play:     { title: 'Deal yourself a rule',      desc: 'Play is your quietest edge. One arbitrary constraint is the fastest way back into curiosity.', href: 'arbitrary-rules', label: 'Draw a Rule' },
+      sequence: { title: 'Name one small flow',        desc: 'Sequence has room to grow. Take a chain you already love and give it a name in Your Flows.', href: 'your-flows?new=1', label: 'Build a Flow' },
+      cue:      { title: 'Find the words',             desc: 'Cue is your quietest edge. Ten minutes of Verb / Your Body Part / Direction sharpens everything you say.', href: 'verb-your-body-part-direction', label: 'Write Cues' },
+      story:    { title: 'Tell one story',             desc: 'Story is waiting. Draw a starter and tell it the way you\u2019d tell it in class.', href: 'story-starters', label: 'Draw a Starter' },
+      sound:    { title: 'Score one class',            desc: 'Sound is your quietest edge. Build a playlist for a class you already teach.', href: 'playlist-builder', label: 'Build a Playlist' },
+      reflect:  { title: 'Close the loop',             desc: 'Reflect is the missing beat. One honest note after your next class is all it takes.', href: 'teaching-log', label: 'Add a Note' },
     };
 
     function renderNextStep() {
@@ -1442,7 +1445,7 @@
       try {
         var playlists = JSON.parse(localStorage.getItem('flowschool_playlists') || '[]');
         playlists.forEach(function (p) {
-          items.push({ icon: 'queue_music', name: p.title || 'Untitled Playlist', sub: 'Playlist Builder', href: 'playlist-builder.html?id=' + p.id, time: p.savedAt ? new Date(p.savedAt).getTime() : 0 });
+          items.push({ icon: 'queue_music', name: p.title || 'Untitled Playlist', sub: 'Playlist Builder', href: 'playlist-builder?id=' + p.id, time: p.savedAt ? new Date(p.savedAt).getTime() : 0 });
         });
       } catch (_) {}
       try {
@@ -1450,7 +1453,7 @@
         rules.forEach(function (r) {
           var name = r.title || 'Saved Challenge';
           if (name.length > 60) name = name.slice(0, 57) + '…';
-          items.push({ icon: 'casino', name: name, sub: 'Arbitrary Rules', href: 'arbitrary-rules.html?challenge=' + r.id, time: r.id || 0 });
+          items.push({ icon: 'casino', name: name, sub: 'Arbitrary Rules', href: 'arbitrary-rules?challenge=' + r.id, time: r.id || 0 });
         });
       } catch (_) {}
       try {
@@ -1459,20 +1462,20 @@
           var id = typeof f === 'object' ? f.id : f;
           var title = typeof f === 'object' ? (f.title || 'Movement Experiment') : 'Movement Experiment';
           var time = typeof f === 'object' ? (f.savedAt || 0) : 0;
-          items.push({ icon: 'gesture', name: title, sub: 'Movement Experiments', href: 'movement-experiments.html?exp=' + id, time: time });
+          items.push({ icon: 'gesture', name: title, sub: 'Movement Experiments', href: 'movement-experiments?exp=' + id, time: time });
         });
       } catch (_) {}
       try {
         var flows = JSON.parse(localStorage.getItem('fs-cue-flows') || '{}');
         Object.values(flows).forEach(function (fl) {
           var time = fl.savedAt ? new Date(fl.savedAt).getTime() : 0;
-          items.push({ icon: 'edit_note', name: fl.name || 'Untitled Flow', sub: 'Verb / Your Body Part / Direction', href: 'verb-your-body-part-direction.html?flow=' + encodeURIComponent(fl.name), time: time });
+          items.push({ icon: 'edit_note', name: fl.name || 'Untitled Flow', sub: 'Verb / Your Body Part / Direction', href: 'verb-your-body-part-direction?flow=' + encodeURIComponent(fl.name), time: time });
         });
       } catch (_) {}
       try {
         var classesSaved = JSON.parse(localStorage.getItem('flowschool_classes') || '[]');
         classesSaved.forEach(function (c) {
-          items.push({ icon: 'edit_document', name: c.title || 'Untitled Class', sub: 'Your Classes', href: 'your-classes.html?id=' + c.id, time: c.editedAt || c.id || 0 });
+          items.push({ icon: 'edit_document', name: c.title || 'Untitled Class', sub: 'Your Classes', href: 'your-classes?id=' + c.id, time: c.editedAt || c.id || 0 });
         });
       } catch (_) {}
       try {
@@ -1480,13 +1483,13 @@
         stories.forEach(function (s) {
           var name = s.text || 'Saved Story';
           if (name.length > 60) name = name.slice(0, 57) + '…';
-          items.push({ icon: 'auto_stories', name: name, sub: 'Story Starters', href: 'stories.html?id=' + s.id, time: s.id || 0 });
+          items.push({ icon: 'auto_stories', name: name, sub: 'Story Starters', href: 'stories?id=' + s.id, time: s.id || 0 });
         });
       } catch (_) {}
       try {
         var poseChains = JSON.parse(localStorage.getItem('fs-pose-connector-saved') || '[]');
         poseChains.forEach(function (c) {
-          items.push({ icon: 'conversion_path', name: c.name || 'Untitled Chain', sub: 'Pose Popcorn', href: 'pose-popcorn.html?chain=' + (c.savedAt || ''), time: c.savedAt || 0 });
+          items.push({ icon: 'conversion_path', name: c.name || 'Untitled Chain', sub: 'Pose Popcorn', href: 'pose-popcorn?chain=' + (c.savedAt || ''), time: c.savedAt || 0 });
         });
       } catch (_) {}
 

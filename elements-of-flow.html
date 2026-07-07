@@ -303,6 +303,9 @@
 <body class="has-sidebar">
 
   <script src="lib/nav.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/supabase.js"></script>
+  <script src="lib/sync.js"></script>
 
   <main>
 
@@ -600,7 +603,7 @@
         var RECENT_KEY = 'flowschool_recent';
         var recent = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
         recent = recent.filter(function (r) { return r.href !== 'elements-of-flow.html'; });
-        recent.unshift({ name: 'Elements of Flow', icon: 'checklist', href: 'elements-of-flow.html', time: Date.now() });
+        recent.unshift({ name: 'Elements of Flow', icon: 'checklist', href: 'elements-of-flow', time: Date.now() });
         if (recent.length > 8) recent = recent.slice(0, 8);
         localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
       } catch (_) {}

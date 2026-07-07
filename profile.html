@@ -374,6 +374,7 @@ textarea.pf-input { resize: vertical; min-height: 90px; line-height: 1.65; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="lib/supabase.js"></script>
+<script src="lib/sync.js"></script>
 <script>
 
 let currentUser = null;
@@ -383,7 +384,7 @@ let originalData = {};
 
 async function init() {
   const { data: { user } } = await db.auth.getUser();
-  if (!user) { window.location.href = 'login.html'; return; }
+  if (!user) { window.location.href = 'login'; return; }
   currentUser = user;
 
   document.getElementById('avatar-email').textContent = user.email;
@@ -600,13 +601,14 @@ function closeModal(id) { document.getElementById(id).hidden = true; }
 });
 
 document.getElementById('profile-back-btn').addEventListener('click', () => {
-  window.location.href = 'index.html';
+  window.location.href = 'dashboard';
 });
 
 document.getElementById('signout-btn').addEventListener('click', async () => {
+  if (window.fsSync) { try { await fsSync.signOutCleanup(); } catch (_) {} }
   localStorage.removeItem('fs-display-name');
   await db.auth.signOut();
-  window.location.href = 'index.html';
+  window.location.href = 'login';
 });
 
 // email
@@ -673,9 +675,10 @@ document.getElementById('delete-confirm').addEventListener('click', async () => 
     }
     await db.from('profiles').delete().eq('id', uid);
   } catch (err) { console.error('account cleanup:', err); }
+  if (window.fsSync) { try { fsSync.clearCache(); } catch (_) {} }
   localStorage.removeItem('fs-display-name');
   await db.auth.signOut();
-  window.location.href = 'index.html';
+  window.location.href = 'login';
 });
 
 // ─── MESSAGES ────────────────────────────────────────────────────────────────

@@ -149,6 +149,9 @@
 <body class="has-sidebar">
 
   <script src="lib/nav.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/supabase.js"></script>
+  <script src="lib/sync.js"></script>
 <script src="lib/library.js"></script>
   <script src="lib/toast.js"></script>
   <div class="toast" id="toast"></div>
@@ -362,7 +365,7 @@
             return JSON.parse(localStorage.getItem('flowschool_playlists') || '[]').map(function (p) {
               return {
                 name: p.title || 'Untitled Playlist',
-                href: 'playlist-builder.html?id=' + p.id,
+                href: 'playlist-builder?id=' + p.id,
                 time: p.savedAt ? new Date(p.savedAt).getTime() : 0,
               };
             });
@@ -379,7 +382,7 @@
             return Object.values(flows).map(function (fl) {
               return {
                 name: fl.name || 'Untitled Flow',
-                href: 'verb-your-body-part-direction.html?flow=' + encodeURIComponent(fl.name),
+                href: 'verb-your-body-part-direction?flow=' + encodeURIComponent(fl.name),
                 time: fl.savedAt ? new Date(fl.savedAt).getTime() : 0,
               };
             });
@@ -395,7 +398,7 @@
             return JSON.parse(localStorage.getItem('flowschool_favs') || '[]').map(function (f) {
               return {
                 name: typeof f === 'object' ? (f.title || 'Movement Experiment') : 'Movement Experiment',
-                href: 'movement-experiments.html?exp=' + (typeof f === 'object' ? f.id : f),
+                href: 'movement-experiments?exp=' + (typeof f === 'object' ? f.id : f),
                 time: typeof f === 'object' ? (f.savedAt || 0) : 0,
               };
             });
@@ -413,7 +416,7 @@
               if (name.length > 80) name = name.slice(0, 77) + '…';
               return {
                 name: name,
-                href: 'arbitrary-rules.html?challenge=' + r.id,
+                href: 'arbitrary-rules?challenge=' + r.id,
                 time: r.id || 0,
               };
             });
@@ -429,7 +432,7 @@
             return JSON.parse(localStorage.getItem('flowschool_classes') || '[]').map(function (c) {
               return {
                 name: c.title || 'Untitled Class',
-                href: 'your-classes.html?id=' + c.id,
+                href: 'your-classes?id=' + c.id,
                 time: c.editedAt || c.id || 0,
               };
             });
@@ -447,7 +450,7 @@
               if (name.length > 80) name = name.slice(0, 77) + '…';
               return {
                 name: name,
-                href: 'stories.html?id=' + st.id,
+                href: 'stories?id=' + st.id,
                 time: st.id || 0,
               };
             });
@@ -463,7 +466,7 @@
             return JSON.parse(localStorage.getItem('fs-pose-connector-saved') || '[]').map(function (c) {
               return {
                 name: c.name || 'Untitled Chain',
-                href: 'pose-popcorn.html?chain=' + (c.savedAt || ''),
+                href: 'pose-popcorn?chain=' + (c.savedAt || ''),
                 time: c.savedAt || 0,
               };
             });
@@ -511,7 +514,7 @@
         + fsGhostRows()
         + '<p class="library-empty-headline">Everything you keep, in one place.</p>'
         + '<p class="library-empty-sub">Save a challenge, a chain, a cue sheet, or a playlist as you practice \u2014 this shelf fills itself.</p>'
-        + '<div class="library-empty-actions"><a href="index.html" class="btn-primary">Back to Dashboard</a></div>'
+        + '<div class="library-empty-actions"><a href="dashboard" class="btn-primary">Back to Dashboard</a></div>'
         + '</div>';
     } else {
       root.innerHTML = '<div class="saved-header">'

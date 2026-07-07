@@ -194,6 +194,9 @@
 <body class="has-sidebar">
 
   <script src="lib/nav.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/supabase.js"></script>
+  <script src="lib/sync.js"></script>
   <script src="data/story-starters.js"></script>
   <script src="lib/toast.js"></script>
   <script src="lib/confirm-delete.js"></script>
@@ -218,7 +221,7 @@
           <span class="search-icon"><span class="material-symbols-sharp">search</span></span>
           <input type="search" class="search-input" id="stories-search" placeholder="Search your stories&#8230;">
         </div>
-        <a href="story-starters.html" class="btn-icon" title="Find a starter" data-tooltip="Find a starter">
+        <a href="story-starters" class="btn-icon" title="Find a starter" data-tooltip="Find a starter">
           <span class="material-symbols-sharp">auto_stories</span>
         </a>
         <button class="btn-primary" id="new-story-btn">
@@ -354,7 +357,7 @@
           '<div class="library-empty-actions">' +
           '<button class="btn-primary" id="empty-new-btn">Write a Story</button>' +
           '</div>' +
-          '<a href="story-starters.html" class="library-empty-link">Get Inspired <span class="material-symbols-sharp i-sm" style="vertical-align:-2px">arrow_forward</span></a>' +
+          '<a href="story-starters" class="library-empty-link">Get Inspired <span class="material-symbols-sharp i-sm" style="vertical-align:-2px">arrow_forward</span></a>' +
           fsGhostRows() +
           '</div>';
         document.getElementById('empty-new-btn').addEventListener('click', function () {
@@ -389,7 +392,7 @@
         list.length + ' result' + (list.length !== 1 ? 's' : '');
 
       index.innerHTML = list.map(function (s) {
-        return '<a href="stories.html?id=' + s.id + '" class="story-row" data-id="' + s.id + '">' +
+        return '<a href="stories?id=' + s.id + '" class="story-row" data-id="' + s.id + '">' +
           '<span class="story-row-main">' +
             '<span class="story-row-title">' + esc(s.title || firstLine(s.text)) +
               (s.pinned ? '<span class="material-symbols-sharp fav-mark">favorite</span>' : '') +
@@ -490,7 +493,7 @@
       updateSaveEnabled();
       autoGrow();
       document.getElementById('post-title-input').focus();
-      if (push) history.pushState({}, '', st ? 'stories.html?new=' + starterId : 'stories.html?new=blank');
+      if (push) history.pushState({}, '', st ? 'stories?new=' + starterId : 'stories?new=blank');
       window.scrollTo(0, 0);
     }
 
@@ -503,7 +506,7 @@
       composing = false;
       composeStarter = null;
       renderList(document.getElementById('stories-search').value);
-      if (push) history.pushState({}, '', 'stories.html');
+      if (push) history.pushState({}, '', 'stories');
       window.scrollTo(0, 0);
     }
 
@@ -511,7 +514,7 @@
       document.getElementById('list-view').hidden = true;
       document.getElementById('detail-view').hidden = false;
       renderDetail(id);
-      if (push) history.pushState({}, '', 'stories.html?id=' + id);
+      if (push) history.pushState({}, '', 'stories?id=' + id);
       window.scrollTo(0, 0);
     }
 
@@ -539,8 +542,8 @@
           if (yes) { editing = false; composing = false; route(); }
           else {
             history.pushState({}, '', composing
-              ? 'stories.html?new=' + (composeStarter ? composeStarter.id : 'blank')
-              : 'stories.html?edit=' + currentId);
+              ? 'stories?new=' + (composeStarter ? composeStarter.id : 'blank')
+              : 'stories?edit=' + currentId);
           }
         });
       } else {
@@ -613,7 +616,7 @@
       editing = false;
       composing = false;
       setEditing(false);
-      if (push) history.pushState({}, '', 'stories.html?id=' + currentId);
+      if (push) history.pushState({}, '', 'stories?id=' + currentId);
     }
 
     document.getElementById('back-btn').addEventListener('click', function () {
@@ -626,7 +629,7 @@
 
     document.getElementById('edit-btn').addEventListener('click', function () {
       setEditing(true);
-      history.pushState({}, '', 'stories.html?edit=' + currentId);
+      history.pushState({}, '', 'stories?edit=' + currentId);
     });
 
     document.getElementById('cancel-edit-btn').addEventListener('click', function () {
@@ -651,7 +654,7 @@
         };
         stories.push(entry);
         persist(stories);
-        history.replaceState({}, '', 'stories.html?id=' + entry.id);
+        history.replaceState({}, '', 'stories?id=' + entry.id);
         renderDetail(entry.id);
         toast('Story saved.');
         return;
@@ -663,7 +666,7 @@
       s.editedAt = Date.now();
       persist(stories);
       renderDetail(currentId);
-      history.replaceState({}, '', 'stories.html?id=' + currentId);
+      history.replaceState({}, '', 'stories?id=' + currentId);
       toast('Story updated.');
     });
 

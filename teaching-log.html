@@ -240,6 +240,9 @@
   </main>
 
   <script src="lib/nav.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/supabase.js"></script>
+  <script src="lib/sync.js"></script>
   <script src="lib/library.js"></script>
   <script src="lib/toast.js"></script>
   <script src="lib/confirm-delete.js"></script>
@@ -304,7 +307,7 @@
           '<div class="lg-entry-main">' +
             '<div class="lg-entry-head">' +
               '<span class="lg-entry-date">' + fmtDate(e.ts) + '</span>' +
-              '<a class="lg-class-tag" href="your-classes.html?id=' + e.classId + '">' + esc(e.className) + '</a>' +
+              '<a class="lg-class-tag" href="your-classes?id=' + e.classId + '">' + esc(e.className) + '</a>' +
             '</div>' +
             '<div class="lg-entry-text">' + esc(e.text) + '</div>' +
           '</div>' +

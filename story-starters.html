@@ -120,6 +120,9 @@
 <body class="has-sidebar">
 
   <script src="lib/nav.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/supabase.js"></script>
+  <script src="lib/sync.js"></script>
   <script src="data/story-starters.js"></script>
   <div class="toast" id="toast"></div>
 
@@ -146,7 +149,7 @@
       <div class="starter-text" id="starter-text"></div>
 
       <div class="card-actions">
-        <a class="btn-ghost" id="write-btn" href="stories.html">
+        <a class="btn-ghost" id="write-btn" href="stories">
           <span class="material-symbols-sharp i-md" style="margin-right:6px">edit</span>
           Write Your Story
         </a>
@@ -212,7 +215,7 @@
     function renderStarter(starter) {
       currentId = starter.id;
       document.getElementById('starter-text').textContent = starter.text;
-      document.getElementById('write-btn').href = 'stories.html?new=' + starter.id;
+      document.getElementById('write-btn').href = 'stories?new=' + starter.id;
       const card = document.getElementById('story-card');
       card.classList.remove('animate');
       void card.offsetWidth;
@@ -226,7 +229,7 @@
     // ─── INIT ────────────────────────────────────────────────────────────────────
 
     const _urlStory = new URLSearchParams(window.location.search).get('story');
-    if (_urlStory) { window.location.replace('stories.html?id=' + _urlStory); }
+    if (_urlStory) { window.location.replace('stories?id=' + _urlStory); }
     else { draw(); }
   </script>
   <script src="lib/toast.js"></script>
