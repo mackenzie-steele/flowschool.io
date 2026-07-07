@@ -183,6 +183,26 @@
       letter-spacing: .04em;
       color: var(--text-3);
     }
+
+    /* ── sync status — the honesty line ── */
+    .sv-sync {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 12px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .sv-sync i {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: rgba(var(--ink-rgb), .25);
+    }
+    .sv-sync i.on { background: var(--accent); }
+    .sv-sync i.err { background: var(--danger); }
   </style>
 
   <main>
@@ -191,6 +211,7 @@
       <p class="label-1">Your library</p>
       <h3>Saved</h3>
       <p>Everything you’ve bookmarked, in one place.</p>
+      <p class="sv-sync" id="sv-sync"></p>
     </div>
   </section>
 
@@ -199,7 +220,7 @@
 
     <div class="sv-data">
       <span class="label-1">Your work, yours to keep</span>
-      <p class="sv-data-copy">Everything you make &#8212; classes, stories, playlists, cue flows, saved rules &#8212; lives on this device. Download a backup anytime, or restore one onto a new device.</p>
+      <p class="sv-data-copy">Everything you make &#8212; classes, stories, playlists, cue flows, saved rules &#8212; lives in your account and follows you to any device you sign in on. Download a backup anytime, or restore one wherever you need it.</p>
       <div class="sv-data-actions">
         <button class="btn-secondary" id="export-btn">
           <span class="material-symbols-sharp i-md">download</span>
@@ -524,6 +545,36 @@
         + '</div>'
         + html;
     }
+  })();
+
+  // ── the honesty line — what sync is actually doing, in mono ──
+  (function () {
+    var el = document.getElementById('sv-sync');
+    if (!el || !window.fsSync) return;
+
+    function rel(ms) {
+      if (!ms) return 'just now';
+      var s = Math.floor((Date.now() - ms) / 1000);
+      if (s < 60) return 'just now';
+      if (s < 3600) return Math.floor(s / 60) + 'm ago';
+      if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+      return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function render() {
+      var st = fsSync.status();
+      if (st.state === 'error') {
+        el.innerHTML = '<i class="err"></i>Sync issue &mdash; retrying';
+      } else if (st.state === 'syncing') {
+        el.innerHTML = '<i></i>Syncing&hellip;';
+      } else {
+        el.innerHTML = '<i class="on"></i>Synced &middot; ' + rel(st.at);
+      }
+    }
+
+    window.addEventListener('fs-sync-status', render);
+    setInterval(render, 60000); // keep the relative time honest
+    render();
   })();
   </script>
 
