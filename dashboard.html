@@ -805,6 +805,9 @@
       color: var(--text-3) !important;
       font-family: var(--font) !important;
       box-shadow: none !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       cursor: pointer;
       transition: color var(--transition-base);
       flex-shrink: 0;
@@ -1542,7 +1545,7 @@
               (e.time ? '<span class="db-event-time">' + escHTML(e.time) + '</span>' : '') +
             '</div>' +
           '</div>' +
-          (e.url ? '<a class="btn-ghost sm db-event-signup" href="' + escHTML(e.url) + '" target="_blank" rel="noopener">' + escHTML(e.linkLabel || 'Sign up') + '</a>' : '') +
+          (e.url ? '<a class="btn-ghost sm db-event-signup" href="' + escHTML(e.url) + '" target="_blank" rel="noopener">' + escHTML(e.linkLabel || 'Sign up') + '<span class="material-symbols-sharp i-sm">open_in_new</span></a>' : '') +
         '</div>';
       }).join('');
     }
