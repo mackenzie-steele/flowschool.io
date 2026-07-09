@@ -165,7 +165,7 @@
     }
 
     .cta-bar {
-      padding: 16px 28px 16px;
+      padding: 16px 28px calc(18px + env(safe-area-inset-bottom, 0px));
       gap: 8px;
     }
     .cta-bar .btn-primary { box-shadow: var(--shadow-float); border-radius: var(--r-cta); }
@@ -361,23 +361,18 @@
     /* ── Song rows ────────────────────────────────────────────── */
     .song {
       display: grid;
-      grid-template-columns: 28px 1fr auto auto auto auto;
+      grid-template-columns: 1fr auto auto auto auto;
       align-items: center;
       gap: 20px;
-      padding: 12px 20px;
+      /* left: 20px card padding + 48px indent (the lane the old number
+         column drew) — songs sit inside the section labels, not flush */
+      padding: 12px 20px 12px 68px;
       border-bottom: 1px solid rgba(var(--ink-rgb), .06);
       transition: background var(--transition-base);
     }
     .song:last-child { border-bottom: none; padding-bottom: 16px; }
     .song:hover { background: rgba(var(--ink-rgb), .03); opacity: 1; }
 
-    .song-n {
-      font-family: var(--font-mono);
-      font-size: var(--fs-label-2);
-      color: rgba(var(--ink-rgb), .28);
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
     .song-info { overflow: hidden; }
     .song-title {
       font-family: var(--font);
@@ -477,9 +472,21 @@
     }
     @media (max-width: 580px) {
       .res-hdr  { flex-direction: column; align-items: flex-start; }
-      .song     { grid-template-columns: 24px 1fr auto auto auto; padding: 12px 16px; }
+      /* two-line row: actions sit beside title/artist, meta tucks under */
+      .song {
+        grid-template-columns: 1fr auto auto;
+        grid-template-areas:
+          "info swap copy"
+          "meta meta meta";
+        gap: 8px 12px;
+        padding: 12px 16px 12px 32px;
+      }
+      .song-info { grid-area: info; }
+      .song-meta { grid-area: meta; }
+      .song-swap { grid-area: swap; }
+      .song-copy { grid-area: copy; margin-left: 0; }
       .ebar     { display: none; }
-      .cta-bar  { padding: 12px 16px 16px; }
+      .cta-bar  { padding: 12px 16px calc(18px + env(safe-area-inset-bottom, 0px)); }
     }
 
     .curve-line { stroke: var(--volt); }
@@ -1099,8 +1106,6 @@
       const withBpm = allSongs.filter(s => s.bpm);
       const avgBpm = withBpm.length ? Math.round(withBpm.reduce((a, s) => a + s.bpm, 0) / withBpm.length) : '\u2014';
 
-      let n = 0;
-
       const fu = quiet ? '' : ' fade-up';
       container.innerHTML = `
     <div class="res-hdr${fu}">
@@ -1128,13 +1133,12 @@
         </div>
         ${songs.map(s => `
           <div class="song" data-sec="${idx}" data-sid="${s.id}">
-            <span class="song-n">${++n}</span>
             <div class="song-info">
               <span class="song-title">${s.title}</span>
               <span class="song-artist">${s.artist}</span>
             </div>
             <div class="song-meta">
-              <span class="song-bpm">${s.bpm} BPM</span>
+              <span class="song-bpm">${s.bpm ? `${s.bpm} BPM` : '—'}</span>
               <span class="song-dur">${fmt(s.dur)}</span>
             </div>
             <div class="ebar">${[1,2,3,4,5,6,7,8].map(i => `<div class="ebar-seg${i <= Math.round(s.energy * 8 / 100) ? ' on' : ''}"></div>`).join('')}</div>

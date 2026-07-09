@@ -598,7 +598,9 @@ body.has-sidebar .cta-bar {
 
 @media (max-width: 580px) {
   .cta-bar {
-    padding: 12px 20px 16px;
+    /* bottom matches .sidebar-toggle (18px + inset) so the CTA and the
+       menu FAB stay level when Safari's toolbar collapses on scroll */
+    padding: 12px 20px calc(18px + env(safe-area-inset-bottom, 0px));
   }
 
   .cta-bar .btn-primary,

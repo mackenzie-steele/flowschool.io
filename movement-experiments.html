@@ -36,6 +36,20 @@
 
     .exp-actions [hidden] { display: none; }
 
+    /* watch button — the one sanctioned accent-filled control (video lives
+       here): accent circle, near-black filled triangle in both modes */
+    #watch-btn,
+    #watch-btn:hover {
+      border: none;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--paper-solid); /* white on cobalt in light; black on volt in dark */
+    }
+    #watch-btn:hover { transform: translateY(-1px); }
+    #watch-btn .material-symbols-sharp {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+
     .exp-tags {
       display: none;
     }
@@ -284,6 +298,7 @@
       {
         id: 1,
         title: '5 Minutes to Move',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-5-minutes-to-move',
         tags: ['sequencing'],
         rules: [
           'Move for 5 minutes.',
@@ -311,6 +326,7 @@
       {
         id: 2,
         title: 'The Cheerleader',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-the-cheerleader',
         tags: ['arms-hands'],
         rules: [
           'Strike a pose.',
@@ -338,6 +354,7 @@
       {
         id: 3,
         title: 'Alternate the Bend',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-alternate-the-bend',
         tags: ['sequencing', 'standing'],
         rules: [
           'Choose a standing posture.',
@@ -362,6 +379,7 @@
       {
         id: 4,
         title: 'Chair the Top',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-chair-the-top',
         tags: ['props'],
         rules: [
           'Set up a stable chair — anchor the front feet on the top end of your mat so it doesn\'t slide.',
@@ -387,6 +405,7 @@
       {
         id: 5,
         title: 'Roly-Poly',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-roly-poly',
         tags: ['floor', 'slow-somatic'],
         rules: [
           'Begin low to the ground — drop into a posture close to the floor.',
@@ -414,6 +433,7 @@
       {
         id: 6,
         title: 'Watch the Hand',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-watch-the-hand',
         tags: ['gaze', 'slow-somatic'],
         rules: [
           'Keep your gaze on your hand. Move continuously while keeping your eyes on one hand the entire time.',
@@ -439,6 +459,7 @@
       {
         id: 7,
         title: 'Touch the Block',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-touch-the-block',
         tags: ['props'],
         rules: [
           'Continuously touch at least one block the entire time.',
@@ -462,6 +483,7 @@
       {
         id: 8,
         title: 'Stay',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-stay',
         tags: ['slow-somatic', 'floor'],
         rules: [
           'Begin in a long lunge twist (either with prayer hands or swoosh your arms to the side) and make sure you\'re in a deep knee bend to make it spicy.',
@@ -486,6 +508,7 @@
       {
         id: 9,
         title: 'Be a Wave',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-be-a-wave',
         tags: ['floor', 'sequencing'],
         rules: [
           'Begin seated on your knees at the back of the mat.',
@@ -511,6 +534,7 @@
       {
         id: 10,
         title: 'Use a Wall',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-use-the-wall',
         tags: ['props'],
         rules: [
           'Set the short or long end of your mat up against the wall.',
@@ -535,6 +559,7 @@
       {
         id: 11,
         title: 'Long Side Front Side',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-long-side-front-side',
         tags: ['mat-orientation', 'sequencing'],
         rules: [
           'Declare the long side as the "front side" of the mat (not the short end).',
@@ -558,6 +583,7 @@
       {
         id: 12,
         title: 'Keep it Straight',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-keep-it-straight',
         tags: ['standing', 'sequencing'],
         rules: [
           'Keep one leg straight as you move through your flow.',
@@ -583,6 +609,7 @@
       {
         id: 13,
         title: 'Starburst',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-starburst',
         tags: ['arms-hands'],
         rules: [
           'Your hands are stars.',
@@ -606,6 +633,7 @@
       {
         id: 14,
         title: 'Put Your Back Into It',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-put-your-back-into-it',
         tags: ['floor', 'sequencing'],
         rules: [
           'Begin on your back — choose any posture where your back is connected to the ground.',
@@ -630,6 +658,7 @@
       {
         id: 15,
         title: 'Helicopter Arms',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-helicopter-arms',
         tags: ['arms-hands', 'standing'],
         rules: [
           'Hold your arms in the shape of a "T." Keep them parallel with the ground the whole time.',
@@ -653,6 +682,7 @@
       {
         id: 16,
         title: 'Tip it Over',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-tip-it-over',
         tags: ['sequencing'],
         rules: [
           'Pick a pose.',
@@ -677,6 +707,7 @@
       {
         id: 17,
         title: 'No Hands Flow',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-no-hands-flow',
         tags: ['standing', 'sequencing'],
         rules: [
           'Flow using standing postures only. Your hands can only touch the ground as a balance support, not weight-bearing.',
@@ -700,6 +731,7 @@
       {
         id: 18,
         title: 'Touch Yo\'self',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-touch-yo-self',
         tags: ['arms-hands', 'slow-somatic'],
         rules: [
           'Pick a pose and connect your hands to your body.',
@@ -725,6 +757,7 @@
       {
         id: 19,
         title: 'Make It Symmetrical',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-make-it-symmetrical',
         tags: ['sequencing', 'standing'],
         rules: [
           'You can only move through symmetrical postures — both the left and right sides of your body have to do the same thing.',
@@ -747,6 +780,7 @@
       {
         id: 20,
         title: 'Move Your Eyeballs',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-move-your-eyeballs',
         tags: ['gaze', 'slow-somatic'],
         rules: [
           'Begin in a low lunge. Gaze forward.',
@@ -770,6 +804,7 @@
       {
         id: 21,
         title: 'What\'s Behind You',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-whats-behind-you',
         tags: ['mat-orientation', 'sequencing'],
         rules: [
           'Turn around as often as possible. This isn\'t supposed to be fast — take the long route, but continue flipping between facing forwards and backwards.',
@@ -792,6 +827,7 @@
       {
         id: 22,
         title: 'Fork In The Road',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-fork-in-the-road',
         tags: ['props', 'sequencing'],
         rules: [
           'Begin in Down Dog.',
@@ -816,6 +852,7 @@
       {
         id: 23,
         title: 'Invert Your Flow',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-invert-your-flow',
         tags: ['sequencing'],
         rules: [
           'Begin upside down in an inversion or arm balance.',
@@ -840,6 +877,7 @@
       {
         id: 24,
         title: 'Freeze Tag',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-freeze-tag',
         tags: ['sequencing'],
         rules: [
           'Strike a pose.',
@@ -865,6 +903,7 @@
       {
         id: 25,
         title: 'Where\'s Waldo',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-wheres-waldo',
         tags: ['mat-orientation', 'sequencing'],
         rules: [
           'Pick a spot on the mat. Choose a pose to begin in.',
@@ -890,6 +929,7 @@
       {
         id: 26,
         title: 'Swimming',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-swimming',
         tags: ['arms-hands', 'sequencing'],
         rules: [
           'Swim your arms in transition as much as possible.'
@@ -914,6 +954,7 @@
       {
         id: 27,
         title: 'Wheel It Back',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-wheel-it-back',
         tags: ['sequencing', 'standing'],
         rules: [
           'Put as many backward bends in a flow as possible.',
@@ -936,6 +977,7 @@
       {
         id: 28,
         title: 'Lunge Your Heart Out',
+        videoUrl: 'https://flowschool.uscreen.io/programs/home-play-practice-lunge-your-heart-out',
         tags: ['standing', 'sequencing'],
         rules: [
           'Begin in Skandasana with your heel down.',
