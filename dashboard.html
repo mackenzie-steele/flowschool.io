@@ -321,7 +321,7 @@
       -webkit-box-orient: vertical;
     }
 
-    /* ── Flow Feedback — Drive upload folder ─────────────── */
+    /* ── Teacher Practice — Uscreen feedback library ───────── */
     .db-drive {
       display: flex;
       align-items: center;
@@ -338,7 +338,11 @@
       justify-content: center;
     }
 
-    .db-drive-icon .material-symbols-sharp { font-size: var(--icon-lg); color: var(--text-2); }
+    .db-drive-icon .material-symbols-sharp {
+      font-size: var(--icon-lg);
+      color: var(--text-2);
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
 
     .db-drive-info { flex: 1; min-width: 0; }
     .db-drive-info .db-eyebrow { margin-bottom: 8px; }
@@ -969,16 +973,17 @@
 
         </div>
 
-        <!-- Flow Feedback — Drive upload folder (shared link for all teachers;
-             make per-teacher via Supabase profile field when the time comes) -->
+        <!-- Teacher Practice — submitted sequences live on Uscreen; teachers
+             watch each other's flows and leave feedback there -->
         <div class="db-card db-drive">
-          <div class="db-drive-icon"><span class="material-symbols-sharp">folder</span></div>
+          <div class="db-drive-icon"><span class="material-symbols-sharp">play_arrow</span></div>
           <div class="db-drive-info">
-            <span class="db-eyebrow">Flow Feedback</span>
-            <h4 class="db-drive-title">Share your flow.</h4>
-            <p class="db-drive-desc">Record 3&#8211;20 minutes of you teaching &#8212; horizontal, full body, well lit. Upload it to your folder and fill in your doc. By sharing, you&#8217;re signing up to receive from each other.</p>
+            <span class="db-eyebrow">Teacher Practice</span>
+            <h4 class="db-drive-title">Submit your sequence &amp; get the kind of feedback you really want.</h4>
+            <p class="db-drive-desc">When you submit a sequence, you&#8217;re being a leader of bravery, curiosity, generosity, and connection. Watch the &#8220;how to give feedback&#8221; video before you dive in.</p>
+            <a class="db-view-all" href="https://drive.google.com/drive/folders/1ZcuhP1p9U0MGRKBb6O3IzscNe07m4c4G?usp=drive_link" target="_blank" rel="noopener">Upload your sequence <span class="material-symbols-sharp i-sm" style="vertical-align:-2px">arrow_forward</span></a>
           </div>
-          <a class="btn-primary db-drive-cta" href="https://drive.google.com/drive/folders/1ZcuhP1p9U0MGRKBb6O3IzscNe07m4c4G?usp=drive_link" target="_blank" rel="noopener">Open your folder<span class="material-symbols-sharp i-sm">open_in_new</span></a>
+          <a class="btn-primary db-drive-cta" href="https://flowschool.uscreen.io/categories/teacher-practice" target="_blank" rel="noopener">Open Teacher Practice<span class="material-symbols-sharp i-sm">open_in_new</span></a>
         </div>
 
         <!-- 3. Continue Where You Left Off / Start Here (first run) -->
