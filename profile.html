@@ -232,6 +232,16 @@ body { opacity: 0; transition: opacity .18s; }
 /* the booking link reads best on its own full line */
 #sched-url { grid-column: 1 / -1; }
 
+/* iOS time/date pickers size to their own intrinsic width and push the
+   grid column wide — pin them to the track like every other field */
+.sched-form .pf-input { min-width: 0; }
+.sched-form input[type="time"],
+.sched-form input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+}
+
 /* native selects ignore the input padding — take over their look so the
    text insets like every other field, with a quiet chevron seated at the
    same distance as the date picker's icon (text-3 is #A5A5A5 both themes) */
