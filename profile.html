@@ -219,12 +219,32 @@ body { opacity: 0; transition: opacity .18s; }
 .pf-field:last-of-type { margin-bottom: 0; }
 
 /* public classes — a compact editor that saves as you go */
+.sched-form[hidden] { display: none; }
 .sched-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  padding: 20px;
+  border: 1px solid rgba(var(--ink-rgb), .12);
+  border-top-color: rgba(var(--ink-rgb), .22);
+  background: rgba(var(--ink-rgb), .02);
 }
-@media (max-width: 580px) { .sched-form { grid-template-columns: 1fr; } }
+/* the booking link reads best on its own full line */
+#sched-url { grid-column: 1 / -1; }
+
+/* native selects ignore the input padding — take over their look so the
+   text insets like every other field, with a quiet chevron seated at the
+   same distance as the date picker's icon (text-3 is #A5A5A5 both themes) */
+.sched-form select.pf-input {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23A5A5A5' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 10px 6px;
+  padding-right: 40px;
+}
+@media (max-width: 580px) { .sched-form { grid-template-columns: 1fr; padding: 16px; } }
 
 .sched-row {
   display: flex;
@@ -500,9 +520,9 @@ textarea.pf-input { resize: vertical; min-height: 90px; line-height: 1.65; }
   <!-- Your public classes -->
   <section class="pf-section">
     <span class="label-1 pf-section-label">Your Public Classes</span>
-    <p class="pf-hint" style="margin:-16px 0 20px">Shown on your Circle profile, so teachers nearby can practice with you. Saved as you go.</p>
+    <p class="pf-hint" style="margin:-16px 0 20px">Shown on your Circle profile, so teachers nearby can practice with you.</p>
     <div id="sched-list"></div>
-    <div class="sched-form">
+    <div class="sched-form" id="sched-form" hidden>
       <select class="pf-input" id="sched-repeat" aria-label="How often">
         <option value="weekly">Repeats weekly</option>
         <option value="once">One-time class</option>
@@ -522,7 +542,7 @@ textarea.pf-input { resize: vertical; min-height: 90px; line-height: 1.65; }
     </div>
     <div style="display:flex; align-items:center; gap:8px; margin-top:12px">
       <button type="button" class="btn-secondary" id="sched-add">
-        <span class="material-symbols-sharp i-md" style="margin-right:6px" aria-hidden="true">add</span>
+        <span class="material-symbols-sharp i-md" style="margin-right:6px" aria-hidden="true" id="sched-add-icon">add</span>
         <span id="sched-add-label">Add Class</span>
       </button>
       <button type="button" class="btn-ghost" id="sched-cancel" hidden>Cancel</button>
@@ -694,19 +714,33 @@ document.getElementById('sched-repeat').addEventListener('change', function () {
   schedSetRepeat(this.value === 'once');
 });
 
+let schedFormOpen = false;
+
+function schedOpenForm() {
+  schedFormOpen = true;
+  document.getElementById('sched-form').hidden = false;
+  document.getElementById('sched-add-label').textContent = 'Save Class';
+  document.getElementById('sched-add-icon').textContent = 'check';
+  document.getElementById('sched-cancel').hidden = false;
+}
+
 function schedResetForm() {
   editingSchedId = null;
+  schedFormOpen = false;
   ['sched-time', 'sched-name', 'sched-studio', 'sched-city', 'sched-url', 'sched-date'].forEach(id => {
     document.getElementById(id).value = '';
   });
   schedSetRepeat(false);
+  document.getElementById('sched-form').hidden = true;
   document.getElementById('sched-add-label').textContent = 'Add Class';
+  document.getElementById('sched-add-icon').textContent = 'add';
   document.getElementById('sched-cancel').hidden = true;
   renderScheds();
 }
 
 function schedStartEdit(s) {
   editingSchedId = s.id;
+  schedOpenForm();
   schedSetRepeat(!!s.on_date);
   if (s.on_date) { document.getElementById('sched-date').min = ''; document.getElementById('sched-date').value = s.on_date; }
   else document.getElementById('sched-day').value = String(s.weekday);
@@ -736,6 +770,11 @@ async function loadScheds() {
 
 document.getElementById('sched-add').addEventListener('click', async () => {
   const btn = document.getElementById('sched-add');
+  if (!schedFormOpen) {
+    schedOpenForm();
+    document.getElementById('sched-day').focus();
+    return;
+  }
   const time = document.getElementById('sched-time').value;
   if (!time) { toast('Give the class a start time.'); document.getElementById('sched-time').focus(); return; }
   const once = document.getElementById('sched-repeat').value === 'once';
