@@ -1903,6 +1903,23 @@ input[type=range].range-slider:disabled {
 }
 
 /* ── Sidebar identity — seated in the footer, above the serial plate ── */
+/* the gear — quiet, right of the person, same wake as the nav icons */
+.sidebar-identity .nav-avatar-btn { flex: 1; min-width: 0; }
+.nav-settings-btn {
+  flex-shrink: 0;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  margin-right: -6px; /* the glyph's edge lands on the nav dots' 24px line */
+  color: var(--text-3);
+  opacity: .45; /* furniture until wanted */
+  text-decoration: none;
+  transition: color var(--transition-base), opacity var(--transition-base);
+}
+.nav-settings-btn:hover { color: var(--text-1); opacity: 1; }
+.nav-settings-btn .material-symbols-sharp { font-size: 18px; }
+
 .sidebar-identity {
   justify-content: flex-start; /* .hdr-auth right-aligns for its header life; the rail reads left */
   padding: 14px 24px 16px;     /* 24px = the nav rows' icon column (12 rail + 12 row) */
@@ -3170,6 +3187,7 @@ body.has-sidebar {
   padding: 2px 0;
   background: none;
   border: none;
+  text-decoration: none; /* the settings gear is an <a> in this uniform */
   cursor: pointer;
   font-family: var(--font-mono);
   font-size: 10px;
