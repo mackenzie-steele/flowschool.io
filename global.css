@@ -2168,7 +2168,9 @@ body.sidebar-open .sidebar-toggle .nav-tg-close { opacity: 1; }
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 2px 0 8px;
+  /* the retired dock carried the safe-area buffer; the scroll area
+     inherits it so the last rows clear the home indicator */
+  padding: 2px 0 calc(8px + env(safe-area-inset-bottom, 0px));
 }
 .ns-eyebrow {
   font-family: var(--font-mono);
@@ -2198,30 +2200,6 @@ body.sidebar-open .sidebar-toggle .nav-tg-close { opacity: 1; }
   margin-left: auto;
   flex-shrink: 0;
 }
-
-/* the dock — one full-width home bar anchoring the sheet; mono tracked
-   label in the instrument register, resting on the safe area */
-.ns-home {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 56px;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  border-top: 1px solid var(--border-light);
-  flex-shrink: 0;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-2);
-  text-decoration: none;
-  transition: color var(--transition-base), background var(--transition-base);
-}
-.ns-home .material-symbols-sharp { font-size: 18px; color: inherit; }
-.ns-home:active { background: rgba(var(--ink-rgb), .05); }
-.ns-home.on { color: var(--text-1); }
 
 .sidebar-overlay {
   position: fixed;

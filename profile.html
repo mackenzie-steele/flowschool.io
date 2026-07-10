@@ -1126,6 +1126,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
       full_name:      vals.full_name,
       display_name:   vals.display_name,
       location:       vals.location,
+      email:          currentUser.email, // belt & braces: a save can never create an email-less row
       why_i_teach:    vals.why_i_teach,
       in_circle:      vals.in_circle,
       teaching_since: vals.teaching_since,
