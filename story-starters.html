@@ -14,8 +14,6 @@
   <link rel="stylesheet" href="global.css">
   <style>
     /* ── Controls ── */
-    .controls-bar { justify-content: flex-end; }
-    .shuffle-btn { flex-shrink: 0; border-radius: var(--r-cta); }
 
     /* Write CTA flows straight from the starter — no divider */
     .story-card .card-actions {
@@ -31,6 +29,8 @@
       padding: 48px;
       margin-bottom: 40px;
     }
+
+
 
     .story-card.animate {
       animation: fadeUp .4s cubic-bezier(.22, .68, 0, 1.2);
@@ -53,66 +53,11 @@
     /* Starter flows straight into the write CTA */
     .starter-text { margin-bottom: 8px; }
 
-    /* ── Story structure ── */
-    .structure-section {
-      margin-bottom: 48px;
-    }
 
-    .structure-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .structure-step {
-      border: 1px solid var(--border-light);
-      background: rgba(var(--ink-rgb), .018);
-      padding: 24px;
-    }
-
-    .structure-n {
-      display: block;
-      margin-bottom: 16px;
-    }
-
-    .structure-title {
-      font-size: var(--fs-h7);
-      font-weight: var(--weight-medium);
-      color: var(--text-1);
-      margin-bottom: 8px;
-    }
-
-    .structure-desc {
-      font-size: var(--text-body-sm);
-      color: var(--text-2);
-      line-height: 1.6;
-    }
-
-    .structure-openers {
-      margin-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .structure-opener {
-      font-size: var(--text-small);
-      color: var(--text-3);
-      font-style: italic;
-      line-height: 1.5;
-    }
-
-    @media (max-width: 640px) {
-      .structure-grid { grid-template-columns: 1fr; }
-    }
 
     @media (max-width: 580px) {
       .story-card { padding: 28px 24px; }
 
-      .shuffle-btn {
-        width: 100%;
-        justify-content: center;
-      }
     }
   </style>
 </head>
@@ -139,11 +84,12 @@
 
   <div class="wrap">
 
-    <div class="controls-bar">
-      <button class="shuffle-btn" id="shuffle-btn">
-        <span class="material-symbols-sharp">shuffle</span>
-        Shuffle
-      </button>
+    <!-- the deck, face down — cold landings press to begin -->
+    <div class="card story-card deck-stack" id="ready-card" hidden>
+      <div class="ready-state" id="ready-state">
+        <span class="ready-count" id="ready-count"></span>
+        <button class="btn-secondary">Draw a starter</button>
+      </div>
     </div>
 
     <div class="card story-card" id="story-card">
@@ -158,36 +104,12 @@
       </div>
     </div>
 
-    <div class="structure-section">
-      <p class="ctl-label label-1">The Structure</p>
-      <div class="structure-grid">
-
-        <div class="structure-step">
-          <span class="structure-n label-2">01</span>
-          <div class="structure-title">Open with it</div>
-          <div class="structure-desc">Begin class with your story. Try one of these:</div>
-          <div class="structure-openers">
-            <span class="structure-opener">&#8220;I have a story for you&#8230;&#8221;</span>
-            <span class="structure-opener">&#8220;As we move today, I invite you to think about&#8230;&#8221;</span>
-            <span class="structure-opener">&#8220;An intention today is&#8230;&#8221;</span>
-            <span class="structure-opener">&#8220;I have been thinking about&#8230;&#8221;</span>
-            <span class="structure-opener">&#8220;Recently&#8230;&#8221;</span>
-          </div>
-        </div>
-
-        <div class="structure-step">
-          <span class="structure-n label-2">02</span>
-          <div class="structure-title">Sprinkle it through</div>
-          <div class="structure-desc">As class moves, weave words and images from your story into your cueing. A phrase here, a callback there. The story stays alive without being retold.</div>
-        </div>
-
-        <div class="structure-step">
-          <span class="structure-n label-2">03</span>
-          <div class="structure-title">Loop back</div>
-          <div class="structure-desc">End where you began. Return to the story and give them the &#8220;so what&#8221; &#8212; the thing they take off the mat.</div>
-        </div>
-
-      </div>
+    <!-- the redraw — quiet, below the card, only after the first draw -->
+    <div class="redraw" id="redraw" hidden>
+      <button class="btn-ghost" id="shuffle-btn">
+        <span class="material-symbols-sharp i-sm" style="margin-right:6px">shuffle</span>
+        Draw another
+      </button>
     </div>
 
   </div>
@@ -215,6 +137,9 @@
 
     // The teacher's words survive the shuffle — only the starter changes.
     function renderStarter(starter) {
+      document.getElementById('ready-card').hidden = true;
+      document.getElementById('redraw').hidden = false;
+      document.getElementById('story-card').hidden = false;
       currentId = starter.id;
       document.getElementById('starter-text').textContent = starter.text;
       document.getElementById('write-btn').href = 'stories?new=' + starter.id;
@@ -230,9 +155,17 @@
 
     // ─── INIT ────────────────────────────────────────────────────────────────────
 
+    // the deck, face down — nothing is drawn until asked
+    function showReady() {
+      document.getElementById('ready-count').textContent = STARTERS.length + ' stories waiting to be told';
+      document.getElementById('story-card').hidden = true;
+      document.getElementById('ready-card').hidden = false;
+      document.getElementById('ready-state').addEventListener('click', draw);
+    }
+
     const _urlStory = new URLSearchParams(window.location.search).get('story');
     if (_urlStory) { window.location.replace('stories?id=' + _urlStory); }
-    else { draw(); }
+    else { showReady(); }
   </script>
   <script src="lib/toast.js"></script>
   <script src="lib/tracker.js"></script>

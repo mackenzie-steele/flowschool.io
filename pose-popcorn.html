@@ -15,12 +15,53 @@
   <style>
 
     /* ── Deck row ── */
+    /* display:grid/flex would defeat the hidden attribute */
+    [hidden] { display: none !important; }
+
     .deck-row {
       display: grid;
       grid-template-columns: 1fr 64px 1fr;
       align-items: stretch;
       gap: 0;
+      margin-top: 24px;      /* headroom for the stacked-deck peeks */
       margin-bottom: 28px;
+    }
+    /* the row carries the headroom; the slots stay grid-aligned */
+    .deck-row .deck-stack { margin-top: 0; }
+
+    /* the slot owns the stack and holds still — only the card inside
+       ever animates. The slot stays transparent and the card opaque, so
+       when the top card slides away, the full card beneath is revealed. */
+    .deck-slot { display: flex; flex-direction: column; }
+    .deck-slot.deck-stack { background: none; }
+    .deck-slot .pose-card {
+      flex: 1;
+      background: linear-gradient(rgba(var(--ink-rgb), .02), rgba(var(--ink-rgb), .02)), var(--bg);
+    }
+    .deck-slot .dest-card {
+      background: linear-gradient(rgba(var(--ink-rgb), .035), rgba(var(--ink-rgb), .035)), var(--bg);
+    }
+    .deck-slot:hover .pose-card.facedown { border-color: rgba(var(--ink-rgb), .32); }
+
+    /* face down — not yet drawn. The whole card is the hit area; the
+       prompt dresses as a button so the eye knows what to do */
+    .pose-card.facedown { cursor: pointer; }
+    /* mirrors .btn-secondary exactly — one register for draw invitations */
+    .pose-card.facedown .pose-name {
+      margin: auto;                 /* centered in the card's free space */
+      font-size: var(--text-ui);
+      font-weight: var(--weight-semibold);
+      color: var(--text-2);
+      border: 1px solid rgba(var(--ink-rgb), .18);
+      border-radius: var(--rb);
+      padding: 12px 24px;
+      transition: color var(--transition-base), border-color var(--transition-base),
+                  background var(--transition-base);
+    }
+    .deck-slot:hover .pose-card.facedown .pose-name {
+      color: var(--text-1);
+      border-color: rgba(var(--ink-rgb), .35);
+      background: rgba(var(--ink-rgb), .05);
     }
 
     /* ── Pose cards ── */
@@ -48,15 +89,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-
-    .eyebrow-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--text-3);
-      flex-shrink: 0;
-      display: inline-block;
     }
 
     .pose-name {
@@ -436,16 +468,18 @@
       <p>Start with a pose. Connect it to the next one. Practice the art of cueing transitions one link at a time.</p>
     </section>
 
-    <!-- Main deck -->
+    <!-- Two decks, face down — draw each to begin; the stacks stay,
+         because the drawing never stops -->
     <div class="deck-row" id="deck-row">
 
-      <!-- Starting Pose -->
-      <div class="card pose-card" id="start-card">
-        <div class="pose-card-eyebrow">
-          <span class="eyebrow-dot"></span>
-          Starting Pose
+      <!-- Starting Pose — its pile grows with the chain -->
+      <div class="deck-slot" id="start-slot">
+        <div class="card pose-card" id="start-card">
+          <div class="pose-card-eyebrow">
+            Starting Pose
+          </div>
+          <div class="pose-name" id="start-pose-name">—</div>
         </div>
-        <div class="pose-name" id="start-pose-name">—</div>
       </div>
 
       <!-- Connector arrow -->
@@ -456,19 +490,20 @@
         </svg>
       </div>
 
-      <!-- Destination Pose -->
-      <div class="card pose-card dest-card" id="dest-card">
-        <div class="pose-card-eyebrow">
-          <span class="eyebrow-dot"></span>
-          Destination Pose
+      <!-- Destination Pose — the deck you draw from; its stack never moves -->
+      <div class="deck-slot deck-stack" id="dest-slot">
+        <div class="card pose-card dest-card" id="dest-card">
+          <div class="pose-card-eyebrow">
+            Destination Pose
+          </div>
+          <div class="pose-name" id="dest-pose-name">—</div>
         </div>
-        <div class="pose-name" id="dest-pose-name">—</div>
       </div>
 
     </div>
 
     <!-- Action buttons -->
-    <div class="deck-actions">
+    <div class="deck-actions" hidden>
       <button class="btn-ghost" id="reset-btn">
         <span class="material-symbols-sharp i-md" style="margin-right:6px">restart_alt</span>
         <span id="reset-label">Reset</span>
@@ -480,7 +515,7 @@
     </div>
 
     <!-- Chain history -->
-    <div class="chain-section">
+    <div class="chain-section" hidden>
       <div class="chain-header">
         <div>
           <div class="chain-title-wrap" id="chain-title-wrap">
@@ -574,9 +609,39 @@
 
     // ─── RENDER ──────────────────────────────────────────────────
     function renderDeck() {
-      document.getElementById('start-pose-name').textContent = startPose || '—';
-      document.getElementById('dest-pose-name').textContent  = destPose  || '—';
+      document.getElementById('start-pose-name').textContent = startPose || 'Tap to draw';
+      document.getElementById('dest-pose-name').textContent  = destPose  || 'Tap to draw';
+      document.getElementById('start-card').classList.toggle('facedown', !startPose);
+      document.getElementById('dest-card').classList.toggle('facedown', !destPose);
+      renderStartStack();
     }
+
+    // the left pile is the chain made physical — flat at first, one card
+    // added per link, capped at three (the right deck stays full: that's
+    // the pile you draw FROM)
+    function renderStartStack() {
+      var el = document.getElementById('start-slot');
+      var cards = Math.min(chain.length, 3);
+      el.classList.toggle('deck-stack', cards >= 2);
+      el.classList.toggle('stack-1', cards === 2);
+    }
+
+    // each deck is drawn by hand; the first connection lands when both are up
+    function drawSide(side) {
+      if (isViewingSaved) return;
+      if (side === 'start' && !startPose)     startPose = pickPose(destPose);
+      else if (side === 'dest' && !destPose)  destPose  = pickPose(startPose);
+      else return;
+      renderDeck();
+      if (startPose && destPose) {
+        pushToChain();
+        document.querySelector('.deck-actions').hidden = false;
+        document.querySelector('.chain-section').hidden = false;
+      }
+    }
+
+    document.getElementById('start-card').addEventListener('click', function () { drawSide('start'); });
+    document.getElementById('dest-card').addEventListener('click', function () { drawSide('dest'); });
 
     function renderChain() {
       var list    = document.getElementById('chain-list');
@@ -805,11 +870,14 @@
       isViewingSaved = false;
       setChainTitle('Chain');
       document.getElementById('save-btn').classList.remove('saved');
-      startPose = pickPose(null);
-      destPose  = pickPose(startPose);
-      pushToChain();
+      startPose = null;
+      destPose  = null;
+      saveToStorage();
       renderDeck();
+      renderChain();
       updateLockState();
+      document.querySelector('.deck-actions').hidden = true;
+      document.querySelector('.chain-section').hidden = true;
     }
 
     // ─── INIT ────────────────────────────────────────────────────
@@ -925,6 +993,8 @@
       setChainTitle(chainName || 'Chain');
       document.getElementById('save-btn').classList.add('saved');
       updateLockState();
+      document.querySelector('.deck-actions').hidden = false;
+      document.querySelector('.chain-section').hidden = false;
     }
 
     function findSavedChain(savedAt) {
@@ -932,6 +1002,11 @@
         var saved = JSON.parse(localStorage.getItem('fs-pose-connector-saved') || '[]');
         return saved.find(function(c) { return String(c.savedAt) === String(savedAt); }) || null;
       } catch(e) { return null; }
+    }
+
+    function showReady() {
+      renderDeck();       // both face down — the decks are the invitation
+      updateLockState();
     }
 
     function init() {
@@ -944,12 +1019,7 @@
           return;
         }
       }
-      startPose = pickPose(null);
-      destPose  = pickPose(startPose);
-      pushToChain();
-      renderDeck();
-      renderChain();
-      updateLockState();
+      showReady();
     }
 
     // ─── LOAD SAVED CHAIN MODAL ──────────────────────────────────

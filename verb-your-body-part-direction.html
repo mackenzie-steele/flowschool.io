@@ -526,59 +526,53 @@
     }
     .pol-start-btn:hover { opacity: .82; }
 
-    /* ── Word bank rail — in the page, beside the worksheet ── */
-    #main-wrap { max-width: 1140px; }
-    .hero .inner { max-width: 1140px; }
-
-    .ws-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 280px;
-      gap: 48px;
-      align-items: start;
-    }
-
+    /* ── Word bank — a folded shelf below the worksheet ──────────
+       2026-07: moved out of the right rail; the page rejoined the
+       820 reading grid. Same disclosure pattern as the Peak Flow
+       checklist in your-flows. */
     .ws-main { min-width: 0; }
 
-    .wb-rail {
-      position: sticky;
-      top: 24px;
-      /* height set by sizeRail() to exactly fit the viewport from the
-         rail's current position — never past the fold; no-JS fallback: */
-      max-height: calc(100vh - 48px);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      border: 1px solid rgba(var(--ink-rgb), .12);
-      border-top-color: rgba(var(--ink-rgb), .22);
-      background: rgba(var(--ink-rgb), .02);
-      padding: 16px 20px 24px;
-    }
+    .wb-shelf { margin-top: 40px; }
 
-    .wb-words {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      align-content: flex-start;
-    }
-
-    @media (max-width: 980px) {
-      .ws-layout { display: flex; flex-direction: column; align-items: stretch; gap: 40px; }
-      .wb-rail { position: static; height: auto; overflow: visible; }
-      .wb-words { overflow-y: visible; }
-    }
-
-    .wb-title {
+    .wb-head {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 16px;
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(var(--ink-rgb), .02);
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top-color: rgba(var(--ink-rgb), .22);
+      font-family: var(--font);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color var(--transition-base);
+    }
+    .wb-head:hover { border-color: rgba(var(--ink-rgb), .30); }
+    .wb-head-title {
       font-family: var(--font-mono);
       font-size: 10px;
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--ls-label);
       text-transform: uppercase;
-      letter-spacing: .12em;
-      color: var(--text-3);
-      margin-bottom: 16px;
+      color: var(--text-2);
+      line-height: 1;
     }
-    .wb-title .material-symbols-sharp { font-size: var(--icon-sm); }
+    .wb-context {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: var(--fs-label-2);
+      color: var(--text-3);
+      line-height: 1;
+    }
+    .wb-chev { color: var(--text-3); transition: transform var(--transition-base); }
+    .wb-head[aria-expanded="true"] .wb-chev { transform: rotate(180deg); }
+
+    .wb-body {
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top: none;
+      padding: 16px 20px 20px;
+    }
 
     .wb-tabs {
       display: flex;
@@ -722,6 +716,24 @@
     </div>
   </div>
 
+  <!-- ── WORD BANK — folded shelf; vocabulary follows the focused column ── -->
+  <div class="wb-shelf" id="wb-shelf">
+    <button type="button" class="wb-head" id="wb-toggle" aria-expanded="false" aria-controls="wb-body">
+      <span class="wb-head-title">Word Bank</span>
+      <span class="wb-context" id="wb-context">Verbs</span>
+      <span class="material-symbols-sharp wb-chev i-md">expand_more</span>
+    </button>
+    <div class="wb-body" id="wb-body" hidden>
+      <div class="wb-tabs">
+        <button class="wb-tab active" data-wb="verbs">Verbs</button>
+        <button class="wb-tab" data-wb="body">Body Parts</button>
+        <button class="wb-tab" data-wb="dirs">Directions</button>
+      </div>
+      <p class="wb-hint">Click a word to insert it into the active field.</p>
+      <div class="wb-words" id="wb-words"></div>
+    </div>
+  </div>
+
   <!-- ── CUE ACTIONS ───────────────────────────────────────────── -->
 
   <div class="cue-actions">
@@ -733,20 +745,6 @@
 
 
 </div><!-- /ws-main -->
-
-<aside class="wb-rail" id="wb-rail">
-  <div class="wb-title">
-    <span class="material-symbols-sharp">library_books</span>
-    Word Bank
-  </div>
-  <div class="wb-tabs">
-    <button class="wb-tab active" data-wb="verbs">Verbs</button>
-    <button class="wb-tab" data-wb="body">Body Parts</button>
-    <button class="wb-tab" data-wb="dirs">Directions</button>
-  </div>
-  <p class="wb-hint">Click a word to insert it into the active field.</p>
-  <div class="wb-words" id="wb-words"></div>
-</aside>
 
 </div><!-- /ws-layout -->
 </div><!-- /wrap -->
@@ -1584,8 +1582,9 @@ function renderPOLScript(cues) {
 // ─── CUE SUGGEST ─────────────────────────────────────────────────────────────
 // Inline suggestions for every worksheet column: verbs, body parts, and
 // directions complete from the word bank; the pose column speaks
-// shorthand. Same contract as the class editor — Tab inserts, arrows
-// arm, Enter only when armed, Esc dismisses until the text changes.
+// shorthand. Same contract as the class editor — Tab and Enter insert
+// the top (or armed) match, arrows arm, Esc dismisses until the text
+// changes.
 
 const CUE_SH = (function () {
   const panel = document.createElement('div');
@@ -1687,7 +1686,7 @@ const CUE_SH = (function () {
     if (ev.key === 'Tab') { ev.preventDefault(); insert(state.sel === -1 ? 0 : state.sel); }
     else if (ev.key === 'ArrowDown') { ev.preventDefault(); state.sel = (state.sel + 1) % state.items.length; render(); }
     else if (ev.key === 'ArrowUp') { ev.preventDefault(); state.sel = state.sel <= 0 ? state.items.length - 1 : state.sel - 1; render(); }
-    else if (ev.key === 'Enter' && state.sel !== -1) { ev.preventDefault(); insert(state.sel); }
+    else if (ev.key === 'Enter') { ev.preventDefault(); insert(state.sel === -1 ? 0 : state.sel); }
     else if (ev.key === 'Escape') { state.dismissed = ev.target.value; hide(); }
   }
 
@@ -1701,23 +1700,13 @@ const CUE_SH = (function () {
   return { show, hide, hideIfStale, onKey };
 })();
 
-// the rail always ends 24px above the viewport bottom — shorter at rest,
-// full height once pinned; static (auto) in the stacked mobile layout
-(function () {
-  const rail = document.getElementById('wb-rail');
-  let raf = null;
-  function sizeRail() {
-    raf = null;
-    if (getComputedStyle(rail).position !== 'sticky') { rail.style.height = ''; return; }
-    const top = Math.max(24, rail.getBoundingClientRect().top);
-    rail.style.height = Math.max(240, window.innerHeight - top - 24) + 'px';
-  }
-  function queue() { if (!raf) raf = requestAnimationFrame(sizeRail); }
-  window.addEventListener('scroll', queue, { passive: true });
-  window.addEventListener('resize', queue, { passive: true });
-  sizeRail();
-  setTimeout(sizeRail, 300); // after fonts/layout settle
-})();
+// word bank shelf — folded until asked
+document.getElementById('wb-toggle').addEventListener('click', function () {
+  const body = document.getElementById('wb-body');
+  const open = body.hidden;
+  body.hidden = !open;
+  this.setAttribute('aria-expanded', open ? 'true' : 'false');
+});
 
 (function () {
   const rowsEl = document.getElementById('cue-rows');
@@ -1728,15 +1717,36 @@ const CUE_SH = (function () {
   rowsEl.addEventListener('focusout', () => setTimeout(CUE_SH.hideIfStale, 120));
   // fixed-position panel can't follow a scroll — just close
   window.addEventListener('scroll', CUE_SH.hide, true);
+
+  // Tab at the end of the last row keeps the writing going — a fresh row
+  // appears and focus lands in its verb field. Registered after the
+  // suggest's keydown, so Tab-to-insert wins whenever a match is showing
+  // (defaultPrevented). Only fires when the row has something in it, so
+  // idle tabbing can't spawn empty rows.
+  rowsEl.addEventListener('keydown', e => {
+    if (e.key !== 'Tab' || e.shiftKey || e.defaultPrevented) return;
+    if (!e.target.dataset || e.target.dataset.field !== 'pose') return;
+    const rowEl = e.target.closest('.cue-row');
+    if (!rowEl || parseInt(rowEl.dataset.idx, 10) !== rows.length - 1) return;
+    const r = rows[rows.length - 1];
+    if (!(r.verb || r.body || r.dir || r.pose || e.target.value)) return;
+    e.preventDefault();
+    addRow();
+    markDirty();
+  });
 })();
 
 // ─── WORD BANK ───────────────────────────────────────────────────────────────
+
+const WB_LABELS = { verbs: 'Verbs', body: 'Body Parts', dirs: 'Directions' };
 
 function switchWBTab(tab) {
   wbTab = tab;
   document.querySelectorAll('.wb-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.wb === tab);
   });
+  // the folded shelf's readout follows the focused column
+  document.getElementById('wb-context').textContent = WB_LABELS[tab] || tab;
   renderWBWords();
 }
 

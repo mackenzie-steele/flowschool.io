@@ -53,11 +53,13 @@
    generator, library, and reading surface lives on this grid.
    WORKBENCH pages (two-zone: writing/working column + a tool panel
    in the right margin) may widen their wrap — the class editor
-   (1060px) and the V/YBP/D worksheet (1140px) do. The wider page's
-   hero should match its own wrap so headline and content align
-   within the page. This width jump between page types is a chosen
-   trade-off (2026-07): the panels earn their room; don't "fix" it
-   by squeezing a panel into 820, and don't widen reading pages.
+   (1060px) does. The wider page's hero should match its own wrap so
+   headline and content align within the page. This width jump between
+   page types is a chosen trade-off (2026-07): the panels earn their
+   room; don't "fix" it by squeezing a panel into 820, and don't widen
+   reading pages. (The V/YBP/D worksheet was a 1140px workbench until
+   Jul 2026, when its word bank became a folded shelf below the table
+   and the page rejoined the 820 grid.)
    ═══════════════════════════════════════════════════════════════ */
 
 /* Material Symbols Sharp is loaded via <link> tags in each page's <head>
@@ -588,7 +590,7 @@ footer {
 }
 
 body.has-sidebar .cta-bar {
-  left: 224px;
+  left: 248px;
 }
 
 .cta-bar > * {
@@ -1750,7 +1752,7 @@ input[type=range].range-slider:disabled {
 }
 
 .app-sidebar {
-  width: 224px;
+  width: 248px;
   flex-shrink: 0;
   position: fixed;
   top: 0;
@@ -1766,7 +1768,7 @@ input[type=range].range-slider:disabled {
 
 .app-main {
   flex: 1;
-  margin-left: 224px;
+  margin-left: 248px;
   min-height: 100vh;
   min-width: 0;
   position: relative;
@@ -1775,7 +1777,7 @@ input[type=range].range-slider:disabled {
 
 /* ── Sidebar logo ── */
 .sidebar-logo-wrap {
-  padding: 20px 16px;
+  padding: 20px 24px; /* left edge shared with icons, identity, and version */
   border-bottom: 1px solid rgba(var(--ink-rgb), .09);
   display: flex;
   align-items: center;
@@ -1819,7 +1821,7 @@ input[type=range].range-slider:disabled {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-3);
-  padding: 18px 12px 6px;
+  padding: 20px 12px 8px;
 }
 
 .nav-item {
@@ -1829,7 +1831,7 @@ input[type=range].range-slider:disabled {
   min-height: 36px;
   padding: 0 12px;
   border-radius: var(--r);
-  font-size: 13px;
+  font-size: var(--fs-chip); /* 14px — on the scale; was an off-scale 13px */
   color: var(--text-2);
   text-decoration: none;
   transition: background var(--transition-base), color var(--transition-base);
@@ -1856,7 +1858,7 @@ input[type=range].range-slider:disabled {
 }
 
 .nav-item:hover .material-symbols-sharp {
-  color: var(--text-2);
+  color: var(--text-1); /* full ink with the label — volt stays active-only */
 }
 
 /* the LED dot — current page, same signature as the mobile sheet */
@@ -1887,7 +1889,8 @@ input[type=range].range-slider:disabled {
 
 /* ── Sidebar identity — seated in the footer, above the serial plate ── */
 .sidebar-identity {
-  padding: 14px 20px 2px;
+  justify-content: flex-start; /* .hdr-auth right-aligns for its header life; the rail reads left */
+  padding: 14px 24px 2px;      /* 24px = the nav rows' icon column (12 rail + 12 row) */
   flex-shrink: 0;
 }
 
@@ -1918,7 +1921,7 @@ input[type=range].range-slider:disabled {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px 14px;
+  padding: 10px 24px 14px; /* left edge shared with the identity row + icon column */
 }
 
 .sidebar-version {
@@ -2225,7 +2228,7 @@ body.sidebar-open .sidebar-toggle .nav-tg-close { opacity: 1; }
 }
 
 body.has-sidebar {
-  padding-left: 224px;
+  padding-left: 248px;
 }
 
 @media (max-width: 768px) {
@@ -3199,6 +3202,85 @@ body.has-sidebar {
 }
 .ns-feedback-btn .material-symbols-sharp { font-size: 20px; }
 .ns-feedback-btn:active { color: var(--text-1); }
+
+
+/* ─── 23b. READY DECKS (Play tools) ──────────────────────────── */
+/* The face-down state: the card is the top of a deck, two more
+   peek from behind — depth by ink-alpha, not color. Hover riffles
+   the stack (the deck readying to deal, back card slightly late);
+   press settles it flat — the moment the card leaves the deck.
+   Apply .deck-stack to the ready card element itself. */
+
+.deck-stack {
+  position: relative;
+  margin-top: 24px;              /* room for the 20px peek + hover lift */
+  /* opaque composite — the standard card wash over solid paper. The
+     cards beneath are full-height; this is what hides their bodies
+     until the top card moves away. */
+  background: linear-gradient(rgba(var(--ink-rgb), .02), rgba(var(--ink-rgb), .02)), var(--bg);
+  transition: border-color var(--transition-base);
+}
+.deck-stack:hover { border-color: rgba(var(--ink-rgb), .32); }
+
+.deck-stack::before,
+.deck-stack::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  bottom: 0;                     /* full cards, not strips — a real card
+                                    outline remains when the top one leaves */
+  background: var(--bg);
+  border: 1px solid rgba(var(--ink-rgb), .12);
+  border-top-color: rgba(var(--ink-rgb), .22);
+  transition: transform var(--transition-base);
+}
+/* even steps: exactly 10px of each card shows */
+.deck-stack::before { left: 12px; right: 12px; top: -10px; }
+.deck-stack::after {
+  left: 24px; right: 24px; top: -20px;
+  z-index: -2;                   /* genuinely behind the middle card, not just offset */
+  border-color: rgba(var(--ink-rgb), .09);
+  border-top-color: rgba(var(--ink-rgb), .16);
+  transition-delay: .05s;        /* the deeper card runs a beat late — the riffle */
+}
+/* variable depth — .stack-1 shows one card behind instead of two
+   (a pile that has only just started) */
+.deck-stack.stack-1::after { display: none; }
+
+.deck-stack:hover::before { transform: translateY(-3px); }
+.deck-stack:hover::after  { transform: translateY(-6px); }
+.deck-stack:active::before,
+.deck-stack:active::after {
+  transform: translateY(0);
+  transition: transform var(--transition-fast);
+}
+
+.ready-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: 260px;
+  cursor: pointer;
+}
+.ready-count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label-2);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* the redraw — quiet text control seated under the card,
+   hidden until the first draw */
+.redraw {
+  display: flex;
+  justify-content: center;
+  margin: -24px 0 48px;
+}
+.redraw[hidden] { display: none; } /* display:flex would defeat the hidden attribute */
 
 
 /* ─── 24. SITE FOOTER ────────────────────────────────────────── */

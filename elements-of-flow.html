@@ -308,6 +308,7 @@
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
+  <script src="data/elements-of-flow.js"></script>
 
   <main>
 
@@ -326,7 +327,7 @@
         <div class="res-stats">
           <div class="fc-counter">
             <span class="fc-count" id="fc-total-count">0</span>
-            <span class="fc-denom">/ 27 checked</span>
+            <span class="fc-denom">/ 28 checked</span>
           </div>
         </div>
         <div class="res-actions">
@@ -442,44 +443,12 @@
 
       // ── Data ──────────────────────────────────────────────────────────
 
-      var BODY_POSITIONS = [
-        { id: 'single-leg',   label: 'Single Leg',                     sub: 'Tree · Warrior 3 · Revolved Half Moon' },
-        { id: 'double-same',  label: 'Double Leg, Same Direction',      sub: 'Chair · Tadasana · Wide Leg Forward Fold' },
-        { id: 'diff-dir',     label: 'Double Leg, Different Direction', sub: 'Skandasana · Triangle · Warrior 2' },
-        { id: 'squat',        label: 'Squat / Bent Leg',               sub: 'Chair · Skandasana · Lunge' },
-        { id: 'hinge',        label: 'Hinge / Fold / Spine Flexion',   sub: 'Pyramid · Forward Fold · Triangle' },
-        { id: 'straight-leg', label: 'Straight Leg',                   sub: 'Tadasana · Half Moon · Low Boat' },
-        { id: 'square-hip',   label: 'Square Hip / Neutral Hip',       sub: 'Crescent Lunge · Camel · Chair' },
-        { id: 'open-hip',     label: 'Open Hip / External Rotation',   sub: 'Half Moon · Warrior 2 · Extended Side Angle' },
-        { id: 'twist',        label: 'Twist',                          sub: 'Revolved Chair · Dancing Anjaneyasana' },
-        { id: 'lean',         label: 'Lean',                           sub: 'Wild Thing · Runner\'s Lean · Reverse Triangle' },
-        { id: 'single-arm',   label: 'Single Arm',                     sub: 'Side Plank · Funky Side Plank · Gate' },
-        { id: 'double-arm',   label: 'Double Arm',                     sub: 'Down Dog · Crow · Chaturanga · Handstand' },
-        { id: 'backbend',     label: 'Spine Extension / Backbend',     sub: 'Bridge · Wild Thing · Up Dog' },
-      ];
-
-      var PLANES = [
-        { id: 'sagittal',   label: 'Sagittal',   sub: 'Forward + Back · Up + Down' },
-        { id: 'frontal',    label: 'Frontal',     sub: 'Side to Side' },
-        { id: 'transverse', label: 'Transverse',  sub: 'Twist / Rotation' },
-      ];
-
-      var GAIT = [
-        { id: 'bent-straight', label: 'Bent → Straight',          sub: 'Do both legs alternate between bent and straight?' },
-        { id: 'square-open',   label: 'Square Hip → Open Hip',    sub: 'Do your hips rotate between square and open?' },
-        { id: 'arms-ud',       label: 'Arms Up → Arms Down',      sub: 'Do your arms move in multiple directions, not just up?' },
-        { id: 'twist-lr',      label: 'Twist Left → Twist Right', sub: 'Does your flow twist in both directions?' },
-        { id: 'back-fwd',      label: 'Backbend → Forward Fold',  sub: 'Does your spine both extend and flex?' },
-        { id: 'fwd-bwd',       label: 'Forward → Backward',       sub: 'Does your flow move both forward and backward on the mat?' },
-      ];
-
-      var BIG_FIVE = [
-        { id: 'mobility',     label: 'Mobility',     sub: 'Joint control and strength in range of motion' },
-        { id: 'stability',    label: 'Stability',    sub: 'Ability to control movement' },
-        { id: 'strength',     label: 'Strength',     sub: 'Power, endurance, and exertion of effort' },
-        { id: 'conditioning', label: 'Conditioning', sub: 'Rhythmic movement of the heart and lungs' },
-        { id: 'flow',         label: 'Flow',         sub: 'Transitions and postures sequenced across planes' },
-      ];
+      // canonical checklist data — shared with the Peak Flow checklist
+      // in your-flows.html; lives in data/elements-of-flow.js
+      var BODY_POSITIONS = EOF_DATA.BODY_POSITIONS;
+      var PLANES         = EOF_DATA.PLANES;
+      var GAIT           = EOF_DATA.GAIT;
+      var BIG_FIVE       = EOF_DATA.BIG_FIVE;
 
       // ── Storage ───────────────────────────────────────────────────────
 
@@ -490,7 +459,7 @@
         big5:  'flowschool_fc_big5',
       };
 
-      var TOTALS = { bp: 13, plane: 3, gait: 6, big5: 5 };
+      var TOTALS = { bp: 13, plane: 4, gait: 6, big5: 5 };
 
       // ── State ─────────────────────────────────────────────────────────
 

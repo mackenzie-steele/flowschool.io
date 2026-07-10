@@ -188,6 +188,59 @@
       .story-row-date { display: none; }
       .post-title { font-size: clamp(1.5rem, 6vw, 2rem); }
     }
+
+    /* ── Story structure — reference, moved from story-starters ── */
+    .structure-section {
+      margin-top: 56px;
+      margin-bottom: 48px;
+    }
+
+    .structure-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .structure-step {
+      border: 1px solid var(--border-light);
+      background: rgba(var(--ink-rgb), .018);
+      padding: 24px;
+    }
+
+    .structure-n {
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .structure-title {
+      font-size: var(--fs-h7);
+      font-weight: var(--weight-medium);
+      color: var(--text-1);
+      margin-bottom: 8px;
+    }
+
+    .structure-desc {
+      font-size: var(--text-body-sm);
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+
+    .structure-openers {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .structure-opener {
+      font-size: var(--text-small);
+      color: var(--text-3);
+      font-style: italic;
+      line-height: 1.5;
+    }
+    @media (max-width: 640px) {
+      .structure-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 
@@ -243,6 +296,40 @@
         <span class="result-count" id="result-count"></span>
       </div>
       <div class="story-index" id="story-index"></div>
+
+      <!-- The Structure — how a story becomes a class (moved from
+           story-starters, 2026-07: reference lives with the library) -->
+    <div class="structure-section">
+      <p class="ctl-label label-1">The Structure</p>
+      <div class="structure-grid">
+
+        <div class="structure-step">
+          <span class="structure-n label-2">01</span>
+          <div class="structure-title">Open with it</div>
+          <div class="structure-desc">Begin class with your story. Try one of these:</div>
+          <div class="structure-openers">
+            <span class="structure-opener">&#8220;I have a story for you&#8230;&#8221;</span>
+            <span class="structure-opener">&#8220;As we move today, I invite you to think about&#8230;&#8221;</span>
+            <span class="structure-opener">&#8220;An intention today is&#8230;&#8221;</span>
+            <span class="structure-opener">&#8220;I have been thinking about&#8230;&#8221;</span>
+            <span class="structure-opener">&#8220;Recently&#8230;&#8221;</span>
+          </div>
+        </div>
+
+        <div class="structure-step">
+          <span class="structure-n label-2">02</span>
+          <div class="structure-title">Sprinkle it through</div>
+          <div class="structure-desc">As class moves, weave words and images from your story into your cueing. A phrase here, a callback there. The story stays alive without being retold.</div>
+        </div>
+
+        <div class="structure-step">
+          <span class="structure-n label-2">03</span>
+          <div class="structure-title">Loop back</div>
+          <div class="structure-desc">End where you began. Return to the story and give them the &#8220;so what&#8221; &#8212; the thing they take off the mat.</div>
+        </div>
+
+      </div>
+    </div>
     </div>
   </div>
 

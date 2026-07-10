@@ -317,6 +317,108 @@
 
     .fl-type.on .fl-type-dot { background: var(--volt); }
 
+    /* ── Elements of Flow — the Peak Flow checklist ─────────────
+       one quiet instrument row until asked; sections carry the
+       playlist's header register; checked items recede while the
+       readout keeps score. Peak Flows only. */
+    .ef-head {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(var(--ink-rgb), .02);
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top-color: rgba(var(--ink-rgb), .22);
+      font-family: var(--font);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color var(--transition-base);
+    }
+    .ef-head:hover { border-color: rgba(var(--ink-rgb), .30); }
+    .ef-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-2);
+      line-height: 1;
+    }
+    .ef-progress {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: var(--fs-label-2);
+      color: var(--text-3);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .ef-progress.done { color: var(--volt); }
+    .ef-chev { color: var(--text-3); transition: transform var(--transition-base); }
+    .ef-head[aria-expanded="true"] .ef-chev { transform: rotate(180deg); }
+
+    .ef-body {
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top: none;
+      padding: 0 20px 16px;
+    }
+    /* section header — the playlist's register: microcap name,
+       count seated under it, hairline below */
+    .ef-sec-hdr {
+      padding: 20px 0 10px;
+      border-bottom: 1px solid rgba(var(--ink-rgb), .07);
+    }
+    .ef-sec-hdr h4 {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: var(--weight-regular);
+      letter-spacing: var(--ls-micro);
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin: 0 0 3px;
+      line-height: 1.2;
+    }
+    .ef-sec-hdr span {
+      font-family: var(--font-mono);
+      font-size: var(--fs-label-2);
+      color: rgba(var(--ink-rgb), .35);
+      font-variant-numeric: tabular-nums;
+    }
+    .ef-foot {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 16px;
+    }
+    .ef-sec-items { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+    @media (max-width: 580px) { .ef-sec-items { grid-template-columns: 1fr; } }
+    .ef-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(var(--ink-rgb), .05);
+    }
+    .ef-box {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      border: 1px solid rgba(var(--ink-rgb), .30);
+      border-radius: var(--rs);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-fast), border-color var(--transition-fast);
+    }
+    .ef-check { font-size: 12px; color: var(--paper-solid); opacity: 0; }
+    .ef-item.on .ef-box { background: var(--ink-solid); border-color: var(--ink-solid); }
+    .ef-item.on .ef-check { opacity: 1; }
+    .ef-item-label { display: block; font-size: var(--text-body-sm); color: var(--text-1); line-height: 1.35; }
+    .ef-item-sub   { display: block; font-size: var(--text-small); color: var(--text-3); line-height: 1.4; margin-top: 1px; }
+    .ef-item.on .ef-item-label,
+    .ef-item.on .ef-item-sub { opacity: .45; }
+
     .fl-type-desc {
       display: block;
       font-size: 11px;
@@ -363,6 +465,7 @@
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
   <script src="data/shorthand.js"></script>
+  <script src="data/elements-of-flow.js"></script>
   <script src="lib/toast.js"></script>
   <script src="lib/confirm-delete.js"></script>
   <script src="lib/library.js"></script>
@@ -477,6 +580,18 @@
             <span class="fl-count" id="fl-count" hidden></span>
           </div>
           <textarea class="fl-area" id="fl-area" rows="3" placeholder="SEATED TWIST / BOAT / LOW BOAT / TWIST BOAT"></textarea>
+        </div>
+
+        <!-- Elements of Flow — Peak Flows only. Optional checklist; checked
+             state saves on the flow itself (f.elements) and syncs with it.
+             The canon lives in data/elements-of-flow.js. -->
+        <div class="fl-section" id="fl-elements" hidden>
+          <button type="button" class="ef-head" id="ef-toggle" aria-expanded="false" aria-controls="ef-body">
+            <span class="ef-title">Elements of Flow</span>
+            <span class="ef-progress" id="ef-progress">0/28</span>
+            <span class="material-symbols-sharp ef-chev i-md">expand_more</span>
+          </button>
+          <div class="ef-body" id="ef-body" hidden></div>
         </div>
 
       </div>
@@ -832,6 +947,10 @@
       area.value = f ? (f.text || '') : '';
       renderTypes();
       setTypeCollapsed(!!editType);
+      efLoad(f);
+      efRender();
+      efUpdateVisibility();
+      efCollapse(); // arrives folded — it's an offer, not an assignment
       renderCount();
       autoGrow(area);
 
@@ -842,6 +961,98 @@
       window.scrollTo(0, 0);
       if (!f) document.getElementById('fl-title').focus();
     }
+
+    // ─── ELEMENTS OF FLOW (Peak Flows only) ──────────────────────────────────────
+    // Optional checklist inside the editor. Canon: data/elements-of-flow.js.
+    // Checked state lives on the flow itself (f.elements) and syncs with it.
+
+    var EF_SECTIONS = [
+      { key: 'bp',    label: 'Body Positions',  items: EOF_DATA.BODY_POSITIONS },
+      { key: 'plane', label: 'Movement Planes', items: EOF_DATA.PLANES },
+      { key: 'gait',  label: 'Gait',            items: EOF_DATA.GAIT },
+      { key: 'big5',  label: 'The Big Five',    items: EOF_DATA.BIG_FIVE },
+    ];
+    var EF_TOTAL = EF_SECTIONS.reduce(function (n, s) { return n + s.items.length; }, 0);
+    var efState = {};
+
+    function efLoad(f) {
+      var saved = (f && f.elements) || {};
+      efState = {};
+      EF_SECTIONS.forEach(function (s) {
+        efState[s.key] = new Set(Array.isArray(saved[s.key]) ? saved[s.key] : []);
+      });
+    }
+
+    function efSerialize() {
+      var out = {};
+      EF_SECTIONS.forEach(function (s) { out[s.key] = Array.from(efState[s.key]); });
+      return out;
+    }
+
+    function efCount() {
+      return EF_SECTIONS.reduce(function (n, s) { return n + efState[s.key].size; }, 0);
+    }
+
+    function efRender() {
+      var n = efCount();
+      document.getElementById('ef-body').innerHTML = EF_SECTIONS.map(function (s) {
+        var got = efState[s.key].size;
+        return '<div class="ef-sec">' +
+          '<div class="ef-sec-hdr">' +
+            '<h4>' + s.label + '</h4>' +
+            '<span>' + got + ' of ' + s.items.length + '</span>' +
+          '</div>' +
+          '<div class="ef-sec-items">' + s.items.map(function (item) {
+            var on = efState[s.key].has(item.id);
+            return '<div class="ef-item' + (on ? ' on' : '') + '" data-sec="' + s.key + '" data-id="' + item.id + '">' +
+              '<span class="ef-box"><span class="material-symbols-sharp ef-check">check</span></span>' +
+              '<span><span class="ef-item-label">' + item.label + '</span>' +
+              '<span class="ef-item-sub">' + item.sub + '</span></span>' +
+            '</div>';
+          }).join('') + '</div>' +
+        '</div>';
+      }).join('') +
+      '<div class="ef-foot">' +
+        '<button type="button" class="btn-ghost sm" id="ef-reset"' + (n ? '' : ' disabled') + '>' +
+          '<span class="material-symbols-sharp i-sm" style="margin-right:6px">restart_alt</span>Reset</button>' +
+      '</div>';
+      var progress = document.getElementById('ef-progress');
+      progress.textContent = n + '/' + EF_TOTAL;
+      progress.classList.toggle('done', n === EF_TOTAL);
+    }
+
+    // the module only exists for Peak Flows
+    function efUpdateVisibility() {
+      document.getElementById('fl-elements').hidden = editType !== 'peak';
+    }
+
+    function efCollapse() {
+      document.getElementById('ef-body').hidden = true;
+      document.getElementById('ef-toggle').setAttribute('aria-expanded', 'false');
+    }
+
+    document.getElementById('ef-toggle').addEventListener('click', function () {
+      var body = document.getElementById('ef-body');
+      var open = body.hidden;
+      body.hidden = !open;
+      this.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    document.getElementById('ef-body').addEventListener('click', function (e) {
+      if (e.target.closest('#ef-reset')) {
+        EF_SECTIONS.forEach(function (s) { efState[s.key].clear(); });
+        efRender();
+        markDirty();
+        return;
+      }
+      var row = e.target.closest('.ef-item');
+      if (!row) return;
+      var set = efState[row.dataset.sec];
+      if (set.has(row.dataset.id)) set.delete(row.dataset.id);
+      else set.add(row.dataset.id);
+      efRender();
+      markDirty();
+    });
 
     // ─── GUARDS ──────────────────────────────────────────────────────────────────
 
@@ -878,6 +1089,7 @@
         f.name = name || 'Untitled Flow';
         f.type = editType;
         f.text = text;
+        f.elements = efSerialize();
         f.editedAt = Date.now();
       } else {
         var entry = {
@@ -885,6 +1097,7 @@
           name: name || 'Untitled Flow',
           type: editType,
           text: text,
+          elements: efSerialize(),
           editedAt: Date.now(),
         };
         flows.push(entry);
@@ -966,6 +1179,7 @@
       editType = btn.dataset.type;
       renderTypes();
       setTypeCollapsed(true);
+      efUpdateVisibility();
       markDirty();
       document.getElementById('fl-area').focus();
     });
@@ -975,8 +1189,8 @@
     });
 
     // ─── SHORTHAND SUGGEST ───────────────────────────────────────────────────────
-    // Same contract as the class editor: Tab inserts, arrows arm, Enter
-    // only when armed, Esc dismisses for the current token.
+    // Same contract as the class editor: Tab and Enter insert the top
+    // (or armed) match, arrows arm, Esc dismisses for the current token.
 
     var SH = fsShorthandSuggest({
       container: '.fl-editor',
