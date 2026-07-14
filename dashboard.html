@@ -41,10 +41,15 @@
       text-decoration: none;
       color: inherit;
       cursor: pointer;
-      transition: border-color var(--transition-base);
+      background: rgba(var(--ink-rgb), .022);
+      transition: border-color var(--transition-base), background .15s;
     }
 
-    .db-pod:hover { border-color: rgba(var(--ink-rgb), .32); }
+    /* hover matches Your Favorite Classes — a slight background wash + border lift */
+    .db-pod:hover {
+      border-color: rgba(var(--ink-rgb), .22);
+      background: rgba(var(--ink-rgb), .038);
+    }
 
     .db-pod-num {
       font-family: var(--font-mono);
@@ -74,52 +79,67 @@
       overflow: hidden;
     }
 
-    .db-pod-meta {
+    /* bottom row: the play seal + the readout, on a hairline shelf */
+    .db-pod-foot {
       margin-top: auto;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: .04em;
-      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      gap: 12px;
       border-top: 1px solid var(--border-light);
       padding-top: 12px;
     }
 
-    /* hide an episode — the site's armed two-step, no claims made.
-       Idle: a quiet ✕ in the corner on hover. First tap arms it into
-       words; the second tap commits. It disarms on its own. */
-    .db-pod { position: relative; }
+    /* the play seal — says "audio, press to play" at a glance. Ink-filled,
+       NOT accent: the accent play circle is reserved for buttons that link
+       out to a Uscreen video; this links to Apple Podcasts, so it wears
+       solid ink (white in dark, black in light) with a paper-solid filled
+       triangle. The whole card is the link; this is the visual seal, not a
+       second target. */
+    .db-pod-play {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--ink-solid);
+      color: var(--paper-solid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform var(--transition-fast);
+    }
+    .db-pod:hover .db-pod-play { transform: translateY(-1px); }
+    .db-pod-play .material-symbols-sharp {
+      font-size: 18px;
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
 
-    .db-pod-x {
-      position: absolute;
-      top: 14px;
-      right: 14px;
+    .db-pod-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .04em;
+      color: var(--text-3);
+    }
+
+    /* more menu — a quiet ⋯ in the card's bottom-right corner; the
+       Copy link + Mark as played actions live inside it (reuses the .st-menu
+       pattern via fsWireItemMenu, opened upward from the corner). */
+    .db-pod-more {
+      position: relative;
+      margin-left: auto;   /* pushes the trigger to the far right of the foot */
+      flex-shrink: 0;
+      display: flex;
+    }
+    .db-pod-more-btn {
       background: none;
       border: none;
-      padding: 4px 8px;
+      padding: 2px 4px;
       cursor: pointer;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: .04em;
-      line-height: 1;
       color: var(--text-3);
-      opacity: 0;
-      transition: opacity var(--transition-base), color var(--transition-base);
+      display: flex;
+      align-items: center;
+      transition: color var(--transition-base);
     }
-
-    .db-pod:hover .db-pod-x { opacity: 1; }
-    .db-pod-x:hover { color: var(--text-1); }
-
-    .db-pod-x.armed {
-      opacity: 1;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--text-1);
-    }
-
-    @media (hover: none) {
-      .db-pod-x { opacity: 1; }
-    }
+    .db-pod-more-btn:hover { color: var(--text-1); }
 
     .db-pod.leaving {
       opacity: 0;
@@ -391,7 +411,7 @@
     }
 
     .db-prompt-date {
-      font-size: var(--text-small);
+      font-size: 11px;
       color: var(--text-3);
       font-family: var(--font-mono);
     }
@@ -454,7 +474,7 @@
     }
 
     .db-cc-time {
-      font-size: var(--text-small);
+      font-size: 11px;
       color: var(--text-3);
       font-family: var(--font-mono);
       margin-top: auto;
@@ -792,7 +812,7 @@
     }
 
     .db-event-time {
-      font-size: var(--text-small);
+      font-size: 11px;
       color: var(--text-3);
       font-family: var(--font-mono);
     }
@@ -1030,6 +1050,9 @@
       </div>
   </main>
 
+  <div class="toast" id="toast"></div>
+
+  <script src="lib/toast.js"></script>
   <script src="data/dashboard-content.js"></script>
   <script src="data/dashboard-daily-quotes.js"></script>
   <script src="data/dashboard-weekly-prompts.js"></script>
@@ -1130,48 +1153,80 @@
 
         el.innerHTML = picks.map(function (e) {
           return '<a class="db-pod" href="' + escP(e.url) + '" target="_blank" rel="noopener">' +
-            '<button type="button" class="db-pod-x" data-num="' + e.num + '" title="Hide this episode"><span class="material-symbols-sharp i-sm">close</span></button>' +
             '<span class="db-pod-num">EP ' + e.num + '</span>' +
             '<span class="db-pod-title">' + escP(e.title) + '</span>' +
             '<span class="db-pod-blurb">' + escP(e.blurb) + '</span>' +
-            '<span class="db-pod-meta">' + escP(e.dur) + ' &#183; ' + escP(e.date) + '</span>' +
+            '<span class="db-pod-foot">' +
+              '<span class="db-pod-play"><span class="material-symbols-sharp">play_arrow</span></span>' +
+              '<span class="db-pod-meta">' + escP(e.dur) + ' &#183; ' + escP(e.date) + '</span>' +
+              '<span class="db-pod-more">' +
+                '<button type="button" class="db-pod-more-btn" data-num="' + e.num + '" title="More" aria-label="More actions"><span class="material-symbols-sharp i-sm">more_horiz</span></button>' +
+              '</span>' +
+            '</span>' +
           '</a>';
         }).join('');
       }
 
-      // two deliberate taps: ✕ arms into words, tapping the words commits
-      var podArmTimer = null;
+      // Copy link + Mark as played live in a ⋯ menu in each card's corner.
+      // One shared, detachable menu (fsWireItemMenu) re-anchors to whichever
+      // card's trigger was tapped; currentPodNum carries which episode.
+      var currentPodNum = null;
+      var podMenuEl = document.createElement('div');
+      podMenuEl.className = 'st-menu';   // shared panel/item styling, opens downward like elsewhere
+      podMenuEl.hidden = true;
+      // the trigger + menu live inside the card's <a>; never let a click there
+      // navigate to the episode
+      podMenuEl.addEventListener('click', function (e) { e.preventDefault(); });
 
-      function disarmPods() {
-        clearTimeout(podArmTimer);
-        el.querySelectorAll('.db-pod-x.armed').forEach(function (b) {
-          b.classList.remove('armed');
-          b.innerHTML = '<span class="material-symbols-sharp i-sm">close</span>';
-        });
+      function podUrl(num) {
+        var ep = YOGA_STRONG_EPISODES.filter(function (e) { return e.num === num; })[0];
+        return ep ? ep.url : '';
       }
 
+      function copyLink(url) {
+        function done() { if (window.toast) toast('Link copied.'); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(done, function () { legacyCopy(url); done(); });
+        } else { legacyCopy(url); done(); }
+      }
+      function legacyCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch (_) {}
+        document.body.removeChild(ta);
+      }
+
+      var podMenu = (typeof fsWireItemMenu === 'function') ? fsWireItemMenu(podMenuEl, {
+        detach: true,
+        items: function () {
+          return [
+            { act: 'copy',   icon: 'link',        label: 'Copy link' },
+            { act: 'played', icon: 'headphones',  label: 'Mark as played' },
+          ];
+        },
+        on: function (act) {
+          if (currentPodNum == null) return;
+          if (act === 'copy') { copyLink(podUrl(currentPodNum)); return; }
+          if (act === 'played') {
+            var gone = heard();
+            if (gone.indexOf(currentPodNum) === -1) gone.push(currentPodNum);
+            localStorage.setItem(HEARD_KEY, JSON.stringify(gone));
+            var trigger = el.querySelector('.db-pod-more-btn[data-num="' + currentPodNum + '"]');
+            var card = trigger && trigger.closest('.db-pod');
+            if (card) { card.classList.add('leaving'); setTimeout(renderPods, 230); } // pool backfills after the fade
+            else renderPods();
+          }
+        },
+      }) : null;
+
       el.addEventListener('click', function (ev) {
-        var btn = ev.target.closest('.db-pod-x');
-        if (!btn) { disarmPods(); return; }
-        ev.preventDefault();
-        ev.stopPropagation();
-
-        if (!btn.classList.contains('armed')) {
-          disarmPods();
-          btn.classList.add('armed');
-          btn.textContent = "Don't show again?";
-          clearTimeout(podArmTimer);
-          podArmTimer = setTimeout(disarmPods, 2600);
-          return;
-        }
-
-        var gone = heard();
-        var num = parseInt(btn.dataset.num, 10);
-        if (gone.indexOf(num) === -1) gone.push(num);
-        localStorage.setItem(HEARD_KEY, JSON.stringify(gone));
-        var card = btn.closest('.db-pod');
-        card.classList.add('leaving');
-        setTimeout(renderPods, 230); // the pool backfills after the card fades
+        var btn = ev.target.closest('.db-pod-more-btn');
+        if (!btn || !podMenu) return;
+        ev.preventDefault();      // don't follow the card's link
+        ev.stopPropagation();     // don't trip the menu's document-close
+        currentPodNum = parseInt(btn.dataset.num, 10);
+        podMenu.toggle(btn.closest('.db-pod-more'));
       });
 
       renderPods();

@@ -121,6 +121,15 @@
     .mix-slider-wrap { margin-bottom: 24px; }
     .mix-slider-wrap:last-of-type { margin-bottom: 0; }
 
+    /* intensity — the height dial under the arc pills, above the curve */
+    .intensity-wrap { margin: 28px 0; }
+
+    /* the class-length wrap is a flex column with an 8px gap; the slider's own
+       8px bottom margin stacks on top of it, pushing its ticks 16px away. Zero
+       that margin so its slider-to-ticks gap matches the other sliders' 8px.
+       (selector must out-specify the global input[type=range].range-slider) */
+    .range-slider-wrap input[type=range].range-slider { margin-bottom: 0; }
+
     /* the pole words ARE the display: slide toward one and it comes
        forward, the other recedes — readable with no numbers at all */
     .mix-ends {
@@ -235,24 +244,6 @@
 
 
     /* ── Curve module ─────────────────────────────────────────── */
-    .curve-hdr {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .curve-module-meta {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .curve-module-label {
-      font-family: var(--font-mono);
-      font-size: 9px;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      color: rgba(var(--ink-rgb), .22);
-    }
 
     #curve-svg {
       width: 100%;
@@ -336,37 +327,13 @@
       margin-top: 0;
     }
 
-    .sec-hdr {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 16px 20px 12px;
-      border-bottom: 1px solid rgba(var(--ink-rgb), .07);
-    }
-    .sec-meta h4 {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      font-weight: var(--weight-regular);
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-bottom: 3px;
-    }
-    .sec-meta span {
-      font-family: var(--font-mono);
-      font-size: var(--fs-label-2);
-      color: rgba(var(--ink-rgb), .35);
-    }
-
     /* ── Song rows ────────────────────────────────────────────── */
     .song {
       display: grid;
       grid-template-columns: 1fr auto auto auto auto;
       align-items: center;
       gap: 20px;
-      /* left: 20px card padding + 48px indent (the lane the old number
-         column drew) — songs sit inside the section labels, not flush */
-      padding: 12px 20px 12px 68px;
+      padding: 12px 20px;
       border-bottom: 1px solid rgba(var(--ink-rgb), .06);
       transition: background var(--transition-base);
     }
@@ -397,14 +364,6 @@
       margin-top: 2px;
     }
     .song-meta { display: flex; flex-direction: row; align-items: center; gap: 20px; }
-    .song-bpm {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--pb-text-2);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-variant-numeric: tabular-nums;
-    }
     .song-dur {
       font-family: var(--font-mono);
       font-size: var(--fs-label-2);
@@ -558,10 +517,12 @@
         <div class="step-body">
           <p class="label-1 eyebrow-label">Energy shape</p>
           <div class="arc-pills" id="arc-opts"></div>
-          <div class="curve-hdr">
-            <span class="curve-module-label">Curve Editor</span>
-            <div class="curve-module-meta">
-              <button class="btn-ghost sm" id="reset-curve">Reset</button>
+          <div class="intensity-wrap">
+            <div class="mix-ends label-2"><span>Low</span><span>High</span></div>
+            <input type="range" class="range-slider" id="intensity" min="40" max="100" step="5" value="70">
+            <div class="range-ticks">
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span><span></span>
             </div>
           </div>
           <svg id="curve-svg" viewBox="0 0 600 220"></svg>
@@ -639,6 +600,29 @@
     function getKnotCount(min) { return Math.floor(min / 10) + 1; }
 
     // Sample an arc shape to N evenly-spaced points via linear interpolation of keypoints
+    // the intensity slider scales the whole preset toward gentler — same
+    // shape, lower ceiling (a yin bell vs a vinyasa bell). 100 = the preset
+    // as drawn. Song selection follows automatically: it reads S.pts.
+    function shapedArc(key, n) {
+      const f = S.intensity / 100;
+      return sampleArc(key, n).map(e => Math.round(e * f));
+    }
+
+    function updateIntensity() {
+      const el = document.getElementById('intensity');
+      if (!el) return;
+      const t = (S.intensity - 40) / 60;   // 0 at Low, 1 at High
+      el.value = S.intensity;
+      el.style.background = `linear-gradient(to right,var(--slider-fill) ${t * 100}%,rgba(var(--ink-rgb),.12) ${t * 100}%)`;
+      // the pole words are the display: the one you're heading toward
+      // brightens, the other recedes (same move as the Style sliders)
+      const ends = el.closest('.intensity-wrap').querySelectorAll('.mix-ends span');
+      if (ends.length === 2) {
+        ends[0].style.opacity = (0.30 + 0.70 * (1 - t)).toFixed(2);
+        ends[1].style.opacity = (0.30 + 0.70 * t).toFixed(2);
+      }
+    }
+
     function sampleArc(key, n) {
       const keys = ARC_SHAPES[key].keys;
       return Array.from({ length: n }, (_, i) => {
@@ -683,6 +667,7 @@
       duration: 60,
       arcKey: 'bell-curve',
       style: 'vinyasa',
+      intensity: 70,           // energy level, defaults to the middle of the 40–100 range
       mix: { vocal: 50, electronic: 50 },
       pts: sampleArc('bell-curve', getKnotCount(60)),
       saved: false,
@@ -699,13 +684,6 @@
       return Array.from({ length: n }, (_, i) => Math.round(i / (n - 1) * SVG_W));
     }
 
-    function getBoundaryXS() {
-      const durs = getSecDur(S.duration), total = durs.reduce((a, b) => a + b, 0);
-      let cum = 0;
-      const bs = [0];
-      durs.forEach(d => { cum += d; bs.push(cum / total * SVG_W); });
-      return bs;
-    }
 
     function eToY(e) { return SVG_H - PAD_B - (e / 100) * (SVG_H - PAD_T - PAD_B); }
     function yToE(y) { return Math.round(Math.max(0, Math.min(100, (SVG_H - PAD_B - y) / (SVG_H - PAD_T - PAD_B) * 100))); }
@@ -750,7 +728,7 @@
       svg.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
       svg.setAttribute('height', SVG_H);
       svg.innerHTML = '';
-      const xs = getXS(), bxs = getBoundaryXS();
+      const xs = getXS();
       const durs = getSecDur(S.duration), total = durs.reduce((a, b) => a + b, 0);
       const pts = S.pts.map((e, i) => ({ x: xs[i], y: eToY(e) }));
 
@@ -774,30 +752,6 @@
         t.setAttribute('font-family', 'system-ui,sans-serif'); t.setAttribute('font-weight', '700');
         t.setAttribute('letter-spacing', '0.10em');
         t.textContent = lbl; svg.appendChild(t);
-      });
-
-      // ── Section boundary verticals + labels ───────────────────
-      SECTIONS.forEach((sec, i) => {
-        const x1 = bxs[i], x2 = bxs[i + 1];
-        // boundary line (skip first and last edges)
-        if (i > 0) {
-          const l = ns('line');
-          l.setAttribute('x1', x1); l.setAttribute('x2', x1);
-          l.setAttribute('y1', PAD_T); l.setAttribute('y2', SVG_H - PAD_B + 6);
-          l.setAttribute('stroke', 'rgba(var(--ink-rgb),.14)'); l.setAttribute('stroke-width', '1');
-          l.setAttribute('stroke-dasharray', '2 4');
-          svg.appendChild(l);
-        }
-        // section label
-        const cx = (x1 + x2) / 2;
-        const t = ns('text');
-        t.setAttribute('x', cx); t.setAttribute('y', SVG_H - 10);
-        t.setAttribute('text-anchor', 'middle');
-        t.setAttribute('font-size', '8'); t.setAttribute('fill', 'rgba(var(--ink-rgb),.22)');
-        t.setAttribute('font-family', 'system-ui,sans-serif'); t.setAttribute('font-weight', '700');
-        t.setAttribute('letter-spacing', '0.10em');
-        t.textContent = sec.label.toUpperCase();
-        svg.appendChild(t);
       });
 
       // ── Time axis labels (every 15 min) ──────────────────────
@@ -940,8 +894,8 @@
         const active = S.arcKey === key;
         d.innerHTML = `${miniCurve(arc.keys, active)}<span class="arc-pill-name">${arc.name}</span>`;
         d.addEventListener('click', () => {
-          S.arcKey = key; S.pts = sampleArc(key, getKnotCount(S.duration)); S.userEdited = false;
-          renderArcs(); renderCurve();
+          S.arcKey = key; S.pts = shapedArc(key, getKnotCount(S.duration)); S.userEdited = false;
+          renderArcs(); renderCurve(); updateIntensity();
           markSettingsChanged();
         });
         el.appendChild(d);
@@ -954,8 +908,21 @@
 
     let built = false;
 
+    // any divergence from a saved playlist clears the saved state: the icon
+    // resets, and ?id= is dropped from the URL so a refresh starts fresh
+    // instead of reloading the saved playlist.
+    function forgetSaved() {
+      S.saved = false;
+      const sb = document.getElementById('save-btn');
+      if (sb) { sb.classList.remove('saved'); sb.title = 'Save playlist'; }
+      if (location.search) {
+        try { history.replaceState(null, '', location.pathname); } catch (_) {}
+      }
+    }
+
     function markSettingsChanged() {
       if (!built) return;
+      forgetSaved();
       const bar = document.querySelector('.cta-bar');
       const btn = document.getElementById('gen-btn');
       bar.style.display = '';
@@ -1103,8 +1070,6 @@
       const container = document.getElementById('results');
       const allSongs = data.flatMap(d => d.songs);
       const total = data.reduce((a, d) => a + d.actual, 0);
-      const withBpm = allSongs.filter(s => s.bpm);
-      const avgBpm = withBpm.length ? Math.round(withBpm.reduce((a, s) => a + s.bpm, 0) / withBpm.length) : '\u2014';
 
       const fu = quiet ? '' : ' fade-up';
       container.innerHTML = `
@@ -1112,7 +1077,6 @@
       <div class="res-stats">
         <div class="stat"><span class="stat-val">${allSongs.length}</span><span class="stat-lbl">songs</span></div>
         <div class="stat"><span class="stat-val">${fmt(total)}</span><span class="stat-lbl">total time</span></div>
-        <div class="stat"><span class="stat-val">${avgBpm}</span><span class="stat-lbl">avg BPM</span></div>
       </div>
       <div class="res-actions">
         <button class="btn-icon" id="regen-btn" title="Regenerate playlist" data-tooltip="Regenerate">
@@ -1123,22 +1087,14 @@
         </button>
       </div>
     </div>
-    ${data.map(({ sec, songs, target, actual }, idx) => `
-      <div class="pl-section${fu}"${quiet ? '' : ` style="animation-delay:${(idx * 0.06) + 0.08}s"`}>
-        <div class="sec-hdr">
-          <div class="sec-meta">
-            <h4>${sec.label}</h4>
-            <span>${songs.length} song${songs.length !== 1 ? 's' : ''} · ${fmt(actual)}</span>
-          </div>
-        </div>
-        ${songs.map(s => `
+    <div class="pl-section${fu}">
+      ${data.flatMap((d, idx) => d.songs.map(s => `
           <div class="song" data-sec="${idx}" data-sid="${s.id}">
             <div class="song-info">
               <span class="song-title">${s.title}</span>
               <span class="song-artist">${s.artist}</span>
             </div>
             <div class="song-meta">
-              <span class="song-bpm">${s.bpm ? `${s.bpm} BPM` : '—'}</span>
               <span class="song-dur">${fmt(s.dur)}</span>
             </div>
             <div class="ebar">${[1,2,3,4,5,6,7,8].map(i => `<div class="ebar-seg${i <= Math.round(s.energy * 8 / 100) ? ' on' : ''}"></div>`).join('')}</div>
@@ -1153,13 +1109,12 @@
               </button>
             </div>
           </div>
-        `).join('')}
-      </div>
-    `).join('')}`;
+        `)).join('')}
+    </div>`;
 
       document.getElementById('save-btn').addEventListener('click', handleSave);
       document.getElementById('regen-btn').addEventListener('click', () => {
-        S.saved = false;
+        forgetSaved();
         renderResults(generate());
       });
     }
@@ -1202,7 +1157,12 @@
         mix: { ...S.mix },
         duration: S.duration,
         arc: S.arcKey,
+        intensity: S.intensity,
         savedAt: Date.now(),
+        // the actual songs, per section (in order) — so reopening shows the
+        // exact playlist she saved, not a fresh random build. Regenerate stays
+        // the deliberate re-roll.
+        songs: lastData ? lastData.map(d => d.songs.map(s => s.id)) : null,
       };
       try {
         const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
@@ -1270,7 +1230,7 @@
       if (newN !== S.pts.length) {
         S.pts = S.userEdited
           ? Array.from({ length: newN }, (_, i) => Math.round(getCurveEnergy(i / (newN - 1))))
-          : sampleArc(S.arcKey, newN);
+          : shapedArc(S.arcKey, newN);
       }
       S.duration = newDur;
       updateDurSlider();
@@ -1278,6 +1238,31 @@
       markSettingsChanged();
     });
     updateDurSlider();
+
+    // intensity — re-derives the curve from the preset at the new height,
+    // like choosing an arc (clears manual drags on purpose)
+    document.getElementById('intensity').addEventListener('input', function () {
+      S.intensity = parseInt(this.value, 10);
+      S.pts = shapedArc(S.arcKey, getKnotCount(S.duration));
+      S.userEdited = false;
+      updateIntensity();
+      renderCurve();
+      markSettingsChanged();
+    });
+
+    // tap a pole word to slam to its extreme — same shortcut as the Style
+    // sliders (the .mix-ends class already gives them the cursor + hover)
+    (function () {
+      const slider = document.getElementById('intensity');
+      const ends = slider.closest('.intensity-wrap').querySelectorAll('.mix-ends span');
+      const slam = v => { slider.value = v; slider.dispatchEvent(new Event('input', { bubbles: true })); };
+      ends[0].title = 'Tap for lowest';
+      ends[1].title = 'Tap for highest';
+      ends[0].addEventListener('click', () => slam(40));
+      ends[1].addEventListener('click', () => slam(100));
+    })();
+
+    updateIntensity();
 
     // balance sliders fill from the center toward the thumb
     function paintMix(el) {
@@ -1359,7 +1344,8 @@
           }
           S.duration = _pl.duration || S.duration;
           S.arcKey = _pl.arc || S.arcKey;
-          S.pts = sampleArc(S.arcKey, getKnotCount(S.duration));
+          S.intensity = _pl.intensity || 100;   // legacy entries had no intensity
+          S.pts = shapedArc(S.arcKey, getKnotCount(S.duration));
 
           document.getElementById('mix-vocal').value = S.mix.vocal;
           document.getElementById('mix-elec').value = S.mix.electronic;
@@ -1368,9 +1354,24 @@
           updateDurSlider();
           renderArcs();
           renderCurve();
+          updateIntensity();
           S.saved = true;
           setTimeout(() => {
-            renderResults(generate());
+            // rebuild the exact saved playlist from its stored song ids; only
+            // fall back to a fresh generate() for legacy entries saved before
+            // songs were stored (or if every saved song has since left the DB)
+            let data = null;
+            if (Array.isArray(_pl.songs)) {
+              const byId = {};
+              SONGS.forEach(s => { byId[s.id] = s; });
+              const secDurs = getSecDur(S.duration);
+              data = SECTIONS.map((sec, i) => {
+                const songs = (_pl.songs[i] || []).map(id => byId[id]).filter(Boolean);
+                return { sec, songs, target: secDurs[i], actual: songs.reduce((a, s) => a + s.dur, 0) };
+              });
+              if (!data.some(d => d.songs.length)) data = null; // nothing resolved → regenerate
+            }
+            renderResults(data || generate());
             built = true;
             document.querySelector('.results').scrollIntoView({ behavior: 'smooth', block: 'start' });
           }, 100);
@@ -1378,12 +1379,8 @@
       } catch (_) {}
     }
 
-    document.getElementById('reset-curve')?.addEventListener('click', () => {
-      S.pts = sampleArc(S.arcKey, getKnotCount(S.duration)); renderCurve();
-      markSettingsChanged();
-    });
-
-
+    // full reset of the Energy shape box: default shape, default level (middle),
+    // and any manual curve drags cleared
     document.querySelector('.results').addEventListener('click', e => {
       const swapBtn = e.target.closest('.song-swap-btn');
       if (swapBtn && lastData) {
@@ -1402,7 +1399,7 @@
         if (!pick) { toast('No fresh song fits here right now.'); return; }
         d.songs[slot] = pick;
         d.actual = d.songs.reduce((a, x) => a + x.dur, 0);
-        S.saved = false;
+        forgetSaved();
         renderResults(lastData, true);
         toast(`Swapped in: ${pick.title}`);
         return;
@@ -1431,7 +1428,7 @@
       const btn = document.getElementById('gen-btn');
       const label = document.getElementById('gen-label');
       btn.disabled = true; label.textContent = 'Building...';
-      S.saved = false;
+      forgetSaved();
       setTimeout(() => {
         renderResults(generate());
         built = true;

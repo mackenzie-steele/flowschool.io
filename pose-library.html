@@ -805,7 +805,14 @@
         );
       }
 
-      return pool;
+      // A–Z by shorthand code; codes that start with a numeral or symbol
+      // (½ SPLITS, △) sink to the bottom. fsShorthandAll() concats a fresh
+      // array, so sorting in place is safe.
+      const startsAZ = s => /^[a-z]/i.test(s.short);
+      return pool.sort((a, b) =>
+        (startsAZ(b) - startsAZ(a)) ||
+        a.short.localeCompare(b.short, undefined, { sensitivity: 'base' }) ||
+        a.full.localeCompare(b.full));
     }
 
     // ─── RENDER LIBRARY ───────────────────────────────────────────────────────────

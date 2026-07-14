@@ -41,7 +41,7 @@
     .deck-slot .dest-card {
       background: linear-gradient(rgba(var(--ink-rgb), .035), rgba(var(--ink-rgb), .035)), var(--bg);
     }
-    .deck-slot:hover .pose-card.facedown { border-color: rgba(var(--ink-rgb), .32); }
+    .deck-slot:hover .pose-card.facedown:not(.waits) { border-color: rgba(var(--ink-rgb), .32); }
 
     /* face down — not yet drawn. The whole card is the hit area; the
        prompt dresses as a button so the eye knows what to do */
@@ -58,10 +58,20 @@
       transition: color var(--transition-base), border-color var(--transition-base),
                   background var(--transition-base);
     }
-    .deck-slot:hover .pose-card.facedown .pose-name {
+    .deck-slot:hover .pose-card.facedown:not(.waits) .pose-name {
       color: var(--text-1);
       border-color: rgba(var(--ink-rgb), .35);
       background: rgba(var(--ink-rgb), .05);
+    }
+
+    /* destination waits its turn — the prompt sheds its button dress and
+       goes quiet until a starting pose is up; no cursor invitation either */
+    .pose-card.facedown.waits { cursor: default; }
+    .pose-card.facedown.waits .pose-name {
+      color: var(--text-3);
+      border-color: transparent;
+      background: none;
+      font-weight: var(--weight-regular);
     }
 
     /* ── Pose cards ── */
@@ -120,6 +130,59 @@
     }
 
     /* ── Action buttons ── */
+    /* ── Deck contents — a switch deciding what's shuffled in.
+       Rail + thumb borrowed from the nav's theme switch (same geometry,
+       same slide); the thumb fills solid ink when on — full strength
+       means "in the deck". ── */
+    .deck-mod {
+      display: flex;
+      justify-content: flex-start;
+      margin: -12px 0 24px;   /* tucks up under the decks, clears the actions */
+    }
+    .inv-switch {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 0;
+    }
+    .inv-switch:focus-visible {
+      outline: 2px solid rgba(var(--ink-rgb), .35);
+      outline-offset: 2px;
+    }
+    .inv-switch-label {
+      font-family: var(--font);
+      font-size: var(--fs-chip);
+      color: var(--text-3);
+      transition: color var(--transition-base);
+    }
+    .inv-switch.on .inv-switch-label { color: var(--text-2); }
+    .inv-rail {
+      position: relative;
+      width: 32px;
+      height: 16px;
+      background: rgba(var(--ink-rgb), .08);
+      box-shadow: inset 0 1px 2px rgba(var(--ink-rgb), .10);
+      flex-shrink: 0;
+      transition: background var(--transition-base);
+    }
+    .inv-switch.on .inv-rail { background: rgba(var(--ink-rgb), .18); }
+    .inv-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 12px;
+      height: 12px;
+      background: rgba(var(--ink-rgb), .35);
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background var(--transition-base);
+    }
+    .inv-switch.on .inv-thumb {
+      transform: translateX(16px);
+      background: var(--ink-solid);   /* white in dark mode, black in light — full-strength ink means on */
+    }
+
     .deck-actions {
       display: flex;
       align-items: center;
@@ -502,6 +565,14 @@
 
     </div>
 
+    <!-- What's in the deck — a switch shuffles inversions & arm balances in or out -->
+    <div class="deck-mod">
+      <button class="inv-switch" id="inv-switch" role="switch" aria-checked="true" title="Shuffle inversions &amp; arm balances into the deck">
+        <span class="inv-switch-label">Inversions &amp; Arm Balances</span>
+        <span class="inv-rail"><span class="inv-thumb"></span></span>
+      </button>
+    </div>
+
     <!-- Action buttons -->
     <div class="deck-actions" hidden>
       <button class="btn-ghost" id="reset-btn">
@@ -598,8 +669,14 @@
     var LS_KEY       = 'fs-pose-connector-chain';
 
     // ─── UTILS ───────────────────────────────────────────────────
+    // inversions & arm balances ride along by default; the chip under the
+    // decks shuffles them out ('0') and the choice sticks per device
+    var INV_KEY = 'fs-popcorn-inversions';
+    function invOn() { return localStorage.getItem(INV_KEY) !== '0'; }
+
     function pickPose(excludeName) {
-      var pool = POSES.filter(function(p) { return p !== excludeName; });
+      var pool = POSES.concat(invOn() ? POSES_INVERSIONS : [])
+        .filter(function(p) { return p !== excludeName; });
       return pool[Math.floor(Math.random() * pool.length)];
     }
 
@@ -610,9 +687,10 @@
     // ─── RENDER ──────────────────────────────────────────────────
     function renderDeck() {
       document.getElementById('start-pose-name').textContent = startPose || 'Tap to draw';
-      document.getElementById('dest-pose-name').textContent  = destPose  || 'Tap to draw';
+      document.getElementById('dest-pose-name').textContent  = destPose  || (startPose ? 'Tap to draw' : 'Starting pose first');
       document.getElementById('start-card').classList.toggle('facedown', !startPose);
       document.getElementById('dest-card').classList.toggle('facedown', !destPose);
+      document.getElementById('dest-card').classList.toggle('waits', !startPose && !destPose);
       renderStartStack();
     }
 
@@ -630,7 +708,7 @@
     function drawSide(side) {
       if (isViewingSaved) return;
       if (side === 'start' && !startPose)     startPose = pickPose(destPose);
-      else if (side === 'dest' && !destPose)  destPose  = pickPose(startPose);
+      else if (side === 'dest' && !destPose && startPose) destPose = pickPose(startPose);
       else return;
       renderDeck();
       if (startPose && destPose) {
@@ -642,6 +720,20 @@
 
     document.getElementById('start-card').addEventListener('click', function () { drawSide('start'); });
     document.getElementById('dest-card').addEventListener('click', function () { drawSide('dest'); });
+
+    // the deck switch — on = inversions & arm balances are in the shuffle.
+    // Cards already dealt stay dealt; only future draws change.
+    var invSwitch = document.getElementById('inv-switch');
+    function renderInvSwitch() {
+      var on = invOn();
+      invSwitch.classList.toggle('on', on);
+      invSwitch.setAttribute('aria-checked', String(on));
+    }
+    invSwitch.addEventListener('click', function () {
+      localStorage.setItem(INV_KEY, invOn() ? '0' : '1');
+      renderInvSwitch();
+    });
+    renderInvSwitch();
 
     function renderChain() {
       var list    = document.getElementById('chain-list');

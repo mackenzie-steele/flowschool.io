@@ -1,5 +1,4 @@
 var DAILY_SUBLINES = [
-  // Original 28
   'Play before you plan.',
   'Perfect is boring.',
   'Everything is an experiment.',
@@ -13,7 +12,6 @@ var DAILY_SUBLINES = [
   'Your weirdest idea might be your best one.',
   'What are you curious about today?',
   'Own the hell out of your voice.',
-  // Attention & presence
   '"Pay attention." — Mary Oliver',
   '"Be astonished." — Mary Oliver',
   'This moment is your life.',
@@ -23,7 +21,6 @@ var DAILY_SUBLINES = [
   'Slow down enough to see.',
   'Curiosity before certainty.',
   'Presence is a skill.',
-  // Body & movement
   'Let the body finish the sentence.',
   'Movement reveals what words cannot.',
   'Follow the next honest step.',
@@ -42,7 +39,6 @@ var DAILY_SUBLINES = [
   'Remember how to feel it.',
   'Find freedom to move.',
   'Breath is boss.',
-  // Teaching & voice
   'Teach what you are learning.',
   'Lead from experience.',
   'Cue less. Notice more.',
@@ -66,7 +62,6 @@ var DAILY_SUBLINES = [
   'Practice before performance.',
   'Stay connected to practice.',
   'The experience matters.',
-  // Class design
   'A class is a conversation.',
   'The story matters.',
   'The transition is the teaching.',
@@ -86,7 +81,6 @@ var DAILY_SUBLINES = [
   'Movement experiments reveal possibilities.',
   'Make it interesting.',
   'Build from what feels true.',
-  // Creative questions
   'What if this became a story?',
   'What is the simplest version?',
   'What wants to happen next?',
@@ -99,7 +93,6 @@ var DAILY_SUBLINES = [
   'Practice the transition.',
   'Creativity is attention in motion.',
   'Follow the interesting thing.',
-  // Permission & identity
   'We give each other permission.',
   'We want real.',
   'The magic is in the middle.',

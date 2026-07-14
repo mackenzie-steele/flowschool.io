@@ -49,6 +49,42 @@
       background: rgba(var(--ink-rgb), .05);
     }
 
+    /* ── Redraw row — Draw again + compact count keys ── */
+    .redraw {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .redraw-nums { display: flex; gap: 8px; }
+    /* smaller siblings of .ready-num; active count inverts to solid ink
+       (the compact count-button pattern) */
+    .redraw-num {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid rgba(var(--ink-rgb), .18);
+      border-radius: var(--rb);
+      font-family: var(--font-mono);
+      font-size: var(--fs-chip);
+      color: var(--text-2);
+      cursor: pointer;
+      transition: color var(--transition-base), border-color var(--transition-base), background var(--transition-base);
+    }
+    .redraw-num:hover {
+      color: var(--text-1);
+      border-color: rgba(var(--ink-rgb), .35);
+      background: rgba(var(--ink-rgb), .05);
+    }
+    .redraw-num.active {
+      background: var(--ink-solid);
+      border-color: var(--ink-solid);
+      color: var(--paper-solid);
+    }
+
     /* ── Challenge card ── */
     .challenge-card {
       padding: 48px;
@@ -165,12 +201,19 @@
 
     <div id="challenge-card" class="challenge-card"></div>
 
-    <!-- the redraw — quiet, below the card, only after the first draw -->
+    <!-- the redraw — quiet, below the card, only after the first draw.
+         The count keys repeat the ready state's contract: the number IS
+         the draw. Draw again repeats the current count. -->
     <div class="redraw" id="redraw" hidden>
       <button class="btn-ghost" id="generate-btn">
         <span class="material-symbols-sharp i-sm" style="margin-right:6px">shuffle</span>
         <span class="btn-label">Draw again</span>
       </button>
+      <div class="redraw-nums" role="group" aria-label="How many rules to draw">
+        <button class="redraw-num" data-n="1">1</button>
+        <button class="redraw-num" data-n="2">2</button>
+        <button class="redraw-num" data-n="3">3</button>
+      </div>
     </div>
 
   </div>
@@ -191,128 +234,122 @@
       // Pose Constraints
       { id: 1, cat: 'pose', text: 'No Warrior 2.' },
       { id: 2, cat: 'pose', text: 'No Down Dog.' },
-      { id: 3, cat: 'pose', text: 'No lunges of any kind.' },
-      { id: 4, cat: 'pose', text: 'No standing balances.' },
+      { id: 129, cat: 'pose', text: 'Must include Twisted High Lunge.' },
+      { id: 130, cat: 'pose', text: 'Must include Tree.' },
       { id: 5, cat: 'pose', text: 'No Chaturanga.' },
-      { id: 6, cat: 'pose', text: 'No hands and knees.' },
+      { id: 131, cat: 'pose', text: 'Must include a Knee Hover Tabletop.' },
       { id: 7, cat: 'pose', text: 'No Sun Salutations.' },
-      { id: 8, cat: 'pose', text: 'No Chair Pose.' },
-      { id: 9, cat: 'pose', text: 'No forward folds.' },
-      { id: 10, cat: 'pose', text: "No Child's Pose." },
+      { id: 132, cat: 'pose', text: 'Must include Chair reaching down and back.' },
+      { id: 133, cat: 'pose', text: 'Must include Seated Wide Leg Forward Fold.' },
+      { id: 10, cat: 'pose', text: 'No Child.' },
       { id: 11, cat: 'pose', text: 'No Pigeon.' },
-      { id: 12, cat: 'pose', text: 'No Triangle Pose.' },
-      { id: 13, cat: 'pose', text: 'No twists.' },
-      { id: 14, cat: 'pose', text: "Only use poses you've never taught before." },
+      { id: 12, cat: 'pose', text: 'No Triangle.' },
+      { id: 134, cat: 'pose', text: 'Must include Twisted Standing Forward Fold.' },
       { id: 15, cat: 'pose', text: 'No Warrior 1.' },
-      { id: 16, cat: 'pose', text: 'No Cobra or Upward-Facing Dog.' },
-      { id: 17, cat: 'pose', text: 'No Plank of any kind.' },
-      { id: 18, cat: 'pose', text: 'No seated poses.' },
-      { id: 83, cat: 'pose', text: 'No backbends.' },
-      { id: 84, cat: 'pose', text: 'No side angle.' },
-      { id: 85, cat: 'pose', text: 'No half moon.' },
-      { id: 86, cat: 'pose', text: 'No wild thing.' },
-      { id: 114, cat: 'pose', text: 'Only use symmetrical postures.' },
-
+      { id: 135, cat: 'pose', text: 'Must include Chaturanga to Wild Thing.' },
+      { id: 136, cat: 'pose', text: 'Must include Elbow Side Plank.' },
+      { id: 137, cat: 'pose', text: 'Must include Seated Bound Angle.' },
+      { id: 138, cat: 'pose', text: 'No Boat.' },
+      { id: 139, cat: 'pose', text: 'Must include Bridge.' },
+      { id: 86, cat: 'pose', text: 'No Wild Thing.' },
+      { id: 140, cat: 'pose', text: 'No Skandasana.' },
+      { id: 141, cat: 'pose', text: 'Must include Wide Leg Forward Fold.' },
+      { id: 142, cat: 'pose', text: 'Must include Goddess.' },
+      { id: 85, cat: 'pose', text: 'No Half Moon.' },
+      { id: 16, cat: 'pose', text: 'No Up Dog.' },
+      { id: 143, cat: 'pose', text: 'Must include Single Leg Plank.' },
+      { id: 144, cat: 'pose', text: 'Must include Shiva Squat.' },
+      { id: 145, cat: 'pose', text: 'Must include Crow or Forward Fold.' },
+      { id: 146, cat: 'pose', text: 'Must include Standing Splits or Handstand.' },
       // Starting Position
       { id: 19, cat: 'start', text: 'Begin seated.' },
       { id: 20, cat: 'start', text: 'Begin lying on your back.' },
       { id: 21, cat: 'start', text: 'Begin on your belly.' },
       { id: 22, cat: 'start', text: 'Begin kneeling.' },
       { id: 23, cat: 'start', text: 'Begin standing at the back of the mat.' },
-      { id: 24, cat: 'start', text: 'Begin in Savasana.' },
-      { id: 25, cat: 'start', text: "Begin in Child's Pose." },
+      { id: 147, cat: 'start', text: 'Begin seated at the back of the mat.' },
+      { id: 148, cat: 'start', text: 'Begin in Bridge.' },
+      { id: 149, cat: 'start', text: 'Begin in Locust.' },
       { id: 26, cat: 'start', text: 'Begin in Plank.' },
       { id: 27, cat: 'start', text: 'Begin inverted.' },
       { id: 28, cat: 'start', text: 'Begin at the short edge of the mat, facing sideways.' },
       { id: 29, cat: 'start', text: 'Begin balanced on one leg.' },
-      { id: 30, cat: 'start', text: 'Begin at the center of the mat.' },
+      { id: 30, cat: 'start', text: 'Begin standing at the center of the mat.' },
       { id: 87, cat: 'start', text: 'Begin in a twist.' },
-      { id: 88, cat: 'start', text: 'Begin in a squat.' },
+      { id: 150, cat: 'start', text: 'Begin in a lunge.' },
       { id: 89, cat: 'start', text: 'Begin with eyes closed.' },
-      { id: 90, cat: 'start', text: 'Begin in stillness for two minutes.' },
       { id: 91, cat: 'start', text: 'Begin with one hand touching the floor.' },
-
-      // Movement Constraints
+      { id: 151, cat: 'start', text: 'Begin with one foot in the air.' },
+      { id: 152, cat: 'start', text: 'Begin in Reverse Tabletop.' },
+      { id: 153, cat: 'start', text: 'Begin in Malasana facing the long side.' },
+      { id: 154, cat: 'start', text: 'Begin lying on your back in Leaning Tree.' },
+      { id: 155, cat: 'start', text: 'Begin with a foot on the wall.' },
+      { id: 156, cat: 'start', text: 'Begin in cactus arms.' },
+      { id: 157, cat: 'start', text: 'Begin with one knee on the ground.' },
+      // Movement
       { id: 31, cat: 'movement', text: 'Include at least three twists.' },
       { id: 32, cat: 'movement', text: 'Include one jump.' },
-      { id: 33, cat: 'movement', text: 'Stay below standing for the entire flow.' },
+      { id: 33, cat: 'movement', text: "After beginning, don't stand all the way up for the rest of the flow." },
       { id: 34, cat: 'movement', text: 'Never face the front of the mat.' },
-      { id: 35, cat: 'movement', text: 'Use only lateral movement.' },
-      { id: 36, cat: 'movement', text: 'Use only circular transitions.' },
+      { id: 35, cat: 'movement', text: 'Use two lateral movements.' },
+      { id: 158, cat: 'movement', text: 'Include a spin.' },
       { id: 37, cat: 'movement', text: 'Every transition must change the height of your hips.' },
       { id: 38, cat: 'movement', text: 'Every posture must include a different arm position.' },
       { id: 39, cat: 'movement', text: 'Never use the same pose twice.' },
-      { id: 40, cat: 'movement', text: 'Move only backward along the mat.' },
+      { id: 159, cat: 'movement', text: 'Walk your hands to the back of the mat during the flow.' },
       { id: 41, cat: 'movement', text: 'Alternate between bent and straight legs on every posture.' },
       { id: 42, cat: 'movement', text: 'Alternate between square hips and open hips throughout.' },
       { id: 43, cat: 'movement', text: 'Stay on one side of the mat only.' },
-      { id: 44, cat: 'movement', text: 'The flow must include a turn-around.' },
-      { id: 92, cat: 'movement', text: 'No pose held longer than one breath.' },
+      { id: 44, cat: 'movement', text: 'The flow must include a turn-around to face the opposite direction.' },
       { id: 93, cat: 'movement', text: 'Never sit down.' },
+      { id: 160, cat: 'movement', text: 'Must sit down.' },
       { id: 94, cat: 'movement', text: 'Never lie down.' },
+      { id: 161, cat: 'movement', text: 'Must lie down.' },
       { id: 95, cat: 'movement', text: 'Hands touch the floor only once.' },
       { id: 96, cat: 'movement', text: 'Keep one hand on the floor at all times.' },
       { id: 97, cat: 'movement', text: 'Rotate 360° throughout the flow.' },
-      { id: 98, cat: 'movement', text: 'Change directions every pose.' },
-      { id: 99, cat: 'movement', text: 'Use only diagonal pathways.' },
-      { id: 100, cat: 'movement', text: 'Keep your gaze on one hand.' },
-      { id: 101, cat: 'movement', text: 'Arms stay in a T shape.' },
-      { id: 102, cat: 'movement', text: 'Keep palms touching the entire flow.' },
+      { id: 98, cat: 'movement', text: 'Change the direction you face in every pose.' },
+      { id: 100, cat: 'movement', text: 'Keep your gaze on one hand for at least 4 poses.' },
+      { id: 101, cat: 'movement', text: 'Reach your arms in a T shape for 3 poses.' },
+      { id: 162, cat: 'movement', text: 'Alternate between prayer hands and twisted open arms the entire flow.' },
       { id: 103, cat: 'movement', text: 'Never use symmetrical arms.' },
-      { id: 104, cat: 'movement', text: 'Stay until your body asks for the next shape.' },
-      { id: 105, cat: 'movement', text: 'Hold every pose for 5 breaths.' },
-      { id: 106, cat: 'movement', text: 'Hold every pose for 10 breaths.' },
-      { id: 107, cat: 'movement', text: 'Move only on exhales.' },
-      { id: 108, cat: 'movement', text: 'Move only on inhales.' },
+      { id: 163, cat: 'movement', text: 'Flow at double speed.' },
       { id: 109, cat: 'movement', text: 'Flow at half speed.' },
+      { id: 164, cat: 'movement', text: 'Keep your eyes closed the entire time.' },
       { id: 115, cat: 'movement', text: 'Keep one leg straight for the entire flow.' },
       { id: 116, cat: 'movement', text: 'Swim your arms through every transition.' },
       { id: 117, cat: 'movement', text: 'Change your gaze direction every time you move to a new pose.' },
-      { id: 118, cat: 'movement', text: 'Find a new way from Down Dog to the top of the mat — no stepping from single-leg Down Dog.' },
-      { id: 119, cat: 'movement', text: 'Build a flow that travels from the back of the mat to the front, then reverses — without repeating.' },
-
+      { id: 119, cat: 'movement', text: 'Travel from the back of the mat to the front.' },
+      { id: 165, cat: 'movement', text: 'No Prayer Hands.' },
       // Body Position
       { id: 45, cat: 'body', text: 'Include a symmetrical pose.' },
-      { id: 46, cat: 'body', text: 'Include a lateral lean.' },
+      { id: 46, cat: 'body', text: 'Include a side lean.' },
       { id: 47, cat: 'body', text: 'Include a single-arm position.' },
-      { id: 48, cat: 'body', text: 'Include a squat.' },
-      { id: 49, cat: 'body', text: 'Include a backbend.' },
+      { id: 166, cat: 'body', text: 'Include a low lunge.' },
+      { id: 49, cat: 'body', text: 'Include a backward bend.' },
       { id: 50, cat: 'body', text: 'Include a single-leg posture.' },
-      { id: 51, cat: 'body', text: 'Include an inversion.' },
-      { id: 52, cat: 'body', text: 'Include a hip hinge.' },
-      { id: 53, cat: 'body', text: 'Include one posture with hands on the floor and one with no hands at all.' },
+      { id: 51, cat: 'body', text: 'Include an inversion or arm balance.' },
+      { id: 167, cat: 'body', text: 'Include a straight leg fold.' },
+      { id: 53, cat: 'body', text: 'Include one posture with hands on the floor followed by one with no hands at all.' },
       { id: 54, cat: 'body', text: 'Include a posture where both feet are off the floor.' },
       { id: 55, cat: 'body', text: 'Include a posture where your back is on the ground.' },
-      { id: 56, cat: 'body', text: 'Include an arm balance.' },
-      { id: 110, cat: 'body', text: 'Include three asymmetrical poses.' },
-      { id: 111, cat: 'body', text: 'Include one balance.' },
       { id: 112, cat: 'body', text: 'Include one kneeling twist.' },
-      { id: 113, cat: 'body', text: 'Include one side-body shape.' },
-      { id: 120, cat: 'body', text: 'In each pose, move through 5 different arm shapes before transitioning.' },
+      { id: 168, cat: 'body', text: 'Include one elbow down pose.' },
       { id: 121, cat: 'body', text: 'Alternate between open hands and closed fists throughout the flow.' },
-      { id: 122, cat: 'body', text: 'At least one hand must be touching your body at all times.' },
-
-      // Wildcards
-      { id: 69, cat: 'wildcard', text: 'Teach the class you wish someone had taught you.' },
-      { id: 70, cat: 'wildcard', text: 'Design this class for one specific student. Pick them. Build it for them.' },
+      { id: 122, cat: 'body', text: 'Have at least one hand touching your body at all times.' },
+      { id: 169, cat: 'body', text: 'Include a block in every pose.' },
+      // Wildcard
+      { id: 70, cat: 'wildcard', text: 'Design this class for one specific student in mind.' },
       { id: 71, cat: 'wildcard', text: "Let a song you can't stop listening to lead the whole thing." },
-      { id: 72, cat: 'wildcard', text: 'Steal something you love from another teacher. Make it yours.' },
-      { id: 73, cat: 'wildcard', text: 'Build a class that would surprise your past self.' },
       { id: 74, cat: 'wildcard', text: "Build the class you'd want to take, not the one you think you should teach." },
-      { id: 75, cat: 'wildcard', text: 'Pick a texture — soft, sharp, heavy, light. Let it shape everything.' },
-      { id: 76, cat: 'wildcard', text: "Build this class for someone who swears they're not flexible." },
+      { id: 75, cat: 'wildcard', text: 'Pick a texture and let it shape the flow: soft, sharp, heavy, light, smooth, etc.' },
       { id: 77, cat: 'wildcard', text: "Build this class for a body that's been sitting all day." },
-      { id: 78, cat: 'wildcard', text: 'Teach it like a conversation, not a performance.' },
       { id: 79, cat: 'wildcard', text: 'Build the whole class around one transition you find beautiful.' },
-      { id: 80, cat: 'wildcard', text: 'Let something you felt this week lead the whole thing.' },
-      { id: 81, cat: 'wildcard', text: 'Build a class that makes movement feel inevitable.' },
       { id: 82, cat: 'wildcard', text: 'Design the flow around the word "enough."' },
+      { id: 170, cat: 'wildcard', text: 'Design the flow around the word "big."' },
+      { id: 171, cat: 'wildcard', text: 'Design the flow around the word "dance."' },
       { id: 123, cat: 'wildcard', text: 'Build a class for a body that is tired.' },
-      { id: 124, cat: 'wildcard', text: 'Start with the hardest thing. Build everything else around it.' },
-      { id: 125, cat: 'wildcard', text: "Build a class that could make someone feel something they didn't expect." },
-      { id: 126, cat: 'wildcard', text: 'Design this class like it needs an arc — beginning, peak, release.' },
       { id: 127, cat: 'wildcard', text: "Build a class you've been too afraid to teach." },
-      { id: 128, cat: 'wildcard', text: 'Create a class that has nothing to do with what you normally teach.' },
     ];
 
     const INVITES = [
@@ -337,25 +374,20 @@
     // ─── GENERATE ────────────────────────────────────────────────────────────────
 
     function pickRules(count) {
-      const n = Math.min(count, RULES.length);
+      // Hard rule: one rule per category — a 3-rule challenge always spans
+      // 3 different categories (which also caps "start" at one). n can never
+      // exceed the number of categories in the deck.
+      const catCount = new Set(RULES.map(r => r.cat)).size;
+      const n = Math.min(count, catCount);
       const shuffled = [...RULES].sort(() => Math.random() - 0.5);
       const selected = [];
       const usedCats = new Set();
 
-      // First pass: prefer different categories; hard-cap "start" at one per challenge
       for (const r of shuffled) {
         if (selected.length >= n) break;
-        if (r.cat === 'start' && usedCats.has('start')) continue;
         if (usedCats.has(r.cat)) continue;
         selected.push(r);
         usedCats.add(r.cat);
-      }
-
-      // Second pass: fill remaining slots, still capping "start" at one
-      for (const r of shuffled) {
-        if (selected.length >= n) break;
-        if (r.cat === 'start' && selected.some(s => s.cat === 'start')) continue;
-        if (!selected.includes(r)) selected.push(r);
       }
 
       return selected;
@@ -367,11 +399,17 @@
     // every possible hand across the 1/2/3 draws, honoring the game's own
     // constraints (no duplicates, at most one Starting Position per draw)
     function comboCount() {
-      const S = RULES.filter(r => r.cat === 'start').length;
-      const M = RULES.length - S;
-      const two   = M * (M - 1) / 2 + S * M;
-      const three = M * (M - 1) * (M - 2) / 6 + S * (M * (M - 1) / 2);
-      return RULES.length + two + three;
+      // one rule per category: a pair spans 2 categories, a triple spans 3 —
+      // count via elementary symmetric sums of the per-category counts
+      const counts = {};
+      RULES.forEach(r => { counts[r.cat] = (counts[r.cat] || 0) + 1; });
+      const c = Object.values(counts);
+      const e1 = c.reduce((a, b) => a + b, 0);                    // singles
+      const p2 = c.reduce((a, b) => a + b * b, 0);
+      const p3 = c.reduce((a, b) => a + b * b * b, 0);
+      const e2 = (e1 * e1 - p2) / 2;                              // cross-category pairs
+      const e3 = (e1 * e1 * e1 - 3 * e1 * p2 + 2 * p3) / 6;       // cross-category triples
+      return e1 + e2 + e3;
     }
 
     function renderReady() {
@@ -412,6 +450,7 @@
       const card = document.getElementById('challenge-card');
       card.classList.remove('deck-stack'); // the card leaves the deck
       document.getElementById('redraw').hidden = false; // the redraw earns its place after the first draw
+      syncRedrawNums(); // the active key tracks the count just dealt
       const alreadySaved = isChallengeInSaved(currentRuleIds);
       const saveBtn = `<button class="btn-icon${alreadySaved ? ' saved' : ''}" id="save-btn" title="${alreadySaved ? 'Saved' : 'Save challenge'}" data-tooltip="Save"><span class="material-symbols-sharp save-icon">bookmark</span></button>`;
 
@@ -483,6 +522,19 @@
     // ─── GENERATE BUTTON ─────────────────────────────────────────────────────────
 
     document.getElementById('generate-btn').addEventListener('click', generate);
+
+    // the count keys keep the ready state's contract: the number IS the draw
+    function syncRedrawNums() {
+      document.querySelectorAll('.redraw-num').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.n, 10) === ruleCount);
+      });
+    }
+    document.querySelector('.redraw-nums').addEventListener('click', e => {
+      const btn = e.target.closest('.redraw-num');
+      if (!btn) return;
+      ruleCount = parseInt(btn.dataset.n, 10);
+      generate();
+    });
 
     // ─── INIT ────────────────────────────────────────────────────────────────────
 

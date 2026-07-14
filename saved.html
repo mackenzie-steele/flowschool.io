@@ -171,19 +171,10 @@
       color: var(--text-2);
       line-height: 1.65;
       margin: 12px 0 16px;
-      max-width: 52ch;
     }
 
     .sv-data-actions { display: flex; gap: 12px; flex-wrap: wrap; }
     .sv-data-actions .btn-secondary { display: inline-flex; align-items: center; gap: 8px; }
-
-    .sv-data-meta {
-      margin-top: 16px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: .04em;
-      color: var(--text-3);
-    }
 
     /* ── sync status — the honesty line ── */
     .sv-sync {
@@ -211,7 +202,6 @@
     <div class="inner">
       <p class="label-1">Your library</p>
       <h3>Saved</h3>
-      <p>Everything you’ve bookmarked, in one place.</p>
       <p class="sv-sync" id="sv-sync"></p>
     </div>
   </section>
@@ -230,7 +220,6 @@
         <button class="btn-ghost" id="import-btn">Restore a Backup</button>
         <input type="file" id="import-file" accept="application/json,.json" hidden>
       </div>
-      <p class="sv-data-meta" id="data-meta"></p>
     </div>
   </div>
 
@@ -260,24 +249,6 @@
         if (WORK_PREFIX.test(k)) data[k] = localStorage.getItem(k);
       }
       return data;
-    }
-
-    function countOf(key) {
-      try { var v = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(v) ? v.length : Object.keys(v).length; }
-      catch (_) { return 0; }
-    }
-
-    function renderMeta() {
-      var parts = [];
-      var c = countOf('flowschool_classes');    if (c) parts.push(c + (c === 1 ? ' class' : ' classes'));
-      var fl = countOf('flowschool_flows');     if (fl) parts.push(fl + (fl === 1 ? ' flow' : ' flows'));
-      var st = countOf('flowschool_stories');   if (st) parts.push(st + (st === 1 ? ' story' : ' stories'));
-      var pl = countOf('flowschool_playlists'); if (pl) parts.push(pl + (pl === 1 ? ' playlist' : ' playlists'));
-      var cf = countOf('fs-cue-flows');         if (cf) parts.push(cf + (cf === 1 ? ' cue flow' : ' cue flows'));
-      var ru = countOf('flowschool_arules');    if (ru) parts.push(ru + (ru === 1 ? ' saved rule' : ' saved rules'));
-      var ch = countOf('fs-pose-connector-saved'); if (ch) parts.push(ch + (ch === 1 ? ' chain' : ' chains'));
-      document.getElementById('data-meta').textContent =
-        parts.length ? 'On this device: ' + parts.join(' \u00B7 ') : 'Nothing saved on this device yet.';
     }
 
     document.getElementById('export-btn').addEventListener('click', function () {
@@ -346,13 +317,10 @@
       });
       pendingRestore = null;
       document.getElementById('restore-modal').hidden = true;
-      renderMeta();
       toast('Backup restored.');
       // the library list itself may now be stale — re-render
       window.location.reload();
     });
-
-    renderMeta();
   })();
   </script>
 

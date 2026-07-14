@@ -218,6 +218,11 @@ body { opacity: 0; transition: opacity .18s; }
 .pf-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .pf-field:last-of-type { margin-bottom: 0; }
 
+/* first + last name sit side by side; stack on narrow screens */
+.pf-name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.pf-name-row .pf-field { margin-bottom: 0; }
+@media (max-width: 580px) { .pf-name-row { grid-template-columns: 1fr; gap: 16px; } }
+
 /* public classes — a compact editor that saves as you go */
 .sched-form[hidden] { display: none; }
 .sched-form {
@@ -455,9 +460,15 @@ textarea.pf-input { resize: vertical; min-height: 90px; line-height: 1.65; }
   <section class="pf-section">
     <span class="label-1 pf-section-label">About you</span>
 
-    <div class="pf-field">
-      <label class="pf-label" for="full-name">Full name</label>
-      <input class="pf-input" type="text" id="full-name" placeholder="Your first and last name" autocomplete="name">
+    <div class="pf-name-row">
+      <div class="pf-field">
+        <label class="pf-label" for="first-name">First name</label>
+        <input class="pf-input" type="text" id="first-name" placeholder="First" autocomplete="given-name">
+      </div>
+      <div class="pf-field">
+        <label class="pf-label" for="last-name">Last name</label>
+        <input class="pf-input" type="text" id="last-name" placeholder="Last" autocomplete="family-name">
+      </div>
     </div>
 
     <div class="pf-field">
@@ -492,7 +503,6 @@ textarea.pf-input { resize: vertical; min-height: 90px; line-height: 1.65; }
     <div class="pf-field">
       <label class="pf-label" for="teaching-style">Teaching style</label>
       <textarea class="pf-input" id="teaching-style" placeholder="e.g. Vinyasa-based, breath-led, creative sequencing…" rows="3"></textarea>
-      <p class="pf-hint">What makes your teaching yours.</p>
     </div>
   </section>
 
@@ -513,18 +523,6 @@ textarea.pf-input { resize: vertical; min-height: 90px; line-height: 1.65; }
       </svg>
       <input class="pf-input" type="text" id="instagram" placeholder="@yourhandle">
     </div>
-  </section>
-
-  <!-- Community -->
-  <section class="pf-section">
-    <span class="label-1 pf-section-label">Community</span>
-    <button type="button" class="pf-circle-row" id="circle-row" aria-pressed="false">
-      <span class="pf-circle-box"><span class="material-symbols-sharp pf-circle-check">check</span></span>
-      <span class="pf-circle-info">
-        <span class="pf-circle-title">Include me in The Circle</span>
-        <span class="pf-circle-sub">When The Circle opens, other Flow School teachers can see your profile &mdash; your photo, name, location, and why you teach. You can step out anytime.</span>
-      </span>
-    </button>
   </section>
 
   <!-- Your public classes -->
@@ -557,6 +555,18 @@ textarea.pf-input { resize: vertical; min-height: 90px; line-height: 1.65; }
       </button>
       <button type="button" class="btn-ghost" id="sched-cancel" hidden>Cancel</button>
     </div>
+  </section>
+
+  <!-- Community -->
+  <section class="pf-section">
+    <span class="label-1 pf-section-label">Community</span>
+    <button type="button" class="pf-circle-row" id="circle-row" aria-pressed="false">
+      <span class="pf-circle-box"><span class="material-symbols-sharp pf-circle-check">check</span></span>
+      <span class="pf-circle-info">
+        <span class="pf-circle-title">Include me in The Circle</span>
+        <span class="pf-circle-sub">When this is checked, other Flow School teachers can see your profile in The Circle.</span>
+      </span>
+    </button>
   </section>
 
 
@@ -624,7 +634,12 @@ async function init() {
 }
 
 function setFields(p) {
-  document.getElementById('full-name').value     = p.full_name       || '';
+  // full_name stays one column in the DB; split it across the two inputs
+  // (first word = first name, the rest = last name)
+  const _nm = (p.full_name || '').trim();
+  const _sp = _nm.indexOf(' ');
+  document.getElementById('first-name').value = _sp === -1 ? _nm : _nm.slice(0, _sp);
+  document.getElementById('last-name').value  = _sp === -1 ? '' : _nm.slice(_sp + 1).trim();
   document.getElementById('display-name').value  = p.display_name    || '';
   document.getElementById('location').value       = p.location        || '';
   document.getElementById('why-teach').value      = p.why_i_teach     || '';
@@ -941,11 +956,12 @@ document.getElementById('avatar-remove').addEventListener('click', async () => {
 
 // ─── DIRTY STATE ─────────────────────────────────────────────────────────────
 
-const FIELD_IDS = ['full-name','display-name','handle','location','teaching-since','why-teach','teaching-style','website','instagram'];
+const FIELD_IDS = ['first-name','last-name','display-name','handle','location','teaching-since','why-teach','teaching-style','website','instagram'];
 
 function getCurrentValues() {
   return {
-    full_name:      document.getElementById('full-name').value.trim(),
+    full_name:      [document.getElementById('first-name').value.trim(),
+                     document.getElementById('last-name').value.trim()].filter(Boolean).join(' '),
     display_name:   document.getElementById('display-name').value.trim(),
     location:       document.getElementById('location').value.trim(),
     why_i_teach:    document.getElementById('why-teach').value.trim(),
@@ -1015,8 +1031,10 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     btn.textContent = 'Save Profile';
   };
 
-  if (vals.full_name && vals.full_name.split(/\s+/).length < 2) {
-    return fail('full-name', 'Enter your first and last name.');
+  const _first = document.getElementById('first-name').value.trim();
+  const _last  = document.getElementById('last-name').value.trim();
+  if ((_first || _last) && !(_first && _last)) {
+    return fail(_first ? 'last-name' : 'first-name', 'Enter your first and last name.');
   }
   if (vals.teaching_since && !/^(19|20)\d{2}$/.test(vals.teaching_since)) {
     return fail('teaching-since', 'Enter a year, like 2015.');
