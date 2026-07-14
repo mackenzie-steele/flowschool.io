@@ -112,7 +112,7 @@
     }
     .tc-meta {
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: var(--fs-meta);
       letter-spacing: .04em;
       color: var(--text-3);
       margin-top: 4px;
@@ -161,7 +161,7 @@
     .tc-modal-name { font-size: var(--fs-h5); font-weight: var(--weight-regular); color: var(--text-1); margin: 0; }
     .tc-modal-meta {
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: var(--fs-meta);
       letter-spacing: .04em;
       color: var(--text-3);
       margin-top: 6px;
@@ -255,6 +255,18 @@
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
+    // ── link hygiene: only http(s) leaves the page (same as teacher.html) ──
+    function safeUrl(raw) {
+      if (!raw) return null;
+      let u = String(raw).trim();
+      if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+      try {
+        const parsed = new URL(u);
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+        return parsed.href;
+      } catch (_) { return null; }
+    }
+
     function faceHTML(t, cls) {
       if (t.avatar_url) return '<div class="' + cls + '"><img src="' + esc(t.avatar_url) + '" alt=""></div>';
       const initial = (t.display_name || '?').charAt(0).toUpperCase();
@@ -329,7 +341,8 @@
       document.getElementById('tc-modal-why-text').textContent = t.why_i_teach || '';
 
       const links = [];
-      if (t.website) links.push('<a class="btn-ghost" href="' + esc(t.website) + '" target="_blank" rel="noopener">Website<span class="material-symbols-sharp i-sm" style="margin-left:6px">open_in_new</span></a>');
+      const website = safeUrl(t.website);
+      if (website) links.push('<a class="btn-ghost" href="' + esc(website) + '" target="_blank" rel="noopener">Website<span class="material-symbols-sharp i-sm" style="margin-left:6px">open_in_new</span></a>');
       if (t.instagram) links.push('<a class="btn-ghost" href="https://instagram.com/' + esc(String(t.instagram).replace('@', '')) + '" target="_blank" rel="noopener">Instagram<span class="material-symbols-sharp i-sm" style="margin-left:6px">open_in_new</span></a>');
       document.getElementById('tc-modal-links').innerHTML = links.join('');
 

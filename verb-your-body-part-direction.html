@@ -850,18 +850,24 @@ const WB = {
     'Take','Tap','Thread','Turn','Twist','Unwind','Wiggle','Wrap','Yield',
   ],
   body: [
+    // left/right pairs sit adjacent so the shelf browses by body part,
+    // not by side (Jul 2026)
     'both of your knees','the crown of your head',
     'your armpits','your arms','your back','your back leg','your back toes',
     'your belly','your bottom knee','your chin','your chest',
     'your elbows','your fingertips','your front leg','your gaze',
     'your hands','your head','your heart','your heels','your hips',
     'your inner right thigh','your knees',
-    'your left ankle','your left arm','your left foot','your left hand',
-    'your left knee','your left leg','your left shoulder','your left wrist',
+    'your left ankle','your right ankle',
+    'your left arm','your right arm',
+    'your left foot','your right foot',
+    'your left hand','your right hand',
+    'your left knee','your right knee',
+    'your left leg','your right leg',
+    'your left shoulder','your right shoulder',
+    'your left wrist','your right wrist',
     'your low belly','your low ribs','your palms','your pelvis',
-    'your ribs','your right ankle','your right arm','your right foot',
-    'your right hand','your right knee','your right leg','your right shoulder',
-    'your right wrist','your shin','your shoulder blades','your shoulders',
+    'your ribs','your shin','your shoulder blades','your shoulders',
     'your sit bones','your spine','your tailbone','your toes',
   ],
   dirs: [
@@ -941,7 +947,9 @@ function buildCue(row) {
   const body = (row.body || '').trim();
   const dir  = (row.dir  || '').trim();
   if (!verb && !body && !dir) return '';
-  const bodyNorm = body && !body.toLowerCase().startsWith('your ')
+  // prepend "your" only when the phrase doesn't already carry one —
+  // "knees" → "your knees", but "both of your knees" stays as written
+  const bodyNorm = body && !/\byour\b/i.test(body)
     ? 'your ' + body : body;
   const parts = [verb, bodyNorm, dir].filter(Boolean);
   let cue = parts.join(' ');
@@ -1762,8 +1770,12 @@ function switchWBTab(tab) {
 function renderWBWords() {
   const words = WB[wbTab] || [];
   const el = document.getElementById('wb-words');
+  // chips hide a LEADING "your" so the list browses clean ("knee", not
+  // "your knee") — but data-word keeps the full entry, so inserting still
+  // writes "your knee" into the table. Mid-phrase "your" ("both of your
+  // knees") is untouched by design.
   el.innerHTML = words.map(w =>
-    `<button class="wb-word" data-word="${esc(w)}">${esc(w)}</button>`
+    `<button class="wb-word" data-word="${esc(w)}">${esc(w.replace(/^your\s+/i, ''))}</button>`
   ).join('');
   el.querySelectorAll('.wb-word').forEach(btn => {
     btn.addEventListener('click', () => insertWord(btn.dataset.word));

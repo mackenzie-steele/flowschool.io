@@ -142,6 +142,7 @@
 
   /* Semantic status */
   --danger: #E05252;
+  --danger-rgb: 224, 82, 82;   /* alpha washes: rgba(var(--danger-rgb), .05) etc. */
 
   /* Slider fill — the highlight, both modes */
   --slider-fill: var(--volt);
@@ -206,6 +207,7 @@
   --fs-body:    16px;
   --fs-label-1: 12px;
   --fs-label-2: 12px;
+  --fs-meta:    11px;   /* mono meta lines (list counts, dossier lines, timestamps) — the platform's smallest text */
   --fs-btn:     16px;
   --fs-chip:    14px;
 
@@ -2402,11 +2404,11 @@ body.has-sidebar {
 
 .auth-error {
   font-size: var(--text-small);
-  color: rgba(160, 40, 40, .85);
+  color: var(--danger);
   line-height: 1.5;
   padding: 12px 16px;
-  background: rgba(160, 40, 40, .06);
-  border: 1px solid rgba(160, 40, 40, .18);
+  background: rgba(var(--danger-rgb), .06);
+  border: 1px solid rgba(var(--danger-rgb), .18);
   border-radius: var(--r);
   display: none;
 }

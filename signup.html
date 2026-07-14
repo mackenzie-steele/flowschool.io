@@ -134,9 +134,18 @@ document.getElementById('auth-form').addEventListener('submit', async e => {
       });
     } catch (_) {}
     window.location.href = 'dashboard';
+  } else if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    // With confirmations on, Supabase answers an already-registered email
+    // with a decoy success (no error, no session, user with zero identities)
+    // so strangers can't probe which emails exist. Zero identities is the
+    // tell — surface the truth instead of "check your email."
+    errEl.textContent = 'An account with this email already exists. Try signing in.';
+    errEl.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Create account';
   } else {
     // Email confirmation on
-    sucEl.textContent = 'Check your email to confirm your account, then sign in.';
+    sucEl.textContent = 'Check your email to confirm your account, then sign in. Already have an account? Sign in instead.';
     sucEl.classList.add('show');
     btn.disabled = false;
     btn.textContent = 'Create account';
