@@ -647,7 +647,7 @@
 
   <script src="lib/version.js"></script>
   <script src="lib/nav.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/vendor/supabase-js-v2.110.7.min.js"></script>
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
@@ -766,7 +766,7 @@
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ws-modal-heading">
     <h3 id="ws-modal-heading">Name your flow</h3>
     <p class="modal-hint">Give it a name so you can find it later.</p>
-    <input type="text" class="modal-input" id="ws-modal-input" placeholder="Flow name" maxlength="80" autocomplete="off">
+    <input type="text" class="modal-input" id="ws-modal-input" placeholder="Flow name" maxlength="80" autocomplete="off" aria-label="Flow name">
     <div class="modal-actions">
       <button class="btn-ghost" id="ws-modal-cancel">Cancel</button>
       <button class="btn-primary" id="ws-modal-confirm">Save flow</button>
@@ -1200,11 +1200,11 @@ function buildRowHTML(row, i) {
   const bodyPh = i === 0 ? ` placeholder="${PLACEHOLDER_CUE.body}"` : '';
   const dirPh  = i === 0 ? ` placeholder="${PLACEHOLDER_CUE.dir}"`  : '';
 
-  const inexCell =`<div class="row-cell"><select class="inex-select" data-field="inex"><option${row.inex==='—'?' selected':''}>—</option><option${row.inex==='IN'?' selected':''}>IN</option><option${row.inex==='EX'?' selected':''}>EX</option></select></div>`;
-  const verbCell = `<div class="row-cell"><input class="cue-input verb-input" data-field="verb" value="${esc(row.verb)}"${verbPh} autocomplete="off" spellcheck="false"></div>`;
-  const bodyCell = `<div class="row-cell"><input class="cue-input" data-field="body" value="${esc(row.body)}"${bodyPh} autocomplete="off" spellcheck="false"></div>`;
-  const dirCell  = `<div class="row-cell"><input class="cue-input" data-field="dir" value="${esc(row.dir)}"${dirPh} autocomplete="off" spellcheck="false"></div>`;
-  const poseCell = `<div class="row-cell"><input class="cue-input pose-input" data-field="pose" value="${esc(row.pose)}" autocomplete="off" spellcheck="false"></div>`;
+  const inexCell =`<div class="row-cell"><select class="inex-select" data-field="inex" aria-label="Breath — inhale or exhale"><option${row.inex==='—'?' selected':''}>—</option><option${row.inex==='IN'?' selected':''}>IN</option><option${row.inex==='EX'?' selected':''}>EX</option></select></div>`;
+  const verbCell = `<div class="row-cell"><input class="cue-input verb-input" data-field="verb" aria-label="Verb" value="${esc(row.verb)}"${verbPh} autocomplete="off" spellcheck="false"></div>`;
+  const bodyCell = `<div class="row-cell"><input class="cue-input" data-field="body" aria-label="Body part" value="${esc(row.body)}"${bodyPh} autocomplete="off" spellcheck="false"></div>`;
+  const dirCell  = `<div class="row-cell"><input class="cue-input" data-field="dir" aria-label="Direction" value="${esc(row.dir)}"${dirPh} autocomplete="off" spellcheck="false"></div>`;
+  const poseCell = `<div class="row-cell"><input class="cue-input pose-input" data-field="pose" aria-label="Pose name" value="${esc(row.pose)}" autocomplete="off" spellcheck="false"></div>`;
   const mvCell   = `<div class="row-mv-cell">` +
     (i > 0 ? `<button class="row-mv" data-mv="-1" tabindex="-1" title="Move up (alt+&#8593;)"><span class="material-symbols-sharp">keyboard_arrow_up</span></button>` : '') +
     (i < rows.length - 1 ? `<button class="row-mv" data-mv="1" tabindex="-1" title="Move down (alt+&#8595;)"><span class="material-symbols-sharp">keyboard_arrow_down</span></button>` : '') +
@@ -1392,6 +1392,7 @@ function startRename() {
   document.body.appendChild(sizer);
 
   const input = document.createElement('input');
+  input.setAttribute('aria-label', 'Flow name');
   input.className = 'ws-flow-title-input';
   input.value = flowName;
 

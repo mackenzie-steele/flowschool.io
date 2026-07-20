@@ -495,7 +495,7 @@
 
   <script src="lib/version.js"></script>
   <script src="lib/nav.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/vendor/supabase-js-v2.110.7.min.js"></script>
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
@@ -521,7 +521,7 @@
           <span class="material-symbols-sharp">search</span>
         </span>
         <input type="text" class="search-input" id="search-input" placeholder="Search shorthand, pose name, or category…"
-          autocomplete="off">
+          autocomplete="off" aria-label="Search the pose library">
         <button class="search-clear hidden" id="search-clear" aria-label="Clear search">×</button>
       </div>
       <button class="btn-secondary" id="add-sh-btn">
@@ -587,8 +587,8 @@
     <div class="modal-card" role="dialog" aria-modal="true">
       <h3>Add your own shorthand</h3>
       <p class="modal-hint">Your code joins the library and every suggestion panel on the platform.</p>
-      <input type="text" class="modal-input" id="sh-code-input" placeholder="Shorthand &#8212; e.g. BOP" maxlength="20" autocomplete="off" spellcheck="false" style="text-transform:uppercase">
-      <input type="text" class="modal-input" id="sh-full-input" placeholder="Full name &#8212; e.g. Bird of Paradise" maxlength="80" autocomplete="off" style="margin-top:10px">
+      <input type="text" class="modal-input" id="sh-code-input" placeholder="Shorthand &#8212; e.g. BOP" maxlength="20" autocomplete="off" spellcheck="false" style="text-transform:uppercase" aria-label="Shorthand code">
+      <input type="text" class="modal-input" id="sh-full-input" placeholder="Full name &#8212; e.g. Bird of Paradise" maxlength="80" autocomplete="off" style="margin-top:10px" aria-label="Full pose name">
       <div class="chips" id="sh-cat-chips" style="margin-top:14px">
         <button type="button" class="chip on" data-cat="general">General</button>
         <button type="button" class="chip" data-cat="double-leg">Double Leg</button>

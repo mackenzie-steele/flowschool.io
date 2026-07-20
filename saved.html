@@ -161,7 +161,7 @@
 
   <script src="lib/version.js"></script>
   <script src="lib/nav.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/vendor/supabase-js-v2.110.7.min.js"></script>
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
@@ -212,7 +212,7 @@
     <div class="library-bar" id="sv-bar" hidden>
       <div class="search-wrap">
         <span class="search-icon"><span class="material-symbols-sharp">search</span></span>
-        <input type="text" class="search-input" id="sv-search" placeholder="Search your library&#8230;" autocomplete="off">
+        <input type="text" class="search-input" id="sv-search" placeholder="Search your library&#8230;" autocomplete="off" aria-label="Search your library">
       </div>
     </div>
     <div id="sv-root"></div>

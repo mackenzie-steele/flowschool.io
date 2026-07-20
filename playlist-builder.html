@@ -527,7 +527,7 @@
 
   <script src="lib/version.js"></script>
   <script src="lib/nav.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/vendor/supabase-js-v2.110.7.min.js"></script>
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
@@ -550,7 +550,7 @@
           <p class="label-1 eyebrow-label">Class length</p>
           <div class="range-slider-wrap">
             <span class="range-val" id="dur-val">60 min</span>
-            <input type="range" class="range-slider" id="dur-slider" min="30" max="90" step="5" value="60">
+            <input type="range" class="range-slider" id="dur-slider" min="30" max="90" step="5" value="60" aria-label="Class length in minutes">
             <div class="range-ticks">
               <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
               <span></span><span></span><span></span><span></span><span></span><span></span>
@@ -566,14 +566,14 @@
 
           <div class="mix-slider-wrap">
             <div class="mix-ends label-2"><span>Instrumental</span><span>Vocal</span></div>
-            <input type="range" class="range-slider" id="mix-vocal" min="0" max="100" step="10" value="50">
+            <input type="range" class="range-slider" id="mix-vocal" min="0" max="100" step="10" value="50" aria-label="Vocal to instrumental mix">
             <div class="range-ticks mix-ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             <p class="mix-read" id="mix-vocal-read"></p>
           </div>
 
           <div class="mix-slider-wrap">
             <div class="mix-ends label-2"><span>Acoustic</span><span>Electronic</span></div>
-            <input type="range" class="range-slider" id="mix-elec" min="0" max="100" step="10" value="50">
+            <input type="range" class="range-slider" id="mix-elec" min="0" max="100" step="10" value="50" aria-label="Electronic to acoustic mix">
             <div class="range-ticks mix-ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             <p class="mix-read" id="mix-elec-read"></p>
           </div>
@@ -586,7 +586,7 @@
           <div class="arc-pills" id="arc-opts"></div>
           <div class="intensity-wrap">
             <div class="mix-ends label-2"><span>Low</span><span>High</span></div>
-            <input type="range" class="range-slider" id="intensity" min="40" max="100" step="5" value="70">
+            <input type="range" class="range-slider" id="intensity" min="40" max="100" step="5" value="70" aria-label="Peak intensity">
             <div class="range-ticks">
               <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
               <span></span><span></span><span></span><span></span><span></span><span></span>
@@ -625,7 +625,7 @@
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="pl-modal-heading">
       <h3 id="pl-modal-heading">Name your playlist</h3>
       <p class="modal-hint">Give it a name so you can find it later.</p>
-      <input type="text" class="modal-input" id="pl-title-input" placeholder="Playlist name" maxlength="80" autocomplete="off">
+      <input type="text" class="modal-input" id="pl-title-input" placeholder="Playlist name" maxlength="80" autocomplete="off" aria-label="Playlist name">
       <div class="modal-actions">
         <button class="btn-ghost" id="pl-modal-cancel">Cancel</button>
         <button class="btn-primary" id="pl-modal-confirm">Save playlist</button>

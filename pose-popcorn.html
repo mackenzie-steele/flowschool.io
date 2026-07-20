@@ -615,7 +615,7 @@
 <body class="has-sidebar">
   <script src="lib/version.js"></script>
   <script src="lib/nav.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/vendor/supabase-js-v2.110.7.min.js"></script>
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
@@ -712,7 +712,7 @@
     <div class="modal-card">
       <h3>Name your chain</h3>
       <p class="modal-hint">Give it a name so you can find it later.</p>
-      <input type="text" class="modal-input" id="pc-name-input" placeholder="Chain name" maxlength="80" autocomplete="off">
+      <input type="text" class="modal-input" id="pc-name-input" placeholder="Chain name" maxlength="80" autocomplete="off" aria-label="Chain name">
       <div class="modal-actions">
         <button class="btn-ghost" id="pc-modal-cancel">Cancel</button>
         <button class="btn-primary" id="pc-modal-confirm">Save chain</button>
@@ -1178,6 +1178,7 @@
 
       var input = document.createElement('input');
       input.className = 'chain-title-input';
+      input.setAttribute('aria-label', 'Chain name');
       input.value = chainName || '';
       input.maxLength = 80;
 
@@ -1370,7 +1371,7 @@
     }
 
     function noteEditHTML(idx, text) {
-      return '<textarea class="chain-note-input" data-idx="' + idx + '" rows="1" placeholder="Add a note…">'
+      return '<textarea class="chain-note-input" aria-label="Transition note" data-idx="' + idx + '" rows="1" placeholder="Add a note…">'
         + escHtml(text)
         + '</textarea>'
         + '<button class="chain-note-btn" data-action="save" data-idx="' + idx + '" aria-label="Save note">'

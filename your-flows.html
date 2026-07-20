@@ -516,7 +516,7 @@
 
   <script src="lib/version.js"></script>
   <script src="lib/nav.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/vendor/supabase-js-v2.110.7.min.js"></script>
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
@@ -544,7 +544,7 @@
       <div class="library-bar" id="library-bar">
         <div class="search-wrap">
           <span class="search-icon"><span class="material-symbols-sharp">search</span></span>
-          <input type="text" class="search-input" id="flow-search" placeholder="Search your flows&#8230;" autocomplete="off">
+          <input type="text" class="search-input" id="flow-search" placeholder="Search your flows&#8230;" autocomplete="off" aria-label="Search your flows">
           <button class="search-clear hidden" id="flow-search-clear" aria-label="Clear search">&#215;</button>
         </div>
         <button class="btn-primary" id="new-flow-btn">
@@ -626,7 +626,7 @@
     <div class="wrap" style="padding-top: 0;">
 
       <div class="fl-editor">
-        <input type="text" class="fl-title-input" id="fl-title" placeholder="Name your flow&#8230;" maxlength="120">
+        <input type="text" class="fl-title-input" id="fl-title" placeholder="Name your flow&#8230;" maxlength="120" aria-label="Flow name">
 
         <!-- the challenge — rules this flow was built under, pinned from
              Arbitrary Rules via the fs-seed handoff -->

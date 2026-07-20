@@ -1003,7 +1003,7 @@
 
   <script src="lib/version.js"></script>
   <script src="lib/nav.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/vendor/supabase-js-v2.110.7.min.js"></script>
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
@@ -1030,7 +1030,7 @@
       <div class="library-bar" id="library-bar">
         <div class="search-wrap">
           <span class="search-icon"><span class="material-symbols-sharp">search</span></span>
-          <input type="search" class="search-input" id="class-search" placeholder="Search your classes&#8230;">
+          <input type="search" class="search-input" id="class-search" placeholder="Search your classes&#8230;" aria-label="Search your classes">
         </div>
         <button class="btn-primary" id="new-class-btn">
           <span class="material-symbols-sharp i-lg">add</span>
@@ -1122,7 +1122,7 @@
 
       <div class="cw-layout">
         <div class="cw-editor">
-          <input type="text" class="cw-title-input" id="cw-title" placeholder="Name your class&#8230;" maxlength="120">
+          <input type="text" class="cw-title-input" id="cw-title" placeholder="Name your class&#8230;" maxlength="120" aria-label="Class title">
 
           <div class="cw-section cw-story-block">
             <button type="button" class="cw-add-row" id="story-add-row">
@@ -1148,7 +1148,7 @@
           <div class="cw-type">
             <span class="label-1">Class Type</span>
             <div class="cw-type-wrap">
-              <input type="text" class="cw-type-input" id="cw-class-type" placeholder="Vinyasa, Slow Flow, Yin&#8230;" maxlength="60" autocomplete="off">
+              <input type="text" class="cw-type-input" id="cw-class-type" placeholder="Vinyasa, Slow Flow, Yin&#8230;" maxlength="60" autocomplete="off" aria-label="Class type">
               <div class="cw-type-menu" id="cw-type-menu" hidden></div>
             </div>
           </div>
@@ -1185,7 +1185,7 @@
               </div>
               <div class="cw-blocks-count" id="cw-blocks-count" hidden>
                 <span class="cw-blocks-label">How many blocks?</span>
-                <input type="number" class="cw-blocks-input" id="cw-blocks-input" min="1" max="99" step="1" value="2" inputmode="numeric">
+                <input type="number" class="cw-blocks-input" id="cw-blocks-input" min="1" max="99" step="1" value="2" inputmode="numeric" aria-label="Number of blocks">
               </div>
               <button type="button" class="cw-change-btn cw-props-done" id="cw-props-done">Done</button>
             </div>
@@ -1194,8 +1194,8 @@
           <div class="cw-playlist">
             <span class="label-1">Playlist</span>
             <div class="cw-playlist-fields">
-              <input type="text" class="cw-playlist-input" id="cw-playlist" placeholder="Playlist title" maxlength="120">
-              <input type="url" class="cw-playlist-url" id="cw-playlist-url" placeholder="Playlist link" maxlength="500">
+              <input type="text" class="cw-playlist-input" id="cw-playlist" placeholder="Playlist title" maxlength="120" aria-label="Playlist name">
+              <input type="url" class="cw-playlist-url" id="cw-playlist-url" placeholder="Playlist link" maxlength="500" aria-label="Playlist link">
             </div>
           </div>
         </aside>
@@ -1211,7 +1211,7 @@
     <div class="modal-card" role="dialog" aria-modal="true">
       <h3>Name this flow</h3>
       <p class="modal-hint">It saves to Your Flows, ready to drop into any class.</p>
-      <input type="text" class="modal-input" id="sf-name-input" placeholder="Twist to Boat" maxlength="120" autocomplete="off">
+      <input type="text" class="modal-input" id="sf-name-input" placeholder="Twist to Boat" maxlength="120" autocomplete="off" aria-label="Flow name">
       <div class="modal-actions">
         <button class="btn-ghost" id="sf-modal-cancel">Cancel</button>
         <button class="btn-primary" id="sf-modal-confirm">Save Flow</button>

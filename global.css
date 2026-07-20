@@ -127,7 +127,10 @@
   /* Text */
   --text-1: #151515;
   --text-2: #555555;
-  --text-3: #A5A5A5;
+  /* light paper needs a darker quiet voice — #A5A5A5 reads at ~2.2:1
+     here (illegible); #6E6E6E clears 4.5:1 and stays quiet. Dark mode
+     keeps #A5A5A5 (its contrast was always fine). */
+  --text-3: #6E6E6E;
 
   /* Accent — muted plum in light mode: the daylight equivalent of volt,
      so state stays visibly LIT instead of collapsing into ink */
@@ -445,6 +448,30 @@ body::after {
   background-size: 256px 256px;
 }
 
+
+/* ── Skip link — the first tab stop on every app page ──────────
+   The injected sidebar is the first thing in the DOM; without this,
+   keyboard and screen-reader users walk the whole rail on every
+   navigation. Hidden off-canvas until keyboard-focused. */
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 400;
+  padding: 10px 16px;
+  background: var(--ink-solid);
+  color: var(--paper-solid);
+  border-radius: var(--rb);
+  font-size: var(--text-ui);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus-visible { transform: none; }
+
+/* the skip target — main takes focus without wearing a ring */
+main:focus { outline: none; }
 
 /* Keyboard focus — visible and consistent; mouse clicks stay quiet.
    Components with their own focus treatment (boxed fields) opt out
@@ -2315,7 +2342,7 @@ textarea.fs-autogrow {
   font-size: 10px;
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: rgba(var(--ink-rgb), .30);
+  color: rgba(var(--ink-rgb), .62);
 }
 
 /* ── Theme switch in nav ── */
@@ -2331,7 +2358,7 @@ textarea.fs-autogrow {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.10em;
-  color: rgba(var(--ink-rgb), .38);
+  color: rgba(var(--ink-rgb), .62);
 }
 
 .nav-theme-switch {
@@ -3519,7 +3546,7 @@ body.has-sidebar {
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: .04em;
-  color: rgba(var(--ink-rgb), .32);
+  color: rgba(var(--ink-rgb), .62);
   line-height: 1.6;
   margin: 4px 0 0;
 }
@@ -3580,7 +3607,7 @@ body.has-sidebar {
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: .04em;
-  color: rgba(var(--ink-rgb), .32);
+  color: rgba(var(--ink-rgb), .62);
   margin: 12px 0 0;
 }
 .fb-context:empty { display: none; }

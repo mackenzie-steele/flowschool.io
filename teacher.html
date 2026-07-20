@@ -288,7 +288,7 @@
 
   <script src="lib/version.js"></script>
   <script src="lib/nav.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="lib/vendor/supabase-js-v2.110.7.min.js"></script>
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
@@ -412,10 +412,11 @@
     let teacher = null;   // the row from circle_directory
     let myId = null;
 
-    // staged for a later drop: Add to My Circle + the report/block menu.
-    // The tables and wiring are live — flip this on when the community
-    // is ready for the graph.
+    // staged for a later drop: Add to My Circle (the follow graph).
     const SHOW_CONNECT_CONTROLS = false;
+    // safety ships with visibility — anyone who can be seen can be
+    // reported or blocked. Never gate this behind the social graph.
+    const SHOW_SAFETY_CONTROLS = true;
 
     function esc(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
@@ -706,10 +707,12 @@
       // own profile: edit, no follow, no safety menu
       if (myId && myId === teacher.id) {
         document.getElementById('tp-edit').hidden = false;
-      } else if (SHOW_CONNECT_CONTROLS) {
-        const follows = await fsCommunity.myFollows();
-        wireFollow(follows);
-        wireMenu();
+      } else {
+        if (SHOW_CONNECT_CONTROLS) {
+          const follows = await fsCommunity.myFollows();
+          wireFollow(follows);
+        }
+        if (SHOW_SAFETY_CONTROLS) wireMenu();
       }
 
       // schedule loads after identity — a failure here degrades to the
