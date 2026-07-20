@@ -1415,11 +1415,12 @@
       ta.style.height = ta.scrollHeight + 'px';
     });
 
-    // an unnamed chain is work only this page remembers — put a hand up
-    // before it's thrown away. Named chains are safe: their notes sync
-    // back to the saved entry on every edit
+    // drawn poses are cheap — only WRITTEN notes are work worth a hand
+    // up before they're thrown away. Named chains are safe either way:
+    // their notes sync back to the saved entry on every edit
     window.addEventListener('beforeunload', function (e) {
-      if (chain.length && !chainName && !isViewingSaved) { e.preventDefault(); e.returnValue = ''; }
+      var hasNotes = chain.some(function (item) { return (item.note || '').trim(); });
+      if (hasNotes && !chainName && !isViewingSaved) { e.preventDefault(); e.returnValue = ''; }
     });
 
     document.getElementById('next-pose-btn').addEventListener('click', function (e) {
