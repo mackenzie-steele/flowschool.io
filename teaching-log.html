@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Teaching Log — Flow School</title>
@@ -245,6 +245,7 @@
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
+  <script src="lib/motion.js"></script>
   <script src="lib/library.js"></script>
   <script src="lib/toast.js"></script>
   <script src="lib/confirm-delete.js"></script>
@@ -294,6 +295,7 @@
         : entries;
 
       var stream = document.getElementById('lg-stream');
+      var hadGhosts = !!stream.querySelector('.library-empty-ghost');
       var sortRow = document.getElementById('sort-row');
 
       if (!entries.length) {
@@ -348,6 +350,7 @@
           render();
         });
       });
+      fsGhostSettle(stream, hadGhosts);
     }
 
     // ─── COMPOSER — a note belongs to a class ────────────────────────
@@ -362,14 +365,14 @@
       document.getElementById('lg-class-pick-label').textContent = 'Attach to a class (optional)';
       document.getElementById('lg-class-pick').classList.remove('chosen');
       document.getElementById('lg-area').value = '';
-      document.getElementById('lg-composer').hidden = false;
+      fsUnfold(document.getElementById('lg-composer'), true);
       document.getElementById('add-note-btn').disabled = true;
       renderClassMenu();
       document.getElementById('lg-area').focus();
     }
 
     function closeComposer() {
-      document.getElementById('lg-composer').hidden = true;
+      fsUnfold(document.getElementById('lg-composer'), false);
       document.getElementById('lg-class-menu').hidden = true;
       document.getElementById('add-note-btn').disabled = false;
     }
@@ -441,7 +444,11 @@
       render();
     });
 
-    document.getElementById('log-search').addEventListener('input', render);
+    var searchT; // the list changes at typing pauses, not per keystroke
+    document.getElementById('log-search').addEventListener('input', function () {
+      clearTimeout(searchT);
+      searchT = setTimeout(render, 140);
+    });
 
     render();
   </script>

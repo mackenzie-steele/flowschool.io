@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Movement Experiments</title>
@@ -21,6 +21,9 @@
       padding: 48px;
       margin-bottom: 40px;
     }
+
+    /* the whole deck is one pressable object — padding ring included */
+    #ready-card { cursor: pointer; }
 
 
 
@@ -180,6 +183,7 @@
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
+  <script src="lib/motion.js"></script>
   <div class="toast" id="toast"></div>
 
   <main>
@@ -245,7 +249,7 @@
     </div>
 
     <!-- the redeal — quiet, below the card, only after the first deal -->
-    <div class="redraw" id="redraw" hidden>
+    <div class="redraw fs-arrive" id="redraw" hidden>
       <button class="btn-ghost" id="shuffle-btn">
         <span class="material-symbols-sharp i-sm" style="margin-right:6px">shuffle</span>
         Again
@@ -1001,54 +1005,73 @@
 
     function renderExperiment(exp) {
       const card = document.getElementById('experiment-card');
-      document.getElementById('ready-card').hidden = true;
-      document.getElementById('redraw').hidden = false;
-      card.hidden = false;
+      const ready = document.getElementById('ready-card');
+      const firstDraw = card.hidden;
 
-      // Tags
-      const tagsEl = document.getElementById('exp-tags');
-      tagsEl.innerHTML = exp.tags.map(t =>
-        `<span class="exp-tag">${TAG_LABELS[t] || t}</span>`
-      ).join('');
+      const fill = () => {
+        // Tags
+        const tagsEl = document.getElementById('exp-tags');
+        tagsEl.innerHTML = exp.tags.map(t =>
+          `<span class="exp-tag">${TAG_LABELS[t] || t}</span>`
+        ).join('');
 
-      // Title
-      document.getElementById('exp-title').textContent = exp.title;
+        // Title
+        document.getElementById('exp-title').textContent = exp.title;
 
-      // Lists
-      const fill = (id, items, ordered) => {
-        const el = document.getElementById(id);
-        el.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+        // Lists
+        const fillList = (id, items) => {
+          const el = document.getElementById(id);
+          el.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+        };
+        fillList('exp-rules', exp.rules);
+        fillList('exp-before', exp.beforeYouBegin);
+        fillList('exp-during', exp.asYouMove);
+        fillList('exp-after', exp.whenSongEnds);
+
+        // Teaching insight (split paragraphs)
+        const insightEl = document.getElementById('exp-insight');
+        insightEl.innerHTML = exp.teachingInsight.split('\n\n')
+          .map(p => `<p>${p}</p>`).join('');
+
+        // Reflection
+        document.getElementById('exp-reflect').textContent = exp.reflectionPrompt;
+
+        // Watch link — visible only when this experiment has a video
+        const watchBtn = document.getElementById('watch-btn');
+        if (exp.videoUrl) {
+          watchBtn.href = exp.videoUrl;
+          watchBtn.hidden = false;
+        } else {
+          watchBtn.hidden = true;
+          watchBtn.removeAttribute('href');
+        }
+
+        // Save button state
+        updateSaveBtn(exp.id);
       };
-      fill('exp-rules', exp.rules);
-      fill('exp-before', exp.beforeYouBegin);
-      fill('exp-during', exp.asYouMove);
-      fill('exp-after', exp.whenSongEnds);
 
-      // Teaching insight (split paragraphs)
-      const insightEl = document.getElementById('exp-insight');
-      insightEl.innerHTML = exp.teachingInsight.split('\n\n')
-        .map(p => `<p>${p}</p>`).join('');
-
-      // Reflection
-      document.getElementById('exp-reflect').textContent = exp.reflectionPrompt;
-
-      // Watch link — visible only when this experiment has a video
-      const watchBtn = document.getElementById('watch-btn');
-      if (exp.videoUrl) {
-        watchBtn.href = exp.videoUrl;
-        watchBtn.hidden = false;
+      if (firstDraw) {
+        // the deal — the peeking cards drop away, then the top card arrives.
+        // Redraws never replay the card entrance; only its face changes.
+        const reveal = () => {
+          ready.hidden = true;
+          document.getElementById('redraw').hidden = false;
+          card.hidden = false;
+          fill();
+          card.classList.remove('animate');
+          void card.offsetWidth;
+          card.classList.add('animate');
+        };
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!ready.hidden && !reduce && document.readyState !== 'loading') {
+          ready.classList.add('deck-dealt');
+          setTimeout(() => { ready.classList.remove('deck-dealt'); reveal(); }, 150);
+        } else {
+          reveal();
+        }
       } else {
-        watchBtn.hidden = true;
-        watchBtn.removeAttribute('href');
+        fsSwapCard(card, fill);
       }
-
-      // Save button state
-      updateSaveBtn(exp.id);
-
-      // Animate in
-      card.classList.remove('animate');
-      void card.offsetWidth;
-      card.classList.add('animate');
     }
 
     // ─── GENERATE ────────────────────────────────────────────────────────────────
@@ -1109,7 +1132,7 @@
       document.getElementById('ready-count').textContent = EXPERIMENTS.length + ' ways to play with your practice';
       document.getElementById('experiment-card').hidden = true;
       document.getElementById('ready-card').hidden = false;
-      document.getElementById('ready-state').addEventListener('click', generate);
+      document.getElementById('ready-card').addEventListener('click', generate);
     }
 
     const _urlExp = new URLSearchParams(window.location.search).get('exp');

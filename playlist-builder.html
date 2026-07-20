@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Playlist Builder</title>
@@ -468,8 +468,11 @@
     .song-swap-btn:hover { color: var(--text-1); }
     .song-swap-btn .material-symbols-sharp { font-size: var(--icon-md); }
 
-    /* results no longer match the controls */
+    /* results no longer match the controls — it fades in beside the
+       title rather than teleporting into the sentence */
+    @keyframes pl-fade-in { from { opacity: 0; } }
     .res-stale {
+      animation: pl-fade-in .18s ease backwards;
       font-family: var(--font-mono);
       font-size: 10px;
       text-transform: uppercase;
@@ -481,8 +484,6 @@
     }
 
     /* ── Save modal (shake animation is page-specific) ───────── */
-    @keyframes pl-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-    .modal-input.shake { animation: pl-shake .3s ease; }
 
     /* ── Responsive ───────────────────────────────────────────── */
     @media (max-width: 680px) {
@@ -530,6 +531,7 @@
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
+  <script src="lib/motion.js"></script>
 
   <main>
   <section class="hero">
@@ -670,18 +672,25 @@
       'gentle-steady': { name: 'Gentle & Steady',  desc: 'Consistent, supportive, sustainable.',         keys: [[0, 35], [.25, 42], [.55, 52], [.75, 50], [.90, 40], [1, 30]] }
     };
 
-    // One handle per 10-minute mark: 30min → 4, 60min → 7, 90min → 10
-    function getKnotCount(min) { return Math.floor(min / 10) + 1; }
+    // Handles sit ON the 10-minute marks (normalized 0–1); a class that
+    // doesn't end on a mark gets one more handle at the true end, so
+    // 60 → 0,10,…,60 (7 handles) and 35 → 0,10,20,30,35 (5 handles)
+    function getKnotTimes(min) {
+      const ts = [];
+      for (let m = 0; m < min; m += 10) ts.push(m / min);
+      ts.push(1);
+      return ts;
+    }
 
-    // Sample an arc shape to N evenly-spaced points via linear interpolation of keypoints
+    // Sample an arc shape at the given normalized times via linear interpolation of keypoints
     // the intensity slider scales the whole preset toward gentler — same
     // shape, lower ceiling (a yin bell vs a vinyasa bell). 100 = the preset
     // as drawn. Song selection follows automatically: it reads S.pts.
-    function shapedArc(key, n) {
+    function shapedArc(key, times) {
       const f = S.intensity / 100;
       // snap every preset handle to the 10-step gridlines — the same grid
       // dragging snaps to, so presets start ON the lines, not near them
-      return sampleArc(key, n).map(e => Math.round(e * f / 10) * 10);
+      return sampleArc(key, times).map(e => Math.round(e * f / 10) * 10);
     }
 
     function updateIntensity() {
@@ -699,10 +708,9 @@
       }
     }
 
-    function sampleArc(key, n) {
+    function sampleArc(key, times) {
       const keys = ARC_SHAPES[key].keys;
-      return Array.from({ length: n }, (_, i) => {
-        const t = i / (n - 1);
+      return times.map(t => {
         for (let j = 0; j < keys.length - 1; j++) {
           const [t0, e0] = keys[j], [t1, e1] = keys[j + 1];
           if (t >= t0 && t <= t1) { const f = (t - t0) / (t1 - t0); return Math.round(e0 + (e1 - e0) * f); }
@@ -713,25 +721,28 @@
 
     // Interpolate current S.pts at any normalized time position 0–1
     function getCurveEnergy(normT) {
-      // monotone cubic (Fritsch–Carlson) — the same family the curve is
-      // DRAWN with, so song targets sample the shape the teacher sees
-      const pts = S.pts, n = pts.length;
+      // monotone cubic (Fritsch–Carlson) in real time — the same family the
+      // curve is DRAWN with, so song targets sample the shape the teacher
+      // sees (knot spacing is uneven when the class doesn't end on a mark)
+      const pts = S.pts, ts = getKnotTimes(S.duration), n = pts.length;
       if (n < 2) return pts[0] || 0;
-      const pos = Math.max(0, Math.min(1, normT)) * (n - 1);
-      const i = Math.min(Math.floor(pos), n - 2), t = pos - i;
-      const d = [];
-      for (let k = 0; k < n - 1; k++) d.push(pts[k + 1] - pts[k]);
-      const m = [d[0]];
-      for (let k = 1; k < n - 1; k++) m.push(d[k - 1] * d[k] <= 0 ? 0 : (d[k - 1] + d[k]) / 2);
-      m.push(d[n - 2]);
+      const x = Math.max(0, Math.min(1, normT));
+      const h = [], m = [];
+      for (let k = 0; k < n - 1; k++) { h.push(ts[k + 1] - ts[k]); m.push((pts[k + 1] - pts[k]) / h[k]); }
+      const g = [m[0]];
+      for (let k = 1; k < n - 1; k++) g.push(m[k - 1] * m[k] <= 0 ? 0 : (m[k - 1] + m[k]) / 2);
+      g.push(m[n - 2]);
       for (let k = 0; k < n - 1; k++) {
-        if (d[k] === 0) { m[k] = 0; m[k + 1] = 0; continue; }
-        const a = m[k] / d[k], b = m[k + 1] / d[k], sq = a * a + b * b;
-        if (sq > 9) { const tau = 3 / Math.sqrt(sq); m[k] = tau * a * d[k]; m[k + 1] = tau * b * d[k]; }
+        if (m[k] === 0) { g[k] = 0; g[k + 1] = 0; continue; }
+        const a = g[k] / m[k], b = g[k + 1] / m[k], sq = a * a + b * b;
+        if (sq > 9) { const tau = 3 / Math.sqrt(sq); g[k] = tau * a * m[k]; g[k + 1] = tau * b * m[k]; }
       }
+      let i = 0;
+      while (i < n - 2 && x > ts[i + 1]) i++;
+      const t = (x - ts[i]) / h[i];
       const h00 = 2 * t ** 3 - 3 * t ** 2 + 1, h10 = t ** 3 - 2 * t ** 2 + t,
             h01 = -2 * t ** 3 + 3 * t ** 2,    h11 = t ** 3 - t ** 2;
-      return h00 * pts[i] + h10 * m[i] + h01 * pts[i + 1] + h11 * m[i + 1];
+      return h00 * pts[i] + h10 * h[i] * g[i] + h01 * pts[i + 1] + h11 * h[i] * g[i + 1];
     }
 
     // SONGS is loaded from data/songs.js
@@ -745,13 +756,13 @@
       style: 'vinyasa',
       intensity: 70,           // energy level, defaults to the middle of the 40–100 range
       mix: { vocal: 50, electronic: 50 },
-      pts: sampleArc('bell-curve', getKnotCount(60)),
+      pts: sampleArc('bell-curve', getKnotTimes(60)),
       saved: false,
       userEdited: false,
     };
     // derive the initial curve the same way every preset change does —
     // intensity-scaled and grid-snapped (the raw init above is a placeholder)
-    S.pts = shapedArc(S.arcKey, getKnotCount(S.duration));
+    S.pts = shapedArc(S.arcKey, getKnotTimes(S.duration));
 
     // ─── CURVE ───────────────────────────────────────────────────────────────────
 
@@ -759,8 +770,7 @@
     const SVG_H = 236, PAD_T = 4, PAD_B = 52;
 
     function getXS() {
-      const n = S.pts.length;
-      return Array.from({ length: n }, (_, i) => Math.round(i / (n - 1) * SVG_W));
+      return getKnotTimes(S.duration).map(t => Math.round(t * SVG_W));
     }
 
 
@@ -833,8 +843,12 @@
         t.textContent = lbl; svg.appendChild(t);
       });
 
-      // ── Time axis labels (every 10 min — matching the handle spacing) ──
-      for (let m = 0; m <= S.duration; m += 10) {
+      // ── Time axis labels (every 10 min — matching the handle spacing,
+      //    plus the true end when the class doesn't land on a mark) ──
+      const timeMarks = [];
+      for (let m = 0; m <= S.duration; m += 10) timeMarks.push(m);
+      if (S.duration % 10) timeMarks.push(S.duration);
+      timeMarks.forEach(m => {
         const x = m / S.duration * SVG_W;
         const tl = ns('text');
         tl.setAttribute('x', m === 0 ? x + 2 : (m === S.duration ? x - 2 : x));
@@ -847,7 +861,7 @@
         tl.setAttribute('letter-spacing', '0.04em');
         tl.textContent = m === 0 ? '0' : m + 'm';
         svg.appendChild(tl);
-      }
+      });
 
       // ── 5-minute minor ticks on baseline ─────────────────────
       for (let m = 0; m <= S.duration; m += 5) {
@@ -973,7 +987,7 @@
         const active = S.arcKey === key;
         d.innerHTML = `${miniCurve(arc.keys, active)}<span class="arc-pill-name">${arc.name}</span>`;
         d.addEventListener('click', () => {
-          S.arcKey = key; S.pts = shapedArc(key, getKnotCount(S.duration)); S.userEdited = false;
+          S.arcKey = key; S.pts = shapedArc(key, getKnotTimes(S.duration)); S.userEdited = false;
           renderArcs(); renderCurve(); updateIntensity();
           markSettingsChanged();
         });
@@ -1110,9 +1124,8 @@
       forgetSaved();
       const bar = document.querySelector('.cta-bar');
       const btn = document.getElementById('gen-btn');
-      bar.style.display = '';
-      btn.disabled = false;
-      document.getElementById('gen-label').textContent = 'Rebuild this playlist';
+      bar.classList.remove('away');
+      fsWorking(btn, false, () => { document.getElementById('gen-label').textContent = 'Rebuild this playlist'; });
       const actions = document.querySelector('.res-actions');
       if (actions && !document.querySelector('.res-stale')) {
         actions.insertAdjacentHTML('afterbegin', '<span class="res-stale">settings changed</span>');
@@ -1300,7 +1313,12 @@
       document.getElementById('save-btn').addEventListener('click', handleSave);
       document.getElementById('regen-btn').addEventListener('click', () => {
         forgetSaved();
-        renderResults(generate());
+        const res = document.getElementById('results');
+        res.classList.add('fs-release');
+        setTimeout(() => {
+          res.classList.remove('fs-release');
+          renderResults(generate());
+        }, 110);
       });
     }
 
@@ -1427,11 +1445,12 @@
     }
     durSlider.addEventListener('input', () => {
       const newDur = parseInt(durSlider.value);
-      const newN = getKnotCount(newDur);
-      if (newN !== S.pts.length) {
+      if (newDur !== S.duration) {
+        const newTimes = getKnotTimes(newDur);
+        // resample BEFORE S.duration moves — getCurveEnergy reads the old grid
         S.pts = S.userEdited
-          ? Array.from({ length: newN }, (_, i) => Math.round(getCurveEnergy(i / (newN - 1))))
-          : shapedArc(S.arcKey, newN);
+          ? newTimes.map(t => Math.round(getCurveEnergy(t)))
+          : shapedArc(S.arcKey, newTimes);
       }
       S.duration = newDur;
       updateDurSlider();
@@ -1444,7 +1463,7 @@
     // like choosing an arc (clears manual drags on purpose)
     document.getElementById('intensity').addEventListener('input', function () {
       S.intensity = parseInt(this.value, 10);
-      S.pts = shapedArc(S.arcKey, getKnotCount(S.duration));
+      S.pts = shapedArc(S.arcKey, getKnotTimes(S.duration));
       S.userEdited = false;
       updateIntensity();
       renderCurve();
@@ -1546,7 +1565,7 @@
           S.duration = _pl.duration || S.duration;
           S.arcKey = _pl.arc || S.arcKey;
           S.intensity = _pl.intensity || 100;   // legacy entries had no intensity
-          S.pts = shapedArc(S.arcKey, getKnotCount(S.duration));
+          S.pts = shapedArc(S.arcKey, getKnotTimes(S.duration));
 
           document.getElementById('mix-vocal').value = S.mix.vocal;
           document.getElementById('mix-elec').value = S.mix.electronic;
@@ -1626,29 +1645,29 @@
       const title = row.querySelector('.song-title').textContent;
       const artist = row.querySelector('.song-artist').textContent;
       const icon = btn.querySelector('.material-symbols-sharp');
-      const swap = name => {
-        icon.style.opacity = '0';
-        icon.style.transform = 'scale(0.65)';
-        setTimeout(() => {
-          icon.textContent = name;
-          icon.style.opacity = '';
-          icon.style.transform = '';
-        }, 120);
-      };
       navigator.clipboard.writeText(`${title} — ${artist}`)
-        .then(() => { swap('check'); toast(`Copied: ${title}`); setTimeout(() => swap('content_copy'), 2000); })
-        .catch(() => { swap('error'); toast('Unable to copy.'); setTimeout(() => swap('content_copy'), 2000); });
+        .then(() => { fsCopied(icon); toast(`Copied: ${title}`); })
+        .catch(() => {
+          icon.textContent = 'error';
+          toast('Unable to copy.');
+          setTimeout(() => { icon.textContent = 'content_copy'; }, 1500);
+        });
     });
 
     document.getElementById('gen-btn').addEventListener('click', () => {
       const btn = document.getElementById('gen-btn');
       const label = document.getElementById('gen-label');
-      btn.disabled = true; label.textContent = 'Building...';
+      fsWorking(btn, true, () => { label.textContent = 'Building...'; });
       forgetSaved();
+      // the button answers first; the old results release underneath it
+      const res = document.getElementById('results');
+      res.classList.add('fs-release');
       setTimeout(() => {
+        res.classList.remove('fs-release');
         renderResults(generate());
         built = true;
-        document.getElementById('gen-btn').closest('.cta-bar').style.display = 'none';
+        fsWorking(btn, false);
+        document.getElementById('gen-btn').closest('.cta-bar').classList.add('away');
         document.querySelector('.results').scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 550);
     });

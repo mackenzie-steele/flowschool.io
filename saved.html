@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Saved — Flow School</title>
@@ -186,9 +186,17 @@
       width: 5px; height: 5px;
       border-radius: 50%;
       background: rgba(var(--ink-rgb), .25);
+      transition: background var(--transition-base);
+      /* no class = syncing — the dot wears the house working pulse */
+      animation: fsBreathe 2s ease-in-out infinite;
     }
-    .sv-sync i.on { background: var(--accent); }
-    .sv-sync i.err { background: var(--danger); }
+    .sv-sync i.on  { background: var(--accent); animation: none; }
+    .sv-sync i.err { background: var(--danger); animation: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sv-sync i { animation: none; opacity: .6; }
+      .sv-sync i.on, .sv-sync i.err { opacity: 1; }
+    }
   </style>
 
   <main>
@@ -443,7 +451,11 @@
         + '</div>';
     } else {
       bar.hidden = false;
-      search.addEventListener('input', render);
+      var searchT; // the list changes at typing pauses, not per keystroke
+      search.addEventListener('input', function () {
+        clearTimeout(searchT);
+        searchT = setTimeout(render, 140);
+      });
       render();
     }
   })();
@@ -462,15 +474,40 @@
       return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
 
+    // one persistent dot — classes toggle on it so the settle into
+    // Synced eases (a rebuilt element can't transition)
+    el.innerHTML = '<i></i><span></span>';
+    var dot = el.querySelector('i');
+    var txt = el.querySelector('span');
+
+    // the pull happens on every load but often lands between frames —
+    // the syncing needle dwells a moment so the instrument reads
+    var bornAt = Date.now();
+    var MIN_DWELL = 1200;
+    var settleT = null;
+
     function render() {
       var st = fsSync.status();
       if (st.state === 'error') {
-        el.innerHTML = '<i class="err"></i>Sync issue &mdash; retrying';
-      } else if (st.state === 'syncing') {
-        el.innerHTML = '<i></i>Syncing&hellip;';
-      } else {
-        el.innerHTML = '<i class="on"></i>Synced &middot; ' + rel(st.at);
+        dot.className = 'err';
+        txt.innerHTML = 'Sync issue &mdash; retrying';
+        return;
       }
+      if (st.state === 'syncing') {
+        dot.className = '';
+        txt.innerHTML = 'Syncing&hellip;';
+        return;
+      }
+      var wait = bornAt + MIN_DWELL - Date.now();
+      if (wait > 0) {
+        dot.className = '';
+        txt.innerHTML = 'Syncing&hellip;';
+        clearTimeout(settleT);
+        settleT = setTimeout(render, wait + 30);
+        return;
+      }
+      dot.className = 'on';
+      txt.innerHTML = 'Synced &middot; ' + rel(st.at);
     }
 
     window.addEventListener('fs-sync-status', render);

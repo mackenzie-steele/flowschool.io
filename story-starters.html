@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Story Starters</title>
@@ -32,8 +32,16 @@
 
 
 
+    /* the whole deck is one pressable object — padding ring included */
+    #ready-card { cursor: pointer; }
+
+    /* the pageEnter decelerate, not an overshoot — cards don't bounce */
     .story-card.animate {
-      animation: fadeUp .4s cubic-bezier(.22, .68, 0, 1.2);
+      animation: fadeUp .4s cubic-bezier(.2, .6, 0, 1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .story-card.animate { animation: none; }
     }
 
     .starter-label {
@@ -70,6 +78,7 @@
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
+  <script src="lib/motion.js"></script>
   <script src="data/story-starters.js"></script>
   <div class="toast" id="toast"></div>
 
@@ -105,7 +114,7 @@
     </div>
 
     <!-- the redraw — quiet, below the card, only after the first draw -->
-    <div class="redraw" id="redraw" hidden>
+    <div class="redraw fs-arrive" id="redraw" hidden>
       <button class="btn-ghost" id="shuffle-btn">
         <span class="material-symbols-sharp i-sm" style="margin-right:6px">shuffle</span>
         Another
@@ -135,18 +144,40 @@
       renderStarter(starter);
     }
 
-    // The teacher's words survive the shuffle — only the starter changes.
+    // The teacher’s words survive the shuffle — only the starter changes.
     function renderStarter(starter) {
-      document.getElementById('ready-card').hidden = true;
-      document.getElementById('redraw').hidden = false;
-      document.getElementById('story-card').hidden = false;
-      currentId = starter.id;
-      document.getElementById('starter-text').textContent = starter.text;
-      document.getElementById('write-btn').href = 'stories?new=' + starter.id;
       const card = document.getElementById('story-card');
-      card.classList.remove('animate');
-      void card.offsetWidth;
-      card.classList.add('animate');
+      const ready = document.getElementById('ready-card');
+      const firstDraw = card.hidden;
+      currentId = starter.id;
+
+      const fill = () => {
+        document.getElementById('starter-text').textContent = starter.text;
+        document.getElementById('write-btn').href = 'stories?new=' + starter.id;
+      };
+
+      if (firstDraw) {
+        // the deal — the peeking cards drop away, then the card arrives.
+        // Redraws swap the face in place instead of replaying the entrance.
+        const reveal = () => {
+          ready.hidden = true;
+          document.getElementById('redraw').hidden = false;
+          card.hidden = false;
+          fill();
+          card.classList.remove('animate');
+          void card.offsetWidth;
+          card.classList.add('animate');
+        };
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!ready.hidden && !reduce && document.readyState !== 'loading') {
+          ready.classList.add('deck-dealt');
+          setTimeout(() => { ready.classList.remove('deck-dealt'); reveal(); }, 150);
+        } else {
+          reveal();
+        }
+      } else {
+        fsSwapCard(card, fill);
+      }
     }
 
     // ─── EVENTS ──────────────────────────────────────────────────────────────────
@@ -160,7 +191,7 @@
       document.getElementById('ready-count').textContent = STARTERS.length + ' stories waiting to be told';
       document.getElementById('story-card').hidden = true;
       document.getElementById('ready-card').hidden = false;
-      document.getElementById('ready-state').addEventListener('click', draw);
+      document.getElementById('ready-card').addEventListener('click', draw);
     }
 
     const _urlStory = new URLSearchParams(window.location.search).get('story');

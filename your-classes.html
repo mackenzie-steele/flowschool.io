@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Classes — Flow School</title>
@@ -386,7 +386,7 @@
       border: 1px solid rgba(var(--ink-rgb), .16);
       border-top-color: rgba(var(--ink-rgb), .30);
       box-shadow: var(--shadow-float);
-      animation: fadeUp .14s ease both;
+      /* enter/exit comes from the global floating-panel system */
       max-height: 220px;
       overflow-y: auto;
     }
@@ -929,7 +929,7 @@
       }
 
       body, main, .wrap, .tv {
-        color: #1b1b1b !important;
+        color: #151515 !important;
         margin: 0 !important;
         padding: 0 !important;
         max-width: none !important;
@@ -937,12 +937,12 @@
         display: block !important;
       }
 
-      .tv * { color: #1b1b1b !important; }
+      .tv * { color: #151515 !important; }
 
       /* head: title full ink, meta lines quiet */
       .tv-title { font-size: 24pt; margin-bottom: 6pt; }
       .tv-title .tv-title-fav { display: none !important; }
-      .tv-head-main { padding-bottom: 10pt; border-bottom: 1px solid #1b1b1b; }
+      .tv-head-main { padding-bottom: 10pt; border-bottom: 1px solid #151515; }
       .tv-meta, .tv-playlist, .tv-props { color: #555 !important; }
       .tv-playlist .material-symbols-sharp { font-size: 10pt; }
       .tv-playlist-link { text-decoration: none !important; }
@@ -1007,6 +1007,7 @@
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
+  <script src="lib/motion.js"></script>
   <script src="data/shorthand.js"></script>
   <script src="lib/toast.js"></script>
   <script src="lib/confirm-delete.js"></script>

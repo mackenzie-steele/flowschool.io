@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
 <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profile — Flow School</title>
@@ -76,7 +76,6 @@
 
 <style>
 
-body { opacity: 0; transition: opacity .18s; }
 
 /* ── Page layout — standard 820 grid, editor's 640 measure inside ── */
 .profile-wrap {
@@ -94,6 +93,8 @@ body { opacity: 0; transition: opacity .18s; }
 .profile-wrap > * { max-width: 640px; margin-left: auto; margin-right: auto; }
 
 /* ── Identity header — the person is the headline ── */
+.pf-identity[hidden] { display: none; }
+
 .pf-identity {
   display: flex;
   align-items: center;
@@ -206,6 +207,18 @@ body { opacity: 0; transition: opacity .18s; }
   display: none;
 }
 .avatar-uploading.show { display: block; }
+
+/* upload — the veil holds while its icon breathes (the house working
+   pulse); a fresh photo develops in with a fade */
+.avatar-wrap.uploading .avatar-veil { opacity: 1; }
+.avatar-wrap.uploading .avatar-veil .material-symbols-sharp {
+  animation: fsBreathe 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-wrap.uploading .avatar-veil .material-symbols-sharp { animation: none; }
+}
+.avatar-preview img { animation: fsFadeIn .25s ease-out backwards; }
 
 /* ── Sections — chromeless, hairline-divided ── */
 .pf-section {
@@ -435,7 +448,7 @@ textarea.pf-input { resize: vertical; min-height: 90px; line-height: 1.65; }
 <div class="profile-wrap">
 
   <!-- Identity — the page's headline -->
-  <header class="pf-identity">
+  <header class="pf-identity fs-arrive" hidden>
     <div class="avatar-wrap">
       <button type="button" class="avatar-hit" id="avatar-change" aria-label="Change profile photo">
         <span class="avatar-preview" id="avatar-preview">?</span>
@@ -580,6 +593,7 @@ textarea.pf-input { resize: vertical; min-height: 90px; line-height: 1.65; }
 <script src="lib/supabase.js"></script>
 <script src="lib/telemetry.js"></script>
 <script src="lib/sync.js"></script>
+<script src="lib/motion.js"></script>
 <script src="lib/toast.js"></script>
 <script>
 
@@ -594,7 +608,6 @@ async function init() {
   currentUser = user;
 
   document.getElementById('avatar-email').textContent = user.email;
-  document.body.style.opacity = '1';
 
   // Load profile
   const { data: profile } = await db
@@ -631,6 +644,9 @@ async function init() {
     if (profile.avatar_url) localStorage.setItem('fs-avatar-url', profile.avatar_url);
     else localStorage.removeItem('fs-avatar-url');
   }
+  // the identity header settles in once it's fully known; even a failed
+  // profile load still shows the person their email
+  document.querySelector('.pf-identity').hidden = false;
 }
 
 function setFields(p) {
@@ -744,8 +760,10 @@ let schedFormOpen = false;
 function schedOpenForm() {
   schedFormOpen = true;
   document.getElementById('sched-form').hidden = false;
-  document.getElementById('sched-add-label').textContent = 'Save Class';
-  document.getElementById('sched-add-icon').textContent = 'check';
+  fsSetLabel(document.getElementById('sched-add'), () => {
+    document.getElementById('sched-add-label').textContent = 'Save Class';
+    document.getElementById('sched-add-icon').textContent = 'check';
+  });
   document.getElementById('sched-cancel').hidden = false;
 }
 
@@ -757,8 +775,10 @@ function schedResetForm() {
   });
   schedSetRepeat(false);
   document.getElementById('sched-form').hidden = true;
-  document.getElementById('sched-add-label').textContent = 'Add Class';
-  document.getElementById('sched-add-icon').textContent = 'add';
+  fsSetLabel(document.getElementById('sched-add'), () => {
+    document.getElementById('sched-add-label').textContent = 'Add Class';
+    document.getElementById('sched-add-icon').textContent = 'add';
+  });
   document.getElementById('sched-cancel').hidden = true;
   renderScheds();
 }
@@ -888,13 +908,16 @@ document.getElementById('avatar-file').addEventListener('change', async e => {
   if (file.size > 20 * 1024 * 1024) { toast('That photo is too large \u2014 try one under 20MB.'); return; }
 
   const uploading = document.getElementById('avatar-uploading');
+  const wrap = document.querySelector('.avatar-wrap');
   uploading.classList.add('show');
+  wrap.classList.add('uploading');
 
   let blob;
   try { blob = await processAvatar(file); }
   catch (err) {
     console.error('avatar processing failed:', err);
     uploading.classList.remove('show');
+  wrap.classList.remove('uploading');
     toast('Couldn\u2019t read that photo \u2014 try a different image.');
     return;
   }
@@ -907,6 +930,7 @@ document.getElementById('avatar-file').addEventListener('change', async e => {
   if (uploadError) {
     console.error('avatar upload failed:', uploadError);
     uploading.classList.remove('show');
+  wrap.classList.remove('uploading');
     toast('Couldn\u2019t upload that photo. Give it another try in a moment.');
     return;
   }
@@ -924,6 +948,7 @@ document.getElementById('avatar-file').addEventListener('change', async e => {
   document.getElementById('avatar-remove').hidden = false;
   originalData.avatar_url = publicUrl;
   uploading.classList.remove('show');
+  wrap.classList.remove('uploading');
   toast('Photo updated');
 });
 
@@ -1018,8 +1043,7 @@ document.getElementById('circle-row').addEventListener('click', function () {
 
 document.getElementById('save-btn').addEventListener('click', async () => {
   const btn = document.getElementById('save-btn');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
+  fsWorking(btn, true, 'Saving…');
   clearMessages();
 
   const vals = getCurrentValues();
@@ -1125,7 +1149,7 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     updateButtons();
   }
 
-  btn.textContent = 'Save Profile';
+  fsWorking(btn, false, 'Save Profile');
 });
 
 // ─── DISCARD ─────────────────────────────────────────────────────────────────

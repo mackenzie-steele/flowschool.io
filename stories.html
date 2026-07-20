@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Stories — Flow School</title>
@@ -166,6 +166,22 @@
     /* ── Edit mode — a forever page, not a form field ──
        The textarea is invisible: same type as the finished post,
        auto-grows with the writing, the page itself scrolls. */
+
+    /* reader ⇄ editor is deliberately NOT a view swap — the words hold
+       still; only the chrome changes hands. Incoming chrome fades in;
+       outgoing leaves in the same frame, so nothing doubles up. */
+    .post-actions, .post-edit-actions, .post-title-input {
+      transition: opacity .15s ease;
+    }
+
+    @starting-style {
+      .post-actions:not([hidden]),
+      .post-edit-actions:not([hidden]),
+      .post-title-input:not([hidden]) {
+        opacity: 0;
+      }
+    }
+
     .post-edit-area {
       width: 100%;
       min-height: 32vh;
@@ -434,6 +450,7 @@
 
     function renderList(filter) {
       var index = document.getElementById('story-index');
+      var hadGhosts = !!index.querySelector('.library-empty-ghost');
       var bar = document.getElementById('library-bar');
       var q = (filter || '').trim().toLowerCase();
 
@@ -492,6 +509,7 @@
           '<span class="story-row-date">' + fmtDate(stampFor(s).ts) + '</span>' +
         '</a>';
       }).join('');
+      fsGhostSettle(index, hadGhosts);
     }
 
     // ─── DETAIL VIEW ─────────────────────────────────────────────────────────────
@@ -558,7 +576,9 @@
 
     // ─── COMPOSE (new story from a drawn starter) ────────────────────────────────
 
-    function showCompose(starterId, push) {
+    // `after` runs once the composer is visible — pre-fill (duplicate)
+    // must go through it, or the deferred render would wipe the writes
+    function showCompose(starterId, push, after) {
       var st = starterId != null
         ? (window.STORY_STARTERS || []).find(function (x) { return x.id === starterId; })
         : null;
@@ -566,46 +586,48 @@
       composing = true;
       composeStarter = st;
       currentId = null;
-      document.getElementById('list-view').hidden = true;
-      document.getElementById('detail-view').hidden = false;
-      document.getElementById('post-title').hidden = true;
-      var csl = document.getElementById('post-starter-line');
-      csl.hidden = !st;
-      csl.textContent = st ? st.text : '';
-      document.getElementById('post-body').innerHTML = '';
-      document.getElementById('post-meta').hidden = true;
-      document.getElementById('save-edit-btn').textContent = 'Save to Your Library';
-      setEditing(true);
-      var area = document.getElementById('post-edit-area');
-      area.value = '';
-      document.getElementById('post-title-input').value = '';
-      editBaseline = baselineNow();
-      updateSaveEnabled();
-      autoGrow();
-      document.getElementById('post-title-input').focus();
+      fsSwapView(storyViews(), document.getElementById('detail-view'), function () {
+        document.getElementById('post-title').hidden = true;
+        var csl = document.getElementById('post-starter-line');
+        csl.hidden = !st;
+        csl.textContent = st ? st.text : '';
+        document.getElementById('post-body').innerHTML = '';
+        document.getElementById('post-meta').hidden = true;
+        document.getElementById('save-edit-btn').textContent = 'Save to Your Library';
+        setEditing(true);
+        var area = document.getElementById('post-edit-area');
+        area.value = '';
+        document.getElementById('post-title-input').value = '';
+        editBaseline = baselineNow();
+        updateSaveEnabled();
+        autoGrow();
+        document.getElementById('post-title-input').focus();
+        if (after) after();
+      });
       if (push) history.pushState({}, '', st ? 'stories?new=' + starterId : 'stories?new=blank');
-      window.scrollTo(0, 0);
     }
 
     // ─── VIEW SWITCHING ──────────────────────────────────────────────────────────
 
+    function storyViews() {
+      return [document.getElementById('list-view'), document.getElementById('detail-view')];
+    }
+
     function showList(push) {
-      document.getElementById('detail-view').hidden = true;
-      document.getElementById('list-view').hidden = false;
       currentId = null;
       composing = false;
       composeStarter = null;
-      renderList(document.getElementById('stories-search').value);
+      fsSwapView(storyViews(), document.getElementById('list-view'), function () {
+        renderList(document.getElementById('stories-search').value);
+      });
       if (push) history.pushState({}, '', 'stories');
-      window.scrollTo(0, 0);
     }
 
     function showDetail(id, push) {
-      document.getElementById('list-view').hidden = true;
-      document.getElementById('detail-view').hidden = false;
-      renderDetail(id);
+      fsSwapView(storyViews(), document.getElementById('detail-view'), function () {
+        renderDetail(id);
+      });
       if (push) history.pushState({}, '', 'stories?id=' + id);
-      window.scrollTo(0, 0);
     }
 
     function route() {
@@ -662,8 +684,10 @@
 
     document.getElementById('post-title-input').addEventListener('input', updateSaveEnabled);
 
+    var searchT; // the list changes at typing pauses, not per keystroke
     document.getElementById('stories-search').addEventListener('input', function (e) {
-      renderList(e.target.value);
+      clearTimeout(searchT);
+      searchT = setTimeout(function () { renderList(e.target.value); }, 140);
     });
 
     var favOnly = false;
@@ -792,18 +816,19 @@
           toast(src.pinned ? 'Added to your favorites.' : 'Removed from favorites.');
         } else if (act === 'dup') {
           // opens unsaved — nothing exists until they save the retelling
-          showCompose(null, true);
-          composeStarter = src.starter ? { id: src.starterId || null, text: src.starter } : null;
-          var csl = document.getElementById('post-starter-line');
-          csl.hidden = !src.starter;
-          csl.textContent = src.starter || '';
-          document.getElementById('post-title-input').value = (src.title || 'Untitled Story') + ' \u2014 copy';
-          var area = document.getElementById('post-edit-area');
-          area.value = src.text || '';
-          editBaseline = '\u0000never';
-          updateSaveEnabled();
-          autoGrow();
-          toast('Copy ready \u2014 make it yours.');
+          showCompose(null, true, function () {
+            composeStarter = src.starter ? { id: src.starterId || null, text: src.starter } : null;
+            var csl = document.getElementById('post-starter-line');
+            csl.hidden = !src.starter;
+            csl.textContent = src.starter || '';
+            document.getElementById('post-title-input').value = (src.title || 'Untitled Story') + ' \u2014 copy';
+            var area = document.getElementById('post-edit-area');
+            area.value = src.text || '';
+            editBaseline = '\u0000never';
+            updateSaveEnabled();
+            autoGrow();
+            toast('Copy ready \u2014 make it yours.');
+          });
         } else if (act === 'del') {
           stories = stories.filter(function (x) { return x.id !== currentId; });
           persist(stories);

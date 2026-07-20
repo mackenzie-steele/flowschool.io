@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Breath Pace</title>
@@ -24,8 +24,9 @@
     }
 
     .pacer-svg {
-      width: 300px;
-      height: 300px;
+      /* the instrument scales with the phone propped on a mat */
+      width: min(300px, 80vw);
+      height: min(300px, 80vw);
       overflow: visible;
     }
 
@@ -73,7 +74,11 @@
       box-shadow: var(--shadow-float);
     }
 
-    .bp-transport:hover { box-shadow: var(--shadow-float); }
+    .bp-transport:hover { background: var(--btn-hover); box-shadow: var(--shadow-float); }
+
+    /* the phase label crossfades over the breath's first moments —
+       never a hard swap at a boundary */
+    #svg-label { transition: opacity .2s ease, fill .4s ease; }
     .bp-transport:active { transform: scale(.96); }
 
     .bp-transport.running {
@@ -348,7 +353,10 @@
       }
     }
 
+    let lastTickState = { progress: 0, fromEnd: false };
+
     function setTickOpacity(progress, baseOpacity = 0.16, fromEnd = false) {
+      lastTickState = { progress: progress, fromEnd: fromEnd };
       const litCount = Math.round(progress * TICK_COUNT);
       document.querySelectorAll('#ticks line').forEach((l, i) => {
         const lit = fromEnd ? i >= TICK_COUNT - litCount : i < litCount;
@@ -363,18 +371,50 @@
       const countEl = document.getElementById('svg-count');
       const labelEl = document.getElementById('svg-label');
       countEl.textContent = count;
-      labelEl.textContent = phase.label.toUpperCase();
-      labelEl.style.fill = phase.id === 'inhale' ? 'var(--ink-solid)' : 'rgba(var(--ink-rgb),.38)';
+      setPhaseLabel(labelEl, phase.label.toUpperCase(),
+        phase.id === 'inhale' ? 'var(--ink-solid)' : 'rgba(var(--ink-rgb),.38)');
     }
 
-    function resetDisplay() {
+    // calls arrive every frame — only a real change moves the label
+    function setPhaseLabel(labelEl, text, fill) {
+      if (labelEl._shown === text) { labelEl.style.fill = fill; return; }
+      labelEl._shown = text;
+      clearTimeout(labelEl._swapT);
+      labelEl.style.opacity = '0';
+      labelEl._swapT = setTimeout(() => {
+        labelEl.textContent = text;
+        labelEl.style.fill = fill;
+        labelEl.style.opacity = '1';
+      }, 200);
+    }
+
+    function resetDisplay(drain) {
       const countEl = document.getElementById('svg-count');
       const labelEl = document.getElementById('svg-label');
       countEl.textContent = '—';
+      clearTimeout(labelEl._swapT);
+      labelEl._shown = 'READY';
       labelEl.textContent = 'READY';
+      labelEl.style.opacity = '1';
       labelEl.style.fill = 'rgba(var(--ink-rgb),.38)';
       breathProgress = 0;
-      setTickOpacity(0);
+      if (drain) drainTicks(); else setTickOpacity(0);
+    }
+
+    // the ring exhales — lit ticks drain out over ~300ms instead of
+    // cutting to black
+    function drainTicks() {
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const from = { progress: lastTickState.progress, fromEnd: lastTickState.fromEnd };
+      if (reduce || !from.progress) { setTickOpacity(0); return; }
+      const t0 = performance.now();
+      function step(ts) {
+        if (running) return; // a restart owns the ring again
+        const p = Math.min(1, (ts - t0) / 300);
+        setTickOpacity(from.progress * (1 - p), 0.16, from.fromEnd);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
     }
 
     // ─── LOOP ────────────────────────────────────────────────────────────────────
@@ -445,7 +485,7 @@
         elapsed = 0;
         lastTs = null;
         lastPhaseSec = -1;
-        resetDisplay();
+        resetDisplay(true);
         setControlsDisabled(false);
         setToggleState(false);
       } else {

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Arbitrary Rules</title>
@@ -39,8 +39,10 @@
       font-size: var(--fs-h5);
       color: var(--text-2);
       cursor: pointer;
-      transition: color var(--transition-base), border-color var(--transition-base), background var(--transition-base);
+      transition: color var(--transition-base), border-color var(--transition-base), background var(--transition-base), transform var(--transition-fast);
     }
+    /* the press note — the chip active-scale, acknowledging the choice */
+    .ready-num:active, .redraw-num:active { transform: scale(.97); }
     /* keys light only under the cursor — the deck riffle carries the
        "this is live" signal; the keys stay a deliberate choice */
     .ready-num:hover {
@@ -49,15 +51,35 @@
       background: rgba(var(--ink-rgb), .05);
     }
 
-    /* ── the exit — from a dealt rule to a class draft ── */
+    /* ── the exit — a quiet centered text link below the rules
+       (the pose-popcorn advance grammar: ink ramps, the arrow gap
+       widens); no seam above it — the rules end and the exit simply
+       waits below them ── */
     .rule-build {
       display: flex;
       justify-content: center;
-      margin-top: 32px;
-      padding-top: 24px;
-      border-top: 1px solid rgba(var(--ink-rgb), .07);
+      margin-top: 24px;
     }
-    .rule-build .btn-secondary { display: inline-flex; align-items: center; }
+
+    #build-class-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: var(--text-ui);
+      font-weight: var(--weight-semibold);
+      color: var(--text-2);
+      transition: color var(--transition-base), gap var(--transition-base);
+    }
+
+    #build-class-btn:hover {
+      color: var(--text-1);
+      gap: 12px;
+    }
 
     /* ── Redraw row — Draw again + compact count keys ── */
     .redraw {
@@ -82,7 +104,7 @@
       font-size: var(--fs-chip);
       color: var(--text-2);
       cursor: pointer;
-      transition: color var(--transition-base), border-color var(--transition-base), background var(--transition-base);
+      transition: color var(--transition-base), border-color var(--transition-base), background var(--transition-base), transform var(--transition-fast);
     }
     .redraw-num:hover {
       color: var(--text-1);
@@ -195,6 +217,7 @@
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
+  <script src="lib/motion.js"></script>
   <div class="toast" id="toast"></div>
 
   <main>
@@ -213,7 +236,7 @@
     <!-- the redraw — quiet, below the card, only after the first draw.
          The count keys repeat the ready state's contract: the number IS
          the draw. Draw again repeats the current count. -->
-    <div class="redraw" id="redraw" hidden>
+    <div class="redraw fs-arrive" id="redraw" hidden>
       <button class="btn-ghost" id="generate-btn">
         <span class="material-symbols-sharp i-sm" style="margin-right:6px">shuffle</span>
         <span class="btn-label">Something else</span>
@@ -457,7 +480,7 @@
 
     function renderCard(rules) {
       const card = document.getElementById('challenge-card');
-      card.classList.remove('deck-stack'); // the card leaves the deck
+      const firstDraw = card.classList.contains('deck-stack');
       document.getElementById('redraw').hidden = false; // the redraw earns its place after the first draw
       syncRedrawNums(); // the active key tracks the count just dealt
       const alreadySaved = isChallengeInSaved(currentRuleIds);
@@ -466,58 +489,79 @@
       // the exit — the rule's whole point is the flow it starts
       const buildBtn = `
       <div class="rule-build">
-        <button type="button" class="btn-secondary" id="build-class-btn">
+        <button type="button" id="build-class-btn">
           Build a flow with ${rules.length === 1 ? 'this' : 'these'}
-          <span class="material-symbols-sharp i-md" style="margin-left:6px">arrow_forward</span>
+          <span class="material-symbols-sharp i-md">arrow_forward</span>
         </button>
       </div>`;
 
-      if (rules.length === 1) {
-        const r = rules[0];
-        const invite = INVITES[Math.floor(Math.random() * INVITES.length)];
-        card.innerHTML = `
-      <div class="card-top">
-        <div class="challenge-label label-1">Your Rule</div>
-        ${saveBtn}
-      </div>
-      <div class="rule-text">${r.text}</div>
-      <span class="rule-cat tag">${CATEGORIES[r.cat]}</span>
-      ${buildBtn}`;
+      const fill = () => {
+        if (rules.length === 1) {
+          const r = rules[0];
+          const invite = INVITES[Math.floor(Math.random() * INVITES.length)];
+          card.innerHTML = `
+        <div class="card-top">
+          <div class="challenge-label label-1">Your Rule</div>
+          ${saveBtn}
+        </div>
+        <div class="rule-text">${r.text}</div>
+        <span class="rule-cat tag">${CATEGORIES[r.cat]}</span>
+        ${buildBtn}`;
+        } else {
+          card.innerHTML = `
+        <div class="card-top">
+          <div class="challenge-label label-1">Your Challenge</div>
+          ${saveBtn}
+        </div>
+        <div class="rule-items">
+          ${rules.map((r, i) => `
+            <div class="rule-item">
+              <span class="rule-n label-2">0${i + 1}</span>
+              <div>
+                <div class="rule-text">${r.text}</div>
+                <span class="rule-cat tag">${CATEGORIES[r.cat]}</span>
+              </div>
+            </div>`).join('')}
+        </div>
+        ${buildBtn}`;
+        }
+
+        document.getElementById('save-btn').addEventListener('click', handleSave);
+        document.getElementById('build-class-btn').addEventListener('click', function () {
+          // fs-seed — the Play → Plan handoff: the flow editor's new-draft
+          // path consumes this and pins the rules as the flow's challenge
+          const texts = currentRuleIds
+            .map(id => RULES.find(r => r.id === id)).filter(Boolean).map(r => r.text);
+          if (!texts.length) return;
+          try {
+            localStorage.setItem('fs-seed', JSON.stringify({ type: 'rules', rules: texts, ts: Date.now() }));
+          } catch (_) {}
+          window.location.href = 'your-flows?new=1';
+        });
+
+      };
+
+      if (firstDraw) {
+        // the deal — the peeking cards drop away as the card leaves the
+        // deck. Redraws swap the face in place, never replay the entrance.
+        const reveal = () => {
+          card.classList.remove('deck-dealt');
+          card.classList.remove('deck-stack'); // the card leaves the deck
+          fill();
+          card.classList.remove('animate');
+          void card.offsetWidth;
+          card.classList.add('animate');
+        };
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reduce && document.readyState !== 'loading') {
+          card.classList.add('deck-dealt');
+          setTimeout(reveal, 150);
+        } else {
+          reveal();
+        }
       } else {
-        card.innerHTML = `
-      <div class="card-top">
-        <div class="challenge-label label-1">Your Challenge</div>
-        ${saveBtn}
-      </div>
-      <div class="rule-items">
-        ${rules.map((r, i) => `
-          <div class="rule-item">
-            <span class="rule-n label-2">0${i + 1}</span>
-            <div>
-              <div class="rule-text">${r.text}</div>
-              <span class="rule-cat tag">${CATEGORIES[r.cat]}</span>
-            </div>
-          </div>`).join('')}
-      </div>
-      ${buildBtn}`;
+        fsSwapCard(card, fill);
       }
-
-      document.getElementById('save-btn').addEventListener('click', handleSave);
-      document.getElementById('build-class-btn').addEventListener('click', function () {
-        // fs-seed — the Play → Plan handoff: the flow editor's new-draft
-        // path consumes this and pins the rules as the flow's challenge
-        const texts = currentRuleIds
-          .map(id => RULES.find(r => r.id === id)).filter(Boolean).map(r => r.text);
-        if (!texts.length) return;
-        try {
-          localStorage.setItem('fs-seed', JSON.stringify({ type: 'rules', rules: texts, ts: Date.now() }));
-        } catch (_) {}
-        window.location.href = 'your-flows?new=1';
-      });
-
-      card.classList.remove('animate');
-      void card.offsetWidth;
-      card.classList.add('animate');
     }
 
     // ─── SAVE ────────────────────────────────────────────────────────────────────

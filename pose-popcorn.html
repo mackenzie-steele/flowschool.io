@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pose Popcorn</title>
@@ -41,50 +41,41 @@
     .deck-slot .dest-card {
       background: linear-gradient(rgba(var(--ink-rgb), .035), rgba(var(--ink-rgb), .035)), var(--bg);
     }
-    .deck-slot:hover .pose-card.facedown:not(.waits) { border-color: rgba(var(--ink-rgb), .32); }
+    .deck-slot:hover .pose-card.facedown { border-color: rgba(var(--ink-rgb), .32); }
 
     /* face down — not yet drawn. The whole card is the hit area; the
-       prompt dresses as a button so the eye knows what to do */
+       prompt is a quiet text link, same register as the advance */
     .pose-card.facedown { cursor: pointer; }
-    /* mirrors .btn-secondary exactly — one register for draw invitations */
     .pose-card.facedown .pose-name {
       margin: auto;                 /* centered in the card's free space */
       font-size: var(--text-ui);
       font-weight: var(--weight-semibold);
       color: var(--text-2);
-      border: 1px solid rgba(var(--ink-rgb), .18);
-      border-radius: var(--rb);
-      padding: 12px 24px;
-      transition: color var(--transition-base), border-color var(--transition-base),
-                  background var(--transition-base);
+      transition: color var(--transition-base);
     }
-    .deck-slot:hover .pose-card.facedown:not(.waits) .pose-name {
+    .deck-slot:hover .pose-card.facedown .pose-name {
       color: var(--text-1);
-      border-color: rgba(var(--ink-rgb), .35);
-      background: rgba(var(--ink-rgb), .05);
     }
 
-    /* destination waits its turn — the prompt sheds its button dress and
-       goes quiet until a starting pose is up; no cursor invitation either */
-    .pose-card.facedown.waits { cursor: default; }
-    .pose-card.facedown.waits .pose-name {
-      color: var(--text-3);
-      border-color: transparent;
-      background: none;
-      font-weight: var(--weight-regular);
-    }
 
     /* ── Pose cards ── */
     .pose-card {
       padding: 40px 40px 40px;
       display: flex;
       flex-direction: column;
-      min-height: 200px;
+      /* the working card's height (eyebrow + four-line name seat +
+         the advance link) — every state holds this size, so nothing
+         jumps no matter how a name wraps */
+      min-height: 312px;
       position: relative;
       transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
     }
 
-    .pose-card.locked {
+    /* lock dims the pose itself, not the action seated in the card */
+    .pose-card .pose-card-eyebrow,
+    .pose-card .pose-name { transition: opacity 0.2s ease, filter 0.2s ease; }
+    .pose-card.locked .pose-card-eyebrow,
+    .pose-card.locked .pose-name {
       opacity: .5;
       filter: grayscale(.5);
     }
@@ -108,6 +99,34 @@
       line-height: var(--lh-heading);
       color: var(--text-1);
     }
+
+    /* drawn names sit in a four-line seat so the card holds its size
+       no matter how a pose name wraps, draw to draw */
+    .pose-card:not(.facedown) .pose-name {
+      min-height: calc(4em * var(--lh-heading));
+    }
+
+    /* mid-deal the button vanishes but keeps its seat — the card
+       never resizes because of its own action */
+    #next-pose-btn.in-flight { visibility: hidden; }
+
+    /* the empty seat — where the first card will land: the full frame,
+       dashed, waiting. Clicking it deals too. CSS dashed borders can't
+       space their dashes, so each edge is a 1px repeating gradient
+       (6px dash, 10px gap) drawn on the wash; the real border goes
+       transparent but keeps its 1px of layout. */
+    .pose-card.seat-empty {
+      --seat-dash: rgba(var(--ink-rgb), .20);
+      border-color: transparent;
+      background:
+        repeating-linear-gradient(90deg,  var(--seat-dash) 0 6px, transparent 6px 16px) left top    / 100% 1px no-repeat,
+        repeating-linear-gradient(90deg,  var(--seat-dash) 0 6px, transparent 6px 16px) left bottom / 100% 1px no-repeat,
+        repeating-linear-gradient(180deg, var(--seat-dash) 0 6px, transparent 6px 16px) left top    / 1px 100% no-repeat,
+        repeating-linear-gradient(180deg, var(--seat-dash) 0 6px, transparent 6px 16px) right top   / 1px 100% no-repeat;
+      cursor: pointer;
+    }
+
+    .pose-card.seat-empty .pose-name { min-height: 0; }
 
     .dest-card {
       border-color: rgba(var(--ink-rgb), .18);
@@ -136,8 +155,9 @@
        means "in the deck". ── */
     .deck-mod {
       display: flex;
-      justify-content: flex-start;
-      margin: -12px 0 24px;   /* tucks up under the decks, clears the actions */
+      justify-content: space-between;
+      align-items: center;
+      margin: -12px 0 24px;   /* tucks up under the decks */
     }
     .inv-switch {
       display: flex;
@@ -183,15 +203,43 @@
       background: var(--ink-solid);   /* white in dark mode, black in light — full-strength ink means on */
     }
 
-    .deck-actions {
-      display: flex;
+    /* the advance — a quiet text link seated in the card's bottom-right
+       corner. The whole card is the control; the tool-card grammar
+       answers the hover (arrow gap widens, ink ramps). */
+    #next-pose-btn {
+      margin-top: auto;
+      align-self: flex-end;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: wrap;
+      padding: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: var(--text-ui);
+      font-weight: var(--weight-semibold);
+      color: var(--text-2);
+      transition: color var(--transition-base), gap var(--transition-base);
     }
 
-    .deck-actions { justify-content: flex-end; }
-    .deck-actions .btn-primary { border-radius: var(--r-cta); }
+    .deck-slot:hover .dest-card:not(.locked) #next-pose-btn,
+    #next-pose-btn:hover {
+      color: var(--text-1);
+      gap: 12px;
+    }
+
+    .dest-card:not(.locked) { cursor: pointer; }
+    .deck-slot:hover .dest-card:not(.locked):not(.facedown) { border-color: rgba(var(--ink-rgb), .32); }
+
+    .dest-card .pose-name { margin-bottom: 24px; }
+
+    /* a fresh link settles into the log as the deal finishes */
+    .chain-new { animation: fsReveal .28s cubic-bezier(.2, .6, 0, 1) backwards; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .chain-new { animation: none; }
+    }
 
     /* ── Chain section ── */
     .chain-section {
@@ -254,12 +302,15 @@
       color: var(--text-3);
     }
 
+    /* rows on strict rails — number · transition · note. Mono 01 02
+       numbering, same as the rules card; everything columns up */
     .chain-item {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: 12px;
+      align-items: start;
       padding: 20px 0;
       border-bottom: 1px solid var(--border-light);
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
     }
 
     .chain-item:last-child { border-bottom: none; }
@@ -268,18 +319,13 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      flex: 1;
       flex-wrap: wrap;
+      row-gap: 2px;
       padding-top: 8px;
     }
 
-    .chain-num {
-      font-family: var(--font-mono);
-      font-size: var(--text-small);
-      color: var(--text-3);
-      min-width: 22px;
-      flex-shrink: 0;
-    }
+    .chain-num { font-variant-numeric: tabular-nums; }
+    .chain-item .chain-num { padding-top: 10px; }
 
     .chain-pose-name {
       font-size: var(--fs-h7);
@@ -288,16 +334,21 @@
     }
 
     .chain-sep {
+      font-size: var(--icon-sm);
       color: var(--text-3);
-      font-size: 13px;
     }
 
     .chain-note-wrap {
       display: flex;
       align-items: center;
       gap: 4px;
-      flex: 1;
       min-width: 0;
+    }
+
+    @media (max-width: 600px) {
+      /* the note drops under the pair, holding the same left rail */
+      .chain-item { grid-template-columns: 28px minmax(0, 1fr); }
+      .chain-note-wrap { grid-column: 2; }
     }
 
     .chain-note-text {
@@ -435,23 +486,70 @@
     }
 
     /* ── Save modal (shake animation is page-specific) ── */
-    @keyframes pc-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-    .modal-input.shake { animation: pc-shake .3s ease; }
 
     /* ── Summary overlay ── */
     .summary-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(var(--ink-rgb), .5);
+      /* the house veil — paper glass, same material as every bar */
+      background: rgba(var(--paper-rgb), .52);
       z-index: 300;
       align-items: center;
       justify-content: center;
       padding: 24px;
-      backdrop-filter: blur(4px);
+      backdrop-filter: var(--glass);
+      -webkit-backdrop-filter: var(--glass);
     }
 
     .summary-overlay.show { display: flex; }
+
+    /* the summary joins the overlay system (global.css modal grammar):
+       the veil fades in with the panel's rise, exits run quicker, and
+       display only flips once the fade has finished */
+    .summary-overlay {
+      transition: opacity .18s ease, display .18s allow-discrete;
+    }
+
+    .summary-overlay:not(.show) {
+      opacity: 0;
+      transition:
+        opacity var(--transition-exit),
+        display var(--transition-exit) allow-discrete;
+    }
+
+    @starting-style {
+      .summary-overlay.show { opacity: 0; }
+    }
+
+    .summary-panel {
+      transition:
+        opacity .18s cubic-bezier(.2, .6, 0, 1),
+        transform .18s cubic-bezier(.2, .6, 0, 1);
+    }
+
+    .summary-overlay:not(.show) .summary-panel {
+      opacity: 0;
+      transform: translateY(4px);
+      transition:
+        opacity var(--transition-exit),
+        transform var(--transition-exit);
+    }
+
+    @starting-style {
+      .summary-overlay.show .summary-panel {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .summary-overlay, .summary-overlay:not(.show),
+      .summary-panel, .summary-overlay:not(.show) .summary-panel {
+        transform: none;
+        transition-duration: .1s;
+      }
+    }
 
     .summary-panel {
       background: var(--bg);
@@ -521,6 +619,7 @@
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
+  <script src="lib/motion.js"></script>
 
   <main class="wrap">
 
@@ -560,28 +659,25 @@
             Destination Pose
           </div>
           <div class="pose-name" id="dest-pose-name">—</div>
+          <button type="button" id="next-pose-btn" hidden>
+            <span id="next-pose-label">Next Pose</span>
+            <span class="material-symbols-sharp i-md" id="next-pose-icon">arrow_forward</span>
+          </button>
         </div>
       </div>
 
     </div>
 
-    <!-- What's in the deck — a switch shuffles inversions & arm balances in or out -->
+    <!-- What's in the deck — a switch shuffles inversions & arm balances in
+         or out; reset sits at the row's far end, under the destination card -->
     <div class="deck-mod">
       <button class="inv-switch" id="inv-switch" role="switch" aria-checked="true" title="Shuffle inversions &amp; arm balances into the deck">
         <span class="inv-switch-label">Inversions &amp; Arm Balances</span>
         <span class="inv-rail"><span class="inv-thumb"></span></span>
       </button>
-    </div>
-
-    <!-- Action buttons -->
-    <div class="deck-actions" hidden>
-      <button class="btn-ghost" id="reset-btn">
+      <button class="btn-ghost" id="reset-btn" hidden>
         <span class="material-symbols-sharp i-md" style="margin-right:6px">restart_alt</span>
         <span id="reset-label">Reset</span>
-      </button>
-      <button class="btn-primary" id="next-pose-btn">
-        <span id="next-pose-label">Next Pose</span>
-        <span class="material-symbols-sharp" id="next-pose-icon">arrow_forward</span>
       </button>
     </div>
 
@@ -674,9 +770,16 @@
     var INV_KEY = 'fs-popcorn-inversions';
     function invOn() { return localStorage.getItem(INV_KEY) !== '0'; }
 
+    // no repeats within a chain — every pose already drawn is out of the
+    // deck until the chain resets. If a marathon chain ever empties the
+    // pool, quietly reshuffle (excluding only the pose that's face-up)
     function pickPose(excludeName) {
-      var pool = POSES.concat(invOn() ? POSES_INVERSIONS : [])
-        .filter(function(p) { return p !== excludeName; });
+      var used = {};
+      if (excludeName) used[excludeName] = true;
+      chain.forEach(function(l) { used[l.start] = true; used[l.dest] = true; });
+      var all = POSES.concat(invOn() ? POSES_INVERSIONS : []);
+      var pool = all.filter(function(p) { return !used[p]; });
+      if (!pool.length) pool = all.filter(function(p) { return p !== excludeName; });
       return pool[Math.floor(Math.random() * pool.length)];
     }
 
@@ -686,12 +789,22 @@
 
     // ─── RENDER ──────────────────────────────────────────────────
     function renderDeck() {
-      document.getElementById('start-pose-name').textContent = startPose || 'Tap for starting pose';
-      document.getElementById('dest-pose-name').textContent  = destPose  || (startPose ? 'Tap for next pose' : '');
-      document.getElementById('start-card').classList.toggle('facedown', !startPose);
+      document.getElementById('start-pose-name').textContent = startPose || '';
+      document.getElementById('dest-pose-name').textContent  = destPose  || (startPose ? 'Tap for next pose' : 'Tap for starting pose');
+      document.getElementById('start-card').classList.toggle('seat-empty', !startPose);
+      document.getElementById('start-card').classList.remove('facedown');
       document.getElementById('dest-card').classList.toggle('facedown', !destPose);
-      document.getElementById('dest-card').classList.toggle('waits', !startPose && !destPose);
       renderStartStack();
+      updateDeckButtons();
+    }
+
+    // the advance lives in the destination card; reset sits by the deck
+    // switch — each appears only when there's something to act on
+    function updateDeckButtons() {
+      var nextBtn = document.getElementById('next-pose-btn');
+      nextBtn.hidden = !destPose;
+      nextBtn.classList.remove('in-flight');
+      document.getElementById('reset-btn').hidden = !chain.length && !isViewingSaved;
     }
 
     // the left pile is the chain made physical — flat at first, one card
@@ -704,22 +817,87 @@
       el.classList.toggle('stack-1', cards === 2);
     }
 
-    // each deck is drawn by hand; the first connection lands when both are up
+    // the opening draw deals from the pile and travels to the start
+    // seat — the same table move as Next Pose; after that, each next
+    // pose is drawn by hand and the first connection lands when both
+    // cards are up
     function drawSide(side) {
       if (isViewingSaved) return;
-      if (side === 'start' && !startPose)     startPose = pickPose(destPose);
-      else if (side === 'dest' && !destPose && startPose) destPose = pickPose(startPose);
-      else return;
-      renderDeck();
-      if (startPose && destPose) {
+      if (!startPose) {
+        var pose = pickPose(destPose);
+        document.getElementById('dest-pose-name').textContent = ''; // travels face down
+        animateFirstDeal(function () {
+          startPose = pose;
+          renderDeck();
+        });
+        return;
+      }
+      if (side === 'dest' && !destPose) {
+        destPose = pickPose(startPose);
+        renderDeck();
         pushToChain();
-        document.querySelector('.deck-actions').hidden = false;
+        updateDeckButtons();
         document.querySelector('.chain-section').hidden = false;
       }
     }
 
+    // the opening deal — the first card travels from the pile to the
+    // start seat: Next Pose's table move, minus the fall (there's
+    // nothing on the table yet)
+    function animateFirstDeal(callback) {
+      if (animating) return;
+      if (!('animate' in Element.prototype) ||
+          (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        callback();
+        return;
+      }
+      animating = true;
+
+      var startCard = document.getElementById('start-card');
+      var destCard  = document.getElementById('dest-card');
+      var connector = document.querySelector('.deck-connector');
+      var sr = startCard.getBoundingClientRect();
+      var dr = destCard.getBoundingClientRect();
+
+      var travel = destCard.animate([
+        { transform: 'none' },
+        { transform: 'translate(' + (sr.left - dr.left) + 'px, ' + (sr.top - dr.top) + 'px)' }
+      ], { duration: 320, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
+
+      if (connector) {
+        connector.animate([{ opacity: 1 }, { opacity: .15 }],
+          { duration: 200, easing: 'ease', fill: 'forwards' });
+      }
+
+      travel.onfinish = function () {
+        callback();
+        travel.cancel();
+
+        // the landed card settles into the seat…
+        startCard.animate([{ opacity: .4 }, { opacity: 1 }],
+          { duration: 160, easing: 'ease-out' });
+
+        // …and the pile's next card slides up on top
+        var deal = destCard.animate([
+          { opacity: 0, transform: 'translateX(28px) rotate(1.2deg)' },
+          { opacity: 1, transform: 'none' }
+        ], { duration: 280, easing: 'cubic-bezier(.2,.7,.3,1)' });
+
+        if (connector) {
+          connector.animate([{ opacity: .15 }, { opacity: 1 }],
+            { duration: 280, easing: 'ease', fill: 'forwards' });
+        }
+
+        deal.onfinish = function () { animating = false; };
+      };
+    }
+
     document.getElementById('start-card').addEventListener('click', function () { drawSide('start'); });
-    document.getElementById('dest-card').addEventListener('click', function () { drawSide('dest'); });
+    document.getElementById('dest-card').addEventListener('click', function () {
+      if (isViewingSaved) return; // read-only here — the button still acts
+      if (!startPose || !destPose) { drawSide('dest'); return; }
+      nextPose(); // once a pose is up, the whole card is the advance
+    });
 
     // the deck switch — on = inversions & arm balances are in the shuffle.
     // Cards already dealt stay dealt; only future draws change.
@@ -747,10 +925,10 @@
 
       list.innerHTML = chain.map(function(item, i) {
         return '<div class="chain-item">'
+          + '<span class="chain-num label-2">' + (i < 9 ? '0' : '') + (i + 1) + '</span>'
           + '<div class="chain-poses">'
-          + '<span class="chain-num">' + (i + 1) + '.</span>'
           + '<span class="chain-pose-name">' + escHtml(item.start) + '</span>'
-          + '<span class="chain-sep">→</span>'
+          + '<span class="material-symbols-sharp chain-sep" aria-hidden="true">arrow_forward</span>'
           + '<span class="chain-pose-name">' + escHtml(item.dest) + '</span>'
           + '</div>'
           + '<div class="chain-note-wrap" data-idx="' + i + '">'
@@ -758,6 +936,13 @@
           + '</div>'
           + '</div>';
       }).join('');
+
+      // a fresh link settles into the log as the deal finishes
+      if (chainJustGrew) {
+        chainJustGrew = false;
+        var items = list.querySelectorAll('.chain-item');
+        if (items.length) items[items.length - 1].classList.add('chain-new');
+      }
     }
 
     function saveToStorage() {
@@ -788,14 +973,20 @@
 
 
     // ─── ACTIONS ─────────────────────────────────────────────────
+    var chainJustGrew = false;
+
     function pushToChain() {
       chain.push({ start: startPose, dest: destPose, note: '' });
       saveToStorage();
+      chainJustGrew = true;
       renderChain();
     }
 
     function nextPose() {
       if (isViewingSaved) { startNewChain(); return; }
+      // the button must not ride the played card — it returns with the
+      // deal, and its seat stays so the card doesn't resize
+      document.getElementById('next-pose-btn').classList.add('in-flight');
       animateTransition(function() {
         startPose = destPose;
         destPose  = pickPose(startPose);
@@ -927,9 +1118,9 @@
 
       document.getElementById('summary-chain').innerHTML = chain.map(function(item, i) {
         return '<div class="summary-link">'
-          + '<span class="chain-num">' + (i + 1) + '.</span>'
+          + '<span class="chain-num label-2">' + (i < 9 ? '0' : '') + (i + 1) + '</span>'
           + '<strong>' + escHtml(item.start) + '</strong>'
-          + '<span style="color:var(--text-3)">→</span>'
+          + '<span class="material-symbols-sharp chain-sep" aria-hidden="true">arrow_forward</span>'
           + '<strong>' + escHtml(item.dest) + '</strong>'
           + '</div>';
       }).join('');
@@ -945,11 +1136,8 @@
       });
       var text = 'Pose Popcorn — Practice Chain\n\n' + lines.join('\n');
       navigator.clipboard.writeText(text).catch(function() {});
-      var btn = document.getElementById('summary-copy-btn');
-      btn.textContent = 'Copied!';
-      setTimeout(function() {
-        btn.innerHTML = '<span class="material-symbols-sharp">content_copy</span> Copy Chain';
-      }, 1800);
+      // the glyph confirms; the label holds still
+      fsCopied(document.querySelector('#summary-copy-btn .material-symbols-sharp'));
     }
 
     document.getElementById('reset-btn').addEventListener('click', startNewChain);
@@ -968,7 +1156,6 @@
       renderDeck();
       renderChain();
       updateLockState();
-      document.querySelector('.deck-actions').hidden = true;
       document.querySelector('.chain-section').hidden = true;
     }
 
@@ -1085,7 +1272,7 @@
       setChainTitle(chainName || 'Chain');
       document.getElementById('save-btn').classList.add('saved');
       updateLockState();
-      document.querySelector('.deck-actions').hidden = false;
+      updateDeckButtons();
       document.querySelector('.chain-section').hidden = false;
     }
 
@@ -1228,7 +1415,17 @@
       ta.style.height = ta.scrollHeight + 'px';
     });
 
-    document.getElementById('next-pose-btn').addEventListener('click', nextPose);
+    // an unnamed chain is work only this page remembers — put a hand up
+    // before it's thrown away. Named chains are safe: their notes sync
+    // back to the saved entry on every edit
+    window.addEventListener('beforeunload', function (e) {
+      if (chain.length && !chainName && !isViewingSaved) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    document.getElementById('next-pose-btn').addEventListener('click', function (e) {
+      e.stopPropagation(); // the card underneath is a draw target
+      nextPose();
+    });
     document.getElementById('chain-title-edit-btn').addEventListener('click', startChainRename);
     document.getElementById('save-btn').addEventListener('click', openSaveModal);
     document.getElementById('load-btn').addEventListener('click', openLoadModal);

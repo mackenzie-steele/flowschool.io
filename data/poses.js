@@ -115,7 +115,6 @@ var POSES = [
   'Seated Bound Angle',
   'Cat',
   'Cow',
-  'Kneeling',
 ];
 
 var POSES_INVERSIONS = [

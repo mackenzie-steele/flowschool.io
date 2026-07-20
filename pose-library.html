@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pose Library</title>
@@ -641,13 +641,15 @@
       });
 
       document.getElementById('sh-add-confirm').addEventListener('click', () => {
+        const refuse = el => { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); el.focus(); };
         const code = document.getElementById('sh-code-input').value.trim().toUpperCase();
         const full = document.getElementById('sh-full-input').value.trim();
-        if (!code) { document.getElementById('sh-code-input').focus(); return; }
-        if (!full) { document.getElementById('sh-full-input').focus(); return; }
+        if (!code) { refuse(document.getElementById('sh-code-input')); return; }
+        if (!full) { refuse(document.getElementById('sh-full-input')); return; }
         const clash = allShorthand().find(s => s.short.trim().toLowerCase() === code.toLowerCase());
         if (clash) {
           toast('\u201C' + code + '\u201D already means ' + clash.full + '.');
+          refuse(document.getElementById('sh-code-input'));
           return;
         }
         const list = fsCustomShorthand();
@@ -839,9 +841,6 @@
         ${s.custom ? `<button class="btn-icon sh-del-btn" data-id="${s.id}" title="Delete" data-tooltip="Delete">
           <span class="material-symbols-sharp">delete</span>
         </button>` : ''}
-        <button class="btn-icon copy-btn" data-short="${esc(s.short)}" title="Copy shorthand" data-tooltip="Copy">
-          <span class="material-symbols-sharp">content_copy</span>
-        </button>
       </div>
     </td>
   </tr>`).join('');
@@ -855,30 +854,6 @@
         });
       });
 
-      tbody.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const icon = btn.querySelector('.material-symbols-sharp');
-          const swap = name => {
-            icon.style.opacity = '0';
-            icon.style.transform = 'scale(0.65)';
-            setTimeout(() => {
-              icon.textContent = name;
-              icon.style.opacity = '';
-              icon.style.transform = '';
-            }, 120);
-          };
-          navigator.clipboard.writeText(btn.dataset.short)
-            .then(() => {
-              swap('check');
-              showToast(`Copied "${btn.dataset.short}"`);
-              setTimeout(() => swap('content_copy'), 2000);
-            })
-            .catch(() => {
-              swap('error');
-              setTimeout(() => swap('content_copy'), 2000);
-            });
-        });
-      });
     }
 
 
@@ -973,17 +948,6 @@
       document.getElementById('seq-output').innerHTML = expandSeq(input, STATE.mode);
     }
 
-    // ─── TOAST ───────────────────────────────────────────────────────────────────
-
-    let toastTimer;
-    function showToast(msg) {
-      const el = document.getElementById('toast');
-      el.textContent = msg;
-      el.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
-    }
-
     // ─── INIT ────────────────────────────────────────────────────────────────────
 
     function init() {
@@ -994,10 +958,12 @@
       const searchInput = document.getElementById('search-input');
       const searchClear = document.getElementById('search-clear');
 
+      let searchT; // the list changes at typing pauses, not per keystroke
       searchInput.addEventListener('input', e => {
         STATE.query = e.target.value;
         searchClear.classList.toggle('hidden', !STATE.query);
-        renderLib();
+        clearTimeout(searchT);
+        searchT = setTimeout(renderLib, 140);
       });
 
       searchClear.addEventListener('click', () => {

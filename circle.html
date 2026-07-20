@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Circle — Flow School</title>
@@ -82,6 +82,31 @@
       transition: border-color var(--transition-base);
     }
     .tc-card:hover { border-color: rgba(var(--ink-rgb), .32); }
+
+    /* quiet placeholders while the room answers — static, no shimmer,
+       fading back like the library ghosts */
+    .tc-ghost {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 24px 28px;
+      background: rgba(var(--ink-rgb), .018);
+      border: 1px solid var(--border-light);
+    }
+    .tc-ghost i { display: block; background: rgba(var(--ink-rgb), .06); }
+    .tc-ghost .g-face { width: 72px; height: 72px; border-radius: 50%; margin-bottom: 20px; }
+    .tc-ghost .g-name { width: 55%; height: 12px; margin-bottom: 10px; }
+    .tc-ghost .g-meta { width: 35%; height: 8px; }
+    .tc-ghost:nth-child(3), .tc-ghost:nth-child(4) { opacity: .55; }
+    .tc-ghost:nth-child(n+5) { opacity: .25; }
+
+    /* the room fills — cards settle in sibling waves, once, when the
+       directory first lands */
+    @media (prefers-reduced-motion: no-preference) {
+      .tc-grid.tc-arrived > * { animation: fsReveal .28s cubic-bezier(.2, .6, 0, 1) backwards; }
+      .tc-grid.tc-arrived > :nth-child(n+4) { animation-delay: 50ms; }
+      .tc-grid.tc-arrived > :nth-child(n+7) { animation-delay: 100ms; }
+    }
 
     .tc-face {
       width: 72px;
@@ -220,7 +245,7 @@
 
     <div class="tc-grid" id="tc-grid"></div>
 
-    <div class="tc-empty" id="tc-empty" hidden>
+    <div class="tc-empty fs-arrive" id="tc-empty" hidden>
       <p id="tc-empty-text"></p>
     </div>
 
@@ -363,10 +388,19 @@
       if (e.key === 'Escape') document.getElementById('tc-modal').hidden = true;
     });
 
-    document.getElementById('tc-search').addEventListener('input', () => render(filtered()));
+    let searchT; // the list changes at typing pauses, not per keystroke
+    document.getElementById('tc-search').addEventListener('input', () => {
+      clearTimeout(searchT);
+      searchT = setTimeout(() => render(filtered()), 140);
+    });
 
     // ── load the room ──
     (async function init() {
+      // quiet placeholders while the room answers
+      document.getElementById('tc-grid').innerHTML = new Array(6).fill(
+        '<div class="tc-ghost" aria-hidden="true"><i class="g-face"></i><i class="g-name"></i><i class="g-meta"></i></div>'
+      ).join('');
+
       const { data: { user } } = await db.auth.getUser();
 
       const [{ data, error }, blocked] = await Promise.all([
@@ -377,6 +411,10 @@
       if (error) console.warn('The Circle could not load:', error.message || error);
       teachers = ((!error && data) ? data : []).filter(t => !blocked.has(t.id));
       render(teachers);
+      // the room fills once — search re-renders stay still
+      const grid = document.getElementById('tc-grid');
+      grid.classList.add('tc-arrived');
+      setTimeout(() => grid.classList.remove('tc-arrived'), 600);
 
       // the nudge — only for signed-in teachers who haven't stepped in
       if (user) {

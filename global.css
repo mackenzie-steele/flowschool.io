@@ -125,17 +125,17 @@
   --border-light: rgba(var(--ink-rgb), .07);
 
   /* Text */
-  --text-1: #1B1B1B;
+  --text-1: #151515;
   --text-2: #555555;
   --text-3: #A5A5A5;
 
-  /* Accent — cobalt in light mode: the daylight equivalent of volt,
+  /* Accent — muted plum in light mode: the daylight equivalent of volt,
      so state stays visibly LIT instead of collapsing into ink */
-  --volt:          #618FEA;
-  --volt-rgb:      97, 143, 234;
-  --accent:        #618FEA;
-  --accent-dim:    rgba(97, 143, 234, .10);
-  --accent-border: rgba(97, 143, 234, .30);
+  --volt:          #8D6889;
+  --volt-rgb:      141, 104, 137;
+  --accent:        #8D6889;
+  --accent-dim:    rgba(141, 104, 137, .10);
+  --accent-border: rgba(141, 104, 137, .30);
 
   /* Primary button hover fill */
   --btn-hover: #2C2C28;
@@ -184,7 +184,10 @@
             0 1px 4px  rgba(var(--ink-rgb), .06);
 
   /* Effects */
-  --glass: blur(20px);
+  /* ONE GLASS (Jul 2026): every frosted surface — bars, veils, the
+     sheet scrim — wears the same material. Density (the paper fill
+     behind it) may vary by role; the frost itself never does. */
+  --glass: blur(48px) saturate(190%);
 
   /* Typography — font families */
   --font:      'ABC Monument Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -241,10 +244,23 @@
   /* MOTION SPEC (Jul 2026): two durations, one curve. fast = hover/
      focus feedback; base = state changes & reveals. Keyframe
      animations (pageEnter, card-turn) are set pieces, not spec'd here.
-     Never `transition: all` — name the properties. */
+     Never `transition: all` — name the properties.
+
+     VOCABULARY (Jul 2026): four words, whole platform.
+     ENTER — a floating surface arrives with the reveal (fade + small
+       rise). EXIT — it leaves the same way, faster (~0.7x): nothing
+       vanishes, nothing makes you wait. CHANGE — content replaced in
+       place releases first (fast fade, no movement), then the new
+       content settles in; the container never teleports its height.
+       CONTINUITY — when a thing MOVES (card leaves a deck, row swaps
+       position), carry it: measure, translate, settle. Pose Popcorn's
+       deal is the reference implementation.
+     Overshoot is reserved for small transient objects — the toast and
+     the feedback check own the only springs. Cards don't bounce. */
   --transition-fast: .12s ease-out;
   --transition-base: .2s ease-out;
   --transition-slow: .25s ease;
+  --transition-exit: .14s ease;
 
   /* Z-index scale */
   --z-overlay:         45;
@@ -265,24 +281,24 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg:            #1B1B1B;
+  --bg:            #151515;
   --ink-rgb:       239, 239, 239;
   --ink-solid:     #EFEFEF;
-  --paper-solid:   #1B1B1B;
+  --paper-solid:   #151515;
   --surface:       #262626;
   --surface-2:     #333333;
   --border:        #333333;
   --border-light:  #262626;
-  --accent:        #FFF55F;
-  --accent-dim:    rgba(255, 245, 95, .10);
-  --accent-border: rgba(255, 245, 95, .25);
+  --accent:        #84AAF1;
+  --accent-dim:    rgba(132, 170, 241, .10);
+  --accent-border: rgba(132, 170, 241, .25);
   --text-1:        #EFEFEF;
   --text-2:        #C3C3C3;
   --text-3:        #A5A5A5;
-  --volt:          #FFF55F;
-  --volt-rgb:      255, 245, 95;
+  --volt:          #84AAF1;
+  --volt-rgb:      132, 170, 241;
   --slider-fill:   var(--volt);
-  --paper-rgb:     27, 27, 27;
+  --paper-rgb:     21, 21, 21;
   --sidebar-bg:    var(--paper-solid);
   --btn-hover:     #EFEFEF;
 }
@@ -340,6 +356,24 @@
    transitions. */
 ::view-transition-group(app-sidebar) {
   animation: none;
+}
+
+/* The active row's LED dot is the one element that meaningfully MOVES
+   between pages. Naming it lets it slide from the old row to the new
+   one while the rest of the rail holds still — a thread of continuity
+   through the one part of the app that never reloads. Pages without an
+   active row (settings, profile) just fade it out gracefully. */
+.nav-dot {
+  view-transition-name: nav-dot;
+}
+
+::view-transition-group(nav-dot) {
+  animation-duration: .28s;
+  animation-timing-function: cubic-bezier(.2, .6, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(nav-dot) { animation: none; }
 }
 
 
@@ -418,6 +452,26 @@ body::after {
 :focus-visible {
   outline: 2px solid rgba(var(--ink-rgb), .55);
   outline-offset: 2px;
+}
+
+/* Keyboard focus on text fields wears no ring — the field's own
+   border simply comes forward (.35 mouse → .55 keyboard). The doubled
+   pseudo-class lifts specificity above the components' later
+   .class:focus values without resorting to !important. */
+input:focus:focus-visible,
+textarea:focus:focus-visible,
+select:focus:focus-visible {
+  outline: none;
+  border-color: rgba(var(--ink-rgb), .55);
+}
+
+/* the inset-seam textareas (feedback, log, class sections, flows)
+   have no border — their seam deepens the same way */
+textarea.fb-text:focus:focus-visible,
+textarea.lg-area:focus:focus-visible,
+textarea.cw-area:focus:focus-visible,
+textarea.fl-area:focus:focus-visible {
+  box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .55);
 }
 
 /* ─── 3. TYPOGRAPHY ──────────────────────────────────────────── */
@@ -598,6 +652,24 @@ body.has-sidebar .cta-bar {
 .cta-bar > * {
   pointer-events: all;
   box-shadow: var(--shadow-float);
+}
+
+/* the bar travels — it slides away when its job is done and rises
+   back when called, never a display pop. Visibility rides along so
+   an away bar isn't tabbable; toggle with .away, not display. */
+.cta-bar {
+  transition: transform .2s cubic-bezier(.2, .6, 0, 1), opacity .2s ease, visibility .2s;
+}
+
+.cta-bar.away {
+  transform: translateY(calc(100% + 24px));
+  opacity: 0;
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-bar { transition: opacity .1s ease, visibility .1s; }
+  .cta-bar.away { transform: none; }
 }
 
 @media (max-width: 580px) {
@@ -856,7 +928,11 @@ button svg {
   color: var(--text-3);
 }
 
-.save-icon { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20; }
+.save-icon {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  /* saving is a quiet keeping — the fill blooms in, nothing bursts */
+  transition: font-variation-settings .15s ease;
+}
 .saved .save-icon { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20; }
 
 .btn-icon.saved {
@@ -869,14 +945,17 @@ button svg {
   transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
 
-/* bare glyph buttons (song swap) join the tooltip component */
+/* bare glyph buttons (song swap, the dashboard's pod menu) join
+   the tooltip component */
 .btn-icon[data-tooltip],
-.song-swap-btn[data-tooltip] {
+.song-swap-btn[data-tooltip],
+.db-pod-more-btn[data-tooltip] {
   position: relative;
 }
 
 .btn-icon[data-tooltip]::before,
-.song-swap-btn[data-tooltip]::before {
+.song-swap-btn[data-tooltip]::before,
+.db-pod-more-btn[data-tooltip]::before {
   content: attr(data-tooltip);
   position: absolute;
   bottom: calc(100% + 7px);
@@ -898,7 +977,8 @@ button svg {
 }
 
 .btn-icon[data-tooltip]:hover::before,
-.song-swap-btn[data-tooltip]:hover::before {
+.song-swap-btn[data-tooltip]:hover::before,
+.db-pod-more-btn[data-tooltip]:hover::before {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
   transition-delay: 350ms;
@@ -1402,6 +1482,16 @@ input[type=range].range-slider:disabled {
   opacity: 1;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  /* the spring stays for everyone else; here the toast just fades
+     in place */
+  .toast,
+  .toast.show {
+    transform: translateX(-50%);
+    transition: opacity .15s ease;
+  }
+}
+
 
 /* ─── 14. NAV AUTH ───────────────────────────────────────────── */
 
@@ -1503,25 +1593,279 @@ input[type=range].range-slider:disabled {
 
 /* ─── 15. ANIMATIONS ─────────────────────────────────────────── */
 
-/* the reveal — every floating panel enters with the same move */
+/* the reveal — every floating panel enters with the same move.
+   (Kept as a keyframe for JS-driven entrances — the change gesture's
+   settle — but the panels below now enter AND exit via transitions.) */
 @keyframes fsReveal {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.tv-menu:not([hidden]),
-.fl-menu:not([hidden]),
-.st-menu:not([hidden]),
-.sh-suggest:not([hidden]),
-.cw-type-menu:not([hidden]),
-.lg-class-menu:not([hidden]),
-.modal-card {
-  animation: fsReveal var(--transition-base) both;
+/* ── Floating panels — enter and exit ──────────────────────────
+   Transitions, not one-shot animations: they replay on every open
+   and run in reverse on close. `display` rides along as a discrete
+   transition, so on close it only flips to none after the fade has
+   finished; @starting-style supplies the enter-from state. Exits run
+   on --transition-exit (~0.7x the entrance) — leaving never makes
+   anyone wait. Browsers without @starting-style (pre-2024) show and
+   hide instantly — the old behavior, no fallback needed. */
+.tv-menu, .fl-menu, .st-menu,
+.sh-suggest, .cw-type-menu, .lg-class-menu {
+  transition:
+    opacity var(--transition-base),
+    transform var(--transition-base),
+    display var(--transition-base) allow-discrete;
+}
+
+.tv-menu[hidden], .fl-menu[hidden], .st-menu[hidden],
+.sh-suggest[hidden], .cw-type-menu[hidden], .lg-class-menu[hidden] {
+  display: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity var(--transition-exit),
+    transform var(--transition-exit),
+    display var(--transition-exit) allow-discrete;
+}
+
+@starting-style {
+  .tv-menu:not([hidden]), .fl-menu:not([hidden]), .st-menu:not([hidden]),
+  .sh-suggest:not([hidden]), .cw-type-menu:not([hidden]), .lg-class-menu:not([hidden]) {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tv-menu, .fl-menu, .st-menu, .sh-suggest, .cw-type-menu,
-  .lg-class-menu, .modal-card { animation: none; }
+  /* the movement goes, the fade stays — and it gets quicker */
+  .tv-menu, .fl-menu, .st-menu, .sh-suggest, .cw-type-menu, .lg-class-menu,
+  .tv-menu[hidden], .fl-menu[hidden], .st-menu[hidden],
+  .sh-suggest[hidden], .cw-type-menu[hidden], .lg-class-menu[hidden] {
+    transform: none;
+    transition-duration: .1s;
+  }
+
+  @starting-style {
+    .tv-menu:not([hidden]), .fl-menu:not([hidden]), .st-menu:not([hidden]),
+    .sh-suggest:not([hidden]), .cw-type-menu:not([hidden]), .lg-class-menu:not([hidden]) {
+      transform: none;
+    }
+  }
+}
+
+/* ── The change gesture — content replaced in place ────────────
+   A surface whose content is REPLACED (a new draw, a filtered list)
+   never just swaps: the outgoing content releases — a fast fade,
+   no movement — then the incoming content settles in with fsReveal
+   or .fade-up, and the container's height eases between the two.
+   .fs-release is the outgoing half; adoption is per-surface. */
+@keyframes fsRelease {
+  to { opacity: 0; }
+}
+
+.fs-release {
+  animation: fsRelease .1s ease-out both;
+}
+
+/* ── Late arrivals ─────────────────────────────────────────────
+   Content revealed after first paint (async identity, schedules,
+   whole async views) settles in instead of popping — and never
+   reflows what's above it. Mark the element .fs-arrive in markup;
+   JS just unhides it when the data lands. */
+.fs-arrive {
+  transition: opacity .24s ease, transform .24s cubic-bezier(.2, .6, 0, 1);
+}
+
+@starting-style {
+  .fs-arrive:not([hidden]) {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fs-arrive { transition-duration: .1s; }
+
+  @starting-style {
+    .fs-arrive:not([hidden]) { transform: none; }
+  }
+}
+
+/* ── In-page view swaps (list ↔ reader ↔ editor) ───────────────
+   The three-screen library pages change views with the same grammar
+   as page navigation: the outgoing view releases, the scroll reset
+   happens while nothing is visible, then the incoming view runs the
+   page-enter settle — shorter than a true arrival, because the frame
+   didn't change, only the room's contents. Driven by fsSwapView()
+   in lib/library.js, which goes instant on initial load and under
+   reduced motion. */
+.view-release {
+  animation: fsRelease .1s ease-out both;
+}
+
+.view-enter {
+  animation: pageEnter .28s cubic-bezier(.2, .6, 0, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-release, .view-enter { animation: none; }
+}
+
+/* ── The draw — a generator card changes its face in place ─────
+   Outgoing content releases (content only — the frame stays put),
+   the card's height glides, incoming content settles. Driven by
+   fsSwapCard() in lib/motion.js. */
+.card-swap-out > * {
+  opacity: 0;
+  transition: opacity .1s ease-out;
+}
+
+.card-swap-in > * {
+  animation: fsReveal var(--transition-base) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-swap-in > * { animation: none; }
+}
+
+/* ── Button label changes — a state machine, not a patch ───────
+   fsSetLabel() (lib/motion.js) fades the old label, eases the
+   width, fades the new one in. The chrome never blinks. */
+.btn-label-swap {
+  overflow: hidden;
+  transition:
+    color .09s ease,
+    width .18s cubic-bezier(.2, .6, 0, 1),
+    background var(--transition-base),
+    border-color var(--transition-base);
+}
+
+/* !important: the fade must win every button color state,
+   including :disabled (working buttons are disabled) */
+.btn-label-out { color: transparent !important; }
+
+/* ── Working state — a button awaiting a network breathes ──────
+   The autosave dot's pulse, seated where the icon would sit.
+   Toggle with fsWorking() in lib/motion.js. */
+.btn-working {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-working::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  animation: fsBreathe 2s ease-in-out infinite;
+}
+
+@keyframes fsBreathe {
+  0%, 100% { opacity: .35; transform: scale(.85); }
+  50%      { opacity: 1;   transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-working::before { animation: none; opacity: .6; }
+}
+
+/* ── Banners settle in — errors and confirmations never pop ────
+   The .show-toggled notices (auth boxes, profile/settings banners,
+   inline field errors): fade + a small rise on entry, a quicker
+   fade out, display deferred until the fade has finished. */
+.auth-error, .auth-success, .pf-error, .pf-success, .pf-field-error {
+  transition:
+    opacity .2s ease,
+    transform .2s cubic-bezier(.2, .6, 0, 1),
+    display .2s allow-discrete;
+}
+
+.auth-error:not(.show), .auth-success:not(.show),
+.pf-error:not(.show), .pf-success:not(.show), .pf-field-error:not(.show) {
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity var(--transition-exit),
+    transform var(--transition-exit),
+    display var(--transition-exit) allow-discrete;
+}
+
+@starting-style {
+  .auth-error.show, .auth-success.show,
+  .pf-error.show, .pf-success.show, .pf-field-error.show {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-error, .auth-success, .pf-error, .pf-success, .pf-field-error,
+  .auth-error:not(.show), .auth-success:not(.show),
+  .pf-error:not(.show), .pf-success:not(.show), .pf-field-error:not(.show) {
+    transform: none;
+    transition-duration: .1s;
+  }
+}
+
+/* ── Arriving at an empty state is still an arrival ────────────
+   It settles in. Opacity only: search re-renders recreate these
+   blocks per keystroke, and a moving re-entrance would wobble. */
+@keyframes fsFadeIn {
+  from { opacity: 0; }
+}
+
+.library-empty, .flow-filter-empty, .lib-empty, .chain-empty {
+  animation: fsFadeIn .2s ease-out backwards;
+}
+
+/* ── The refusal — a modal input that can't accept yet ─────────
+   One shake for the whole platform; retrigger by removing and
+   re-adding .shake around a reflow. */
+@keyframes fsShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.modal-input.shake { animation: fsShake .3s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-input.shake { animation: none; }
+}
+
+/* ── Auto-growing textareas unroll instead of hiccuping ────────
+   Applied by fsAutoGrow (lib/library.js). The property list is a
+   superset of the focus-ring transitions the pages declare, since
+   a transition list replaces rather than merges. */
+textarea.fs-autogrow {
+  transition:
+    height .08s ease-out,
+    box-shadow var(--transition-base),
+    background var(--transition-base),
+    border-color var(--transition-base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  textarea.fs-autogrow { transition-property: box-shadow, background, border-color; }
+}
+
+/* the confirmed check — the feedback modal's settle, at half the
+   drama; put .fs-check-in on a check glyph when a state earns it */
+@keyframes fsCheckIn {
+  from { opacity: 0; transform: scale(.6); }
+}
+
+.fs-check-in {
+  animation: fsCheckIn .25s cubic-bezier(.34, 1.56, .64, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fs-check-in { animation: none; }
 }
 
 @keyframes fadeUp {
@@ -1553,9 +1897,17 @@ input[type=range].range-slider:disabled {
   animation: fadeUp .42s ease both;
 }
 
+/* the pageEnter decelerate, not an overshoot — cards don't bounce;
+   the toast and the feedback check own the only springs */
 .challenge-card.animate,
 .experiment-card.animate {
-  animation: fadeUp .4s cubic-bezier(.22, .68, 0, 1.2);
+  animation: fadeUp .4s cubic-bezier(.2, .6, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up,
+  .challenge-card.animate,
+  .experiment-card.animate { animation: none; }
 }
 
 
@@ -2225,9 +2577,9 @@ body.sidebar-open .sidebar-toggle .nav-tg-close { opacity: 1; }
   inset: 0;
   /* paper veil, same convention as the modal backdrop — paper darkens in
      dark mode; an ink-based scrim would invert and go light there */
-  background: rgba(var(--paper-rgb), .65);
-  backdrop-filter: blur(14px) saturate(120%);
-  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  background: rgba(var(--paper-rgb), .52);
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
   opacity: 0;
   visibility: hidden;
   transition: opacity .2s ease, visibility .2s ease;
@@ -2515,11 +2867,6 @@ body.has-sidebar {
   opacity: 1;
 }
 
-/* Modal backdrop + card shadow — dark */
-[data-theme="dark"] .modal-backdrop {
-  background: rgba(var(--paper-rgb), .85);
-}
-
 [data-theme="dark"] .modal-card {
   --shadow-press: 0 4px 32px rgba(0, 0, 0, .50), 0 20px 60px rgba(0, 0, 0, .35);
   box-shadow: var(--shadow-press);
@@ -2702,7 +3049,6 @@ body.has-sidebar {
   border: 1px solid rgba(var(--ink-rgb), .16);
   border-top-color: rgba(var(--ink-rgb), .30);
   box-shadow: var(--shadow-float);
-  animation: fsReveal var(--transition-base) both;
 }
 
 .sh-row {
@@ -2779,7 +3125,6 @@ body.has-sidebar {
   border: 1px solid rgba(var(--ink-rgb), .16);
   border-top-color: rgba(var(--ink-rgb), .30);
   box-shadow: var(--shadow-float);
-  animation: fsReveal var(--transition-base) both;
 }
 
 .tv-menu-item, .fl-menu-item, .st-menu-item {
@@ -2851,9 +3196,9 @@ body.has-sidebar {
   height: 81px;
   padding: 0 24px;
   margin-bottom: 40px;
-  background: rgba(var(--paper-rgb), .48);
-  backdrop-filter: blur(32px) saturate(180%);
-  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  background: rgba(var(--paper-rgb), .52);
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
   border-bottom: 1px solid rgba(var(--ink-rgb), .09);
 }
 
@@ -2861,17 +3206,6 @@ body.has-sidebar {
 
 .post-edit-actions { display: flex; align-items: center; gap: 16px; }
 .post-edit-actions .btn-primary { border-radius: var(--r-cta); }
-
-/* desktop: heavier material — large type under a tall bar needs more
-   blur AND a denser fill before it stops being readable (the
-   apple/tidal look); mobile keeps the lighter mix */
-@media (min-width: 769px) {
-  .post-bar {
-    background: rgba(var(--paper-rgb), .52);
-    backdrop-filter: blur(48px) saturate(190%);
-    -webkit-backdrop-filter: blur(48px) saturate(190%);
-  }
-}
 
 @media (max-width: 768px) {
   /* the toggle floats bottom-left now, so the bar owns the top edge.
@@ -2975,16 +3309,66 @@ body.has-sidebar {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(var(--paper-rgb), .65);
-  backdrop-filter: blur(14px) saturate(120%);
-  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  background: rgba(var(--paper-rgb), .52);
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: var(--z-modal);
+  /* the veil fades in with the card and lingers through its exit —
+     same discrete-display mechanics as the floating panels */
+  transition:
+    opacity .18s ease,
+    display .18s allow-discrete;
 }
 
-.modal-backdrop[hidden] { display: none; }
+.modal-backdrop[hidden] {
+  display: none;
+  opacity: 0;
+  transition:
+    opacity var(--transition-exit),
+    display var(--transition-exit) allow-discrete;
+}
+
+@starting-style {
+  .modal-backdrop:not([hidden]) { opacity: 0; }
+}
+
+.modal-card {
+  /* rises to meet you on every open (fb-rise's timing, now for all
+     modals), and lets itself out a touch faster */
+  transition:
+    opacity .18s cubic-bezier(.2, .6, 0, 1),
+    transform .18s cubic-bezier(.2, .6, 0, 1);
+}
+
+.modal-backdrop[hidden] .modal-card {
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity var(--transition-exit),
+    transform var(--transition-exit);
+}
+
+@starting-style {
+  .modal-backdrop:not([hidden]) .modal-card {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop, .modal-backdrop[hidden],
+  .modal-card, .modal-backdrop[hidden] .modal-card {
+    transform: none;
+    transition-duration: .1s;
+  }
+
+  @starting-style {
+    .modal-backdrop:not([hidden]) .modal-card { transform: none; }
+  }
+}
 
 .modal-card {
   position: relative;
@@ -3341,6 +3725,15 @@ body.has-sidebar {
 .deck-stack:active::after {
   transform: translateY(0);
   transition: transform var(--transition-fast);
+}
+
+/* the deal — the peeking cards drop away in the beat before the
+   top card leaves the deck (.deck-dealt is worn for ~150ms) */
+.deck-stack.deck-dealt::before,
+.deck-stack.deck-dealt::after {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .15s ease, transform .15s ease;
 }
 
 .ready-state {

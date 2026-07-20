@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script>!function(){var t=localStorage.getItem("fs-theme");document.documentElement.setAttribute("data-theme",t||"dark")}()</script>
-  <style>html{background:#1B1B1B;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
+  <style>html{background:#151515;color-scheme:dark}html[data-theme="light"]{background:#F5F4F0;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Flows — Flow School</title>
@@ -189,22 +189,42 @@
 
     .fl-title-input::placeholder { color: var(--text-3); }
 
-    /* ── the challenge — a quiet pinned strip under the title ── */
+    /* ── the challenge — the drawn card, carried into the flow. Speaks the
+       Arbitrary Rules card's language (eyebrow, mono numbers, hairline
+       dividers); shared by the editor strip and the detail view ── */
     .fl-challenge {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
       border: 1px solid rgba(var(--ink-rgb), .13);
       border-top-color: rgba(var(--ink-rgb), .24);
       background: rgba(var(--ink-rgb), .02);
-      padding: 12px 14px;
-      margin: 4px 0 16px;
+      padding: 14px 16px;
+      margin: 0 0 16px;
     }
-    .fl-challenge > .material-symbols-sharp { font-size: var(--icon-md); color: var(--text-3); flex-shrink: 0; position: relative; top: 1px; }
-    .fl-challenge-body { flex: 1; font-size: var(--text-body-sm); color: var(--text-2); line-height: 1.5; }
-    .fl-challenge-body ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-    .fl-challenge-body li { display: flex; gap: 8px; }
-    .fl-challenge-body li::before { content: '\2022'; color: var(--text-3); flex-shrink: 0; }
+    .fl-challenge-hdr {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .fl-challenge-hdr > .material-symbols-sharp { font-size: var(--icon-sm); color: var(--text-3); }
+    .fl-challenge-hdr .label-1 { flex: 1; }
+    .fl-challenge-rules { list-style: none; margin: 0; padding: 0; }
+    .fl-challenge-rules li {
+      display: flex;
+      gap: 12px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border-light);
+      font-size: var(--text-body-sm);
+      color: var(--text-1);
+      line-height: 1.5;
+    }
+    .fl-challenge-rules li:first-child { padding-top: 0; }
+    .fl-challenge-rules li:last-child { border-bottom: none; padding-bottom: 0; }
+    .fl-challenge-rules .rule-n {
+      flex-shrink: 0;
+      min-width: 18px;
+      padding-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
     .fl-challenge-x {
       background: none;
       border: none;
@@ -220,21 +240,10 @@
     .fl-challenge-x.confirm-delete-armed,
     .fl-challenge-x.confirm-delete-armed:hover { color: var(--danger); }
 
-    /* detail view — the challenge above the flow text, same bulleted
-       layout as the editor's strip */
-    .fd-challenge {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      font-size: var(--text-body-sm);
-      color: var(--text-2);
-      line-height: 1.5;
-      margin: 0 0 16px;
-    }
-    .fd-challenge > .material-symbols-sharp { font-size: var(--icon-md); color: var(--text-3); position: relative; top: 1px; flex-shrink: 0; }
-    .fd-challenge ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-    .fd-challenge li { display: flex; gap: 8px; }
-    .fd-challenge li::before { content: '\2022'; color: var(--text-3); flex-shrink: 0; }
+    /* viewer — the head above carries 32px, so the module gives 32px
+       back to the flow text below; even on both sides */
+    #fd-challenge { margin-bottom: 32px; }
+
 
     .fl-section { padding: 20px 0; }
 
@@ -511,6 +520,7 @@
   <script src="lib/supabase.js"></script>
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
+  <script src="lib/motion.js"></script>
   <script src="data/shorthand.js"></script>
   <script src="data/elements-of-flow.js"></script>
   <script src="lib/toast.js"></script>
@@ -583,7 +593,13 @@
           </div>
         </div>
 
-        <p class="fd-challenge" id="fd-challenge" hidden><span class="material-symbols-sharp" aria-hidden="true">casino</span><span id="fd-challenge-body"></span></p>
+        <div class="fl-challenge" id="fd-challenge" hidden>
+          <div class="fl-challenge-hdr">
+            <span class="material-symbols-sharp" aria-hidden="true">casino</span>
+            <span class="label-1">Your Challenge</span>
+          </div>
+          <div id="fd-challenge-body"></div>
+        </div>
         <div class="fd-flow" id="fd-flow"></div>
 
         <div class="fd-usedin">
@@ -615,11 +631,14 @@
         <!-- the challenge — rules this flow was built under, pinned from
              Arbitrary Rules via the fs-seed handoff -->
         <div class="fl-challenge" id="fl-challenge" hidden>
-          <span class="material-symbols-sharp" aria-hidden="true">casino</span>
-          <span class="fl-challenge-body" id="fl-challenge-body"></span>
-          <button type="button" class="fl-challenge-x" id="fl-challenge-x" title="Remove the challenge" aria-label="Remove the challenge">
-            <span class="material-symbols-sharp i-sm">close</span>
-          </button>
+          <div class="fl-challenge-hdr">
+            <span class="material-symbols-sharp" aria-hidden="true">casino</span>
+            <span class="label-1">Your Challenge</span>
+            <button type="button" class="fl-challenge-x" id="fl-challenge-x" title="Remove the challenge" aria-label="Remove the challenge">
+              <span class="material-symbols-sharp i-sm">close</span>
+            </button>
+          </div>
+          <div id="fl-challenge-body"></div>
         </div>
 
         <div class="fl-typebar" id="fl-typebar" hidden>
@@ -743,6 +762,7 @@
 
     function renderList() {
       var index = document.getElementById('flow-index');
+      var hadGhosts = !!index.querySelector('.library-empty-ghost');
       var bar = document.getElementById('library-bar');
 
       document.getElementById('flow-filter').hidden = !flows.length;
@@ -819,6 +839,7 @@
           showDetail(parseInt(el.dataset.id, 10), true);
         });
       });
+      fsGhostSettle(index, hadGhosts);
     }
 
     // ─── ACTIONS MENU — favorite / duplicate / delete ────────────────────────────
@@ -851,14 +872,15 @@
           toast(f.pinned ? 'Added to your favorites.' : 'Removed from favorites.');
         } else if (act === 'dup') {
           // opens unsaved — nothing exists until they save the variant
-          showEdit(null, true, f.type);
-          document.getElementById('fl-title').value = (f.name || 'Untitled Flow') + ' \u2014 copy';
-          var area = document.getElementById('fl-area');
-          area.value = f.text || '';
-          autoGrow(area);
-          renderCount();
-          markDirty();
-          toast('Copy ready \u2014 make it yours.');
+          showEdit(null, true, f.type, function () {
+            document.getElementById('fl-title').value = (f.name || 'Untitled Flow') + ' \u2014 copy';
+            var area = document.getElementById('fl-area');
+            area.value = f.text || '';
+            autoGrow(area);
+            renderCount();
+            markDirty();
+            toast('Copy ready \u2014 make it yours.');
+          });
         } else if (act === 'del') {
           flows = flows.filter(function (x) { return x.id !== currentId; });
           persist();
@@ -872,10 +894,20 @@
 
     var editChallenge = [];
 
+    // same numbering rule as the Arbitrary Rules card: one rule stands
+    // alone, several get mono 01 02 03
+    function challengeRows(rules) {
+      var multi = rules.length > 1;
+      return '<ul class="fl-challenge-rules">' + rules.map(function (r, i) {
+        return '<li>'
+          + (multi ? '<span class="rule-n label-2">0' + (i + 1) + '</span>' : '')
+          + '<span>' + esc(r) + '</span></li>';
+      }).join('') + '</ul>';
+    }
+
     function renderChallenge() {
       document.getElementById('fl-challenge').hidden = !editChallenge.length;
-      document.getElementById('fl-challenge-body').innerHTML =
-        '<ul>' + editChallenge.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>';
+      document.getElementById('fl-challenge-body').innerHTML = challengeRows(editChallenge);
     }
 
     // removing the challenge uses the app's arm-to-confirm: first tap turns
@@ -919,10 +951,10 @@
     function setSaveButton(state) {
       var btn = document.getElementById('save-btn');
       if (state === 'saved') {
-        btn.innerHTML = '<span class="material-symbols-sharp i-md">check</span>Saved';
+        fsSetLabel(btn, '<span class="material-symbols-sharp i-md fs-check-in">check</span>Saved');
         btn.disabled = true;
       } else {
-        btn.textContent = editingId != null ? 'Save Changes' : 'Save to Your Library';
+        fsSetLabel(btn, editingId != null ? 'Save Changes' : 'Save to Your Library');
         btn.disabled = (state === 'idle');
       }
     }
@@ -941,13 +973,15 @@
       return editingId != null ? 'your-flows?edit=' + editingId : 'your-flows?new=1';
     }
 
+    function flowViews() {
+      return [document.getElementById('list-view'), document.getElementById('detail-view'), document.getElementById('edit-view')];
+    }
+
     function showList(push) {
-      document.getElementById('edit-view').hidden = true;
-      document.getElementById('detail-view').hidden = true;
-      document.getElementById('list-view').hidden = false;
-      renderList();
+      fsSwapView(flowViews(), document.getElementById('list-view'), function () {
+        renderList();
+      });
       if (push) history.pushState({}, '', 'your-flows');
-      window.scrollTo(0, 0);
     }
 
     function renderUsedIn(f, listEl) {
@@ -978,22 +1012,18 @@
       if (!f) { showList(); return; }
       currentId = id;
 
-      document.getElementById('list-view').hidden = true;
-      document.getElementById('edit-view').hidden = true;
-      document.getElementById('detail-view').hidden = false;
-
-      renderFdTitle(f);
-      renderFdMeta(f);
-      // the challenge — the rules this flow was built under, one per line
-      var challenge = f.challenge || [];
-      document.getElementById('fd-challenge').hidden = !challenge.length;
-      document.getElementById('fd-challenge-body').innerHTML =
-        '<ul>' + challenge.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>';
-      document.getElementById('fd-flow').textContent = f.text || '';
-      renderUsedIn(f, document.getElementById('fd-usedin-list'));
+      fsSwapView(flowViews(), document.getElementById('detail-view'), function () {
+        renderFdTitle(f);
+        renderFdMeta(f);
+        // the challenge — the rules this flow was built under, one per line
+        var challenge = f.challenge || [];
+        document.getElementById('fd-challenge').hidden = !challenge.length;
+        document.getElementById('fd-challenge-body').innerHTML = challengeRows(challenge);
+        document.getElementById('fd-flow').textContent = f.text || '';
+        renderUsedIn(f, document.getElementById('fd-usedin-list'));
+      });
 
       if (push) history.pushState({}, '', 'your-flows?id=' + id);
-      window.scrollTo(0, 0);
     }
 
     function renderFdTitle(f) {
@@ -1011,54 +1041,57 @@
         st.label + ' ' + fmtDate(st.ts) + '</span>';
     }
 
-    function showEdit(id, push, presetType) {
+    // `after` runs once the editor is visible and composed — callers that
+    // pre-fill the fresh editor (duplicate) must go through it, or the
+    // deferred render would wipe their writes
+    function showEdit(id, push, presetType, after) {
       var f = id != null ? byId(id) : null;
       if (id != null && !f) { showList(); return; }
       editingId = f ? f.id : null;
       editType = f ? f.type : (presetType || null);
 
-      document.getElementById('list-view').hidden = true;
-      document.getElementById('detail-view').hidden = true;
-      document.getElementById('edit-view').hidden = false;
-      document.getElementById('editor-back-label').textContent =
-        f ? (f.name || 'Untitled Flow') : 'Your Flows';
+      fsSwapView(flowViews(), document.getElementById('edit-view'), function () {
+        document.getElementById('editor-back-label').textContent =
+          f ? (f.name || 'Untitled Flow') : 'Your Flows';
 
-      document.getElementById('fl-title').value = f ? (f.name || '') : '';
-      var area = document.getElementById('fl-area');
-      area.value = f ? (f.text || '') : '';
-      renderTypes();
-      setTypeCollapsed(!!editType);
-      efLoad(f);
-      efRender();
-      efUpdateVisibility();
-      efCollapse(); // arrives folded — it's an offer, not an assignment
-      renderCount();
-      autoGrow(area);
-      editChallenge = f && f.challenge ? f.challenge.slice() : [];
+        document.getElementById('fl-title').value = f ? (f.name || '') : '';
+        var area = document.getElementById('fl-area');
+        area.value = f ? (f.text || '') : '';
+        renderTypes();
+        setTypeCollapsed(!!editType);
+        efLoad(f);
+        efRender();
+        efUpdateVisibility();
+        efCollapse(); // arrives folded — it's an offer, not an assignment
+        renderCount();
+        autoGrow(area);
+        editChallenge = f && f.challenge ? f.challenge.slice() : [];
 
-      dirty = false;
-      setSaveButton(f ? 'saved' : 'idle');
+        dirty = false;
+        setSaveButton(f ? 'saved' : 'idle');
 
-      // fs-seed — the Play → Plan handoff. A tool (Arbitrary Rules today)
-      // leaves a starting point in localStorage; a NEW flow draft picks it
-      // up and pins it. Consumed on read; stale seeds (>10 min) clear quietly.
-      if (!f) {
-        try {
-          var seed = JSON.parse(localStorage.getItem('fs-seed') || 'null');
-          localStorage.removeItem('fs-seed');
-          if (seed && seed.type === 'rules' && Array.isArray(seed.rules) &&
-              seed.rules.length && Date.now() - (seed.ts || 0) < 600000) {
-            editChallenge = seed.rules.slice();
-            dirty = true;
-            setSaveButton('ready');
-          }
-        } catch (_) {}
-      }
-      renderChallenge();
+        // fs-seed — the Play → Plan handoff. A tool (Arbitrary Rules today)
+        // leaves a starting point in localStorage; a NEW flow draft picks it
+        // up and pins it. Consumed on read; stale seeds (>10 min) clear quietly.
+        if (!f) {
+          try {
+            var seed = JSON.parse(localStorage.getItem('fs-seed') || 'null');
+            localStorage.removeItem('fs-seed');
+            if (seed && seed.type === 'rules' && Array.isArray(seed.rules) &&
+                seed.rules.length && Date.now() - (seed.ts || 0) < 600000) {
+              editChallenge = seed.rules.slice();
+              dirty = true;
+              setSaveButton('ready');
+            }
+          } catch (_) {}
+        }
+        renderChallenge();
+
+        if (!f) document.getElementById('fl-title').focus();
+        if (after) after();
+      });
 
       if (push) history.pushState({}, '', f ? 'your-flows?edit=' + f.id : 'your-flows?new=1');
-      window.scrollTo(0, 0);
-      if (!f) document.getElementById('fl-title').focus();
     }
 
     // ─── ELEMENTS OF FLOW (Peak Flows only) ──────────────────────────────────────
@@ -1127,13 +1160,14 @@
 
     function efCollapse() {
       document.getElementById('ef-body').hidden = true;
+      document.getElementById('ef-body')._fsUnfoldOpen = false;
       document.getElementById('ef-toggle').setAttribute('aria-expanded', 'false');
     }
 
     document.getElementById('ef-toggle').addEventListener('click', function () {
-      var body = document.getElementById('ef-body');
-      var open = body.hidden;
-      body.hidden = !open;
+      // the panel unfolds with its chevron, not after it
+      var open = this.getAttribute('aria-expanded') !== 'true';
+      fsUnfold(document.getElementById('ef-body'), open);
       this.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
 
@@ -1258,10 +1292,12 @@
     var searchEl = document.getElementById('flow-search');
     var searchClear = document.getElementById('flow-search-clear');
 
+    var searchT; // the list changes at typing pauses, not per keystroke
     searchEl.addEventListener('input', function () {
       searchQ = searchEl.value;
       searchClear.classList.toggle('hidden', !searchQ);
-      renderList();
+      clearTimeout(searchT);
+      searchT = setTimeout(renderList, 140);
     });
 
     searchClear.addEventListener('click', function () {
