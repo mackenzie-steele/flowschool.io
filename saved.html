@@ -16,35 +16,19 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 24px;
+      margin-bottom: 8px;
     }
 
     .library-bar .search-wrap { flex: 1; }
+
+    .filter-row .filter-chip { flex-shrink: 0; }
+
+    #sv-root { margin-top: 16px; }
+
+    @media (max-width: 620px) {
+      .result-count { display: none; }
+    }
     .library-bar[hidden] { display: none; }
-
-    .saved-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-
-    .saved-header h3 {
-      margin: 0;
-      font-size: var(--fs-h4);
-      font-weight: var(--weight-medium);
-      color: var(--text-1);
-    }
-
-    .saved-total {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-3);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      flex-shrink: 0;
-    }
 
     /* ── Section ── */
     .sv-section {
@@ -213,6 +197,7 @@
         <input type="text" class="search-input" id="sv-search" placeholder="Search your library&#8230;" autocomplete="off" aria-label="Search your library">
       </div>
     </div>
+    <div class="filter-row" id="sv-filter" hidden></div>
     <div id="sv-root"></div>
   </div>
   </main>
@@ -361,7 +346,7 @@
       },
       {
         key: 'cue-flows',
-        label: 'Verb / Your Body Part / Direction',
+        label: 'Your Cues',
         icon: 'edit_note',
         load: function () {
           try {
@@ -369,7 +354,7 @@
             return Object.values(flows).map(function (fl) {
               return {
                 name: fl.name || 'Untitled Flow',
-                href: 'verb-your-body-part-direction?flow=' + encodeURIComponent(fl.name),
+                href: 'your-cues?flow=' + encodeURIComponent(fl.name),
                 time: fl.savedAt ? new Date(fl.savedAt).getTime() : 0,
               };
             });
@@ -405,6 +390,27 @@
     var root = document.getElementById('sv-root');
     var bar = document.getElementById('sv-bar');
     var search = document.getElementById('sv-search');
+    var filterRow = document.getElementById('sv-filter');
+    var svFilter = 'all';
+
+    // categories read A to Z — the chips and the stacked sections agree
+    sections.sort(function (a, b) { return a.label.localeCompare(b.label); });
+
+    filterRow.innerHTML = '<button class="filter-chip active" data-filter="all">All</button>'
+      + sections.map(function (s) {
+          return '<button class="filter-chip" data-filter="' + s.key + '">' + s.label + '</button>';
+        }).join('')
+      + '<span class="result-count" id="sv-count"></span>';
+
+    filterRow.addEventListener('click', function (e) {
+      var chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      svFilter = chip.dataset.filter;
+      filterRow.querySelectorAll('.filter-chip').forEach(function (c) {
+        c.classList.toggle('active', c === chip);
+      });
+      render();
+    });
 
     var loaded = sections.map(function (s) {
       return { section: s, items: s.load() };
@@ -418,6 +424,7 @@
       var html = '';
 
       loaded.forEach(function (g) {
+        if (svFilter !== 'all' && g.section.key !== svFilter) return;
         var items = q
           ? g.items.filter(function (item) {
               return (item.name || '').toLowerCase().indexOf(q) !== -1;
@@ -428,16 +435,15 @@
         html += renderSection(g.section, items);
       });
 
+      document.getElementById('sv-count').textContent =
+        shown + ' item' + (shown !== 1 ? 's' : '');
+
       if (q && shown === 0) {
         root.innerHTML = '<div class="library-empty"><p class="library-empty-sub">Nothing matches &#8220;' + esc(raw) + '&#8221;.</p></div>';
         return;
       }
 
-      root.innerHTML = '<div class="saved-header">'
-        + '<h3>All Saved</h3>'
-        + '<span class="saved-total">' + shown + ' item' + (shown !== 1 ? 's' : '') + '</span>'
-        + '</div>'
-        + html;
+      root.innerHTML = html;
     }
 
     if (allItems === 0) {
@@ -449,6 +455,7 @@
         + '</div>';
     } else {
       bar.hidden = false;
+      filterRow.hidden = false;
       var searchT; // the list changes at typing pauses, not per keystroke
       search.addEventListener('input', function () {
         clearTimeout(searchT);

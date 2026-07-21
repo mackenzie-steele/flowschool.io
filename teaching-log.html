@@ -21,6 +21,12 @@
 
     .library-bar .search-wrap { flex: 1; }
 
+    .filter-row .filter-chip { flex-shrink: 0; }
+
+    @media (max-width: 620px) {
+      .result-count { display: none; }
+    }
+
     .library-bar .btn-primary {
       white-space: nowrap;
       display: inline-flex;
@@ -170,9 +176,39 @@
       line-height: 1.6;
       white-space: pre-wrap;
       overflow-wrap: break-word;
+      cursor: pointer;
+      transition: opacity var(--transition-base);
     }
 
-    .lg-entry-del {
+    .lg-entry-text:hover { opacity: .65; }
+
+    .lg-note-edit {
+      width: 100%;
+      display: block;
+      margin-top: 2px;
+      min-height: 64px;
+      background: var(--well-bg);
+      box-shadow: var(--well), inset 0 0 0 1px rgba(var(--ink-rgb), .12);
+      border: none;
+      border-radius: var(--r);
+      padding: 12px 14px;
+      color: var(--text-1);
+      font-family: var(--font);
+      font-size: var(--text-body-sm);
+      line-height: 1.6;
+      resize: none;
+      overflow: hidden;
+      outline: none;
+      transition: box-shadow var(--transition-base), background var(--transition-base);
+    }
+
+    .lg-note-edit:focus {
+      background: rgba(var(--ink-rgb), .06);
+      box-shadow: var(--well), inset 0 0 0 1px rgba(var(--accent-rgb), .60);
+    }
+
+    .lg-entry-del,
+    .lg-entry-act {
       flex-shrink: 0;
       background: none;
       border: none;
@@ -183,6 +219,8 @@
       line-height: 1;
       transition: color var(--transition-base);
     }
+
+    .lg-entry-act:hover { color: var(--text-1); }
 
     .lg-entry-del:hover { color: var(--danger); }
 
@@ -195,9 +233,9 @@
   <main>
     <section class="hero">
       <div class="inner">
-        <p class="label-1">Same class. Better.</p>
+        <p class="label-1">Teaching is a practice.</p>
         <h3>Teaching Log</h3>
-        <p>After you teach, write down what worked and what you&#8217;d change. Do it after enough classes and you&#8217;ve got a record of how you&#8217;re actually getting better &#8212; which is easy to lose track of when you&#8217;re in the middle of it.</p>
+        <p>A note after each class closes the loop. Attach notes to a class or just write them on their own. Write down what worked and what you&#8217;d change. What do you want to try next time? What felt really good? How did students respond?</p>
       </div>
     </section>
 
@@ -214,6 +252,13 @@
         </button>
       </div>
 
+      <div class="filter-row" id="log-filter">
+        <button class="filter-chip active" data-filter="all">All</button>
+        <button class="filter-chip" data-filter="classes">Classes</button>
+        <button class="filter-chip" data-filter="experiments">Movement Experiments</button>
+        <span class="result-count" id="result-count"></span>
+      </div>
+
       <div class="lg-composer" id="lg-composer" hidden>
         <div class="lg-class-row" id="lg-class-row">
           <button type="button" class="lg-class-pick" id="lg-class-pick">
@@ -222,15 +267,11 @@
           </button>
           <div class="lg-class-menu" id="lg-class-menu" hidden></div>
         </div>
-        <textarea class="lg-area" id="lg-area" placeholder="What worked? What would you change?" aria-label="Teaching note"></textarea>
+        <textarea class="lg-area" id="lg-area" placeholder="Whatcha thinking? How was class?" aria-label="Teaching note"></textarea>
         <div class="lg-composer-actions">
           <button class="btn-ghost sm" id="lg-cancel">Cancel</button>
           <button class="btn-primary sm" id="lg-save">Save Note</button>
         </div>
-      </div>
-
-      <div class="sort-row" id="sort-row" hidden>
-        <span class="result-count" id="result-count"></span>
       </div>
 
       <div class="lg-stream" id="lg-stream"></div>
@@ -252,8 +293,10 @@
 
     var KEY = 'flowschool_classes';
     var LOG_KEY = 'flowschool_lognotes';   // notes not tied to any class
+    var FAVS_KEY = 'flowschool_favs';      // saved experiments carry reflections
     var classes = loadClasses();
     var logNotes = loadLog();
+    var favs = loadFavs();
 
     // one load, one persist — the sync seam, same as every library
     function loadClasses() {
@@ -268,6 +311,12 @@
 
     function persistLog() { localStorage.setItem(LOG_KEY, JSON.stringify(logNotes)); }
 
+    function loadFavs() {
+      try { return JSON.parse(localStorage.getItem(FAVS_KEY) || '[]'); } catch (_) { return []; }
+    }
+
+    function persistFavs() { localStorage.setItem(FAVS_KEY, JSON.stringify(favs)); }
+
     var esc = fsEsc, fmtDate = fsFmtDate;
 
     function allEntries() {
@@ -280,25 +329,48 @@
       logNotes.forEach(function (n) {
         out.push({ ts: n.ts, text: n.text, classId: null, className: null });
       });
+      // reflections written on saved movement experiments — reads the
+      // notesLog shape, plus the brief single-note shape in case the
+      // experiments page hasn't run its migration yet
+      favs.forEach(function (f) {
+        if (!f) return;
+        (f.notesLog || []).forEach(function (n) {
+          out.push({ ts: n.ts, text: n.text, classId: null, className: null,
+                     expId: f.id, expTitle: f.title });
+        });
+        if (f.note) {
+          out.push({ ts: f.noteTs || f.savedAt, text: f.note, classId: null, className: null,
+                     expId: f.id, expTitle: f.title });
+        }
+      });
       out.sort(function (a, b) { return b.ts - a.ts; });
       return out;
     }
 
+    var logFilter = 'all';
+
     function render() {
       var q = document.getElementById('log-search').value.trim().toLowerCase();
       var entries = allEntries();
-      var filtered = q
-        ? entries.filter(function (e) {
-            return e.text.toLowerCase().indexOf(q) !== -1 || e.className.toLowerCase().indexOf(q) !== -1;
-          })
-        : entries;
+      var filtered = entries;
+      if (logFilter === 'classes') {
+        filtered = filtered.filter(function (e) { return e.classId != null; });
+      } else if (logFilter === 'experiments') {
+        filtered = filtered.filter(function (e) { return e.expId != null; });
+      }
+      if (q) {
+        filtered = filtered.filter(function (e) {
+          var where = e.className || e.expTitle || '';
+          return e.text.toLowerCase().indexOf(q) !== -1 || where.toLowerCase().indexOf(q) !== -1;
+        });
+      }
 
       var stream = document.getElementById('lg-stream');
       var hadGhosts = !!stream.querySelector('.library-empty-ghost');
-      var sortRow = document.getElementById('sort-row');
+      var filterRow = document.getElementById('log-filter');
 
       if (!entries.length) {
-        sortRow.hidden = true;
+        filterRow.hidden = true;
         stream.innerHTML = '<div class="library-empty">' +
           fsGhostRows() +
           '<p class="library-empty-headline">The notes start after you teach.</p>' +
@@ -307,35 +379,57 @@
         return;
       }
 
-      sortRow.hidden = false;
+      filterRow.hidden = false;
       document.getElementById('result-count').textContent =
         filtered.length + (filtered.length === 1 ? ' note' : ' notes');
 
       if (!filtered.length) {
-        stream.innerHTML = '<div class="library-empty"><p class="library-empty-sub">Nothing matches &#8220;' + esc(q) + '&#8221;.</p></div>';
+        stream.innerHTML = '<div class="library-empty"><p class="library-empty-sub">' +
+          (q ? 'Nothing matches &#8220;' + esc(q) + '&#8221;.'
+             : (logFilter === 'classes' ? 'No class notes yet.' : 'No experiment notes yet.')) +
+          '</p></div>';
         return;
       }
 
       stream.innerHTML = filtered.map(function (e) {
         var tag = e.classId
           ? '<a class="lg-class-tag" href="your-classes?id=' + e.classId + '">' + esc(e.className) + '</a>'
-          : '';
-        return '<div class="lg-entry">' +
+          : (e.expId != null
+            ? '<a class="lg-class-tag" href="movement-experiments?exp=' + e.expId + '">' + esc(e.expTitle) + '</a>'
+            : '');
+        var addr = 'data-cid="' + (e.classId != null ? e.classId : '') + '" data-exp="' + (e.expId != null ? e.expId : '') + '" data-ts="' + e.ts + '"';
+        return '<div class="lg-entry" ' + addr + '>' +
           '<div class="lg-entry-main">' +
             '<div class="lg-entry-head">' +
               '<span class="lg-entry-date">' + fmtDate(e.ts) + '</span>' +
               tag +
             '</div>' +
-            '<div class="lg-entry-text">' + esc(e.text) + '</div>' +
+            '<div class="lg-entry-text" title="Edit note">' + esc(e.text) + '</div>' +
           '</div>' +
-          '<button class="lg-entry-del" data-cid="' + (e.classId != null ? e.classId : '') + '" data-ts="' + e.ts + '" title="Delete note"><span class="material-symbols-sharp i-sm">close</span></button>' +
+          '<button class="lg-entry-act" title="Edit note" aria-label="Edit note"><span class="material-symbols-sharp i-sm">edit</span></button>' +
+          '<button class="lg-entry-del" ' + addr + ' title="Delete note"><span class="material-symbols-sharp i-sm">close</span></button>' +
         '</div>';
       }).join('');
+
+      stream.querySelectorAll('.lg-entry-text, .lg-entry-act').forEach(function (el) {
+        el.addEventListener('click', function () {
+          startLogNoteEdit(el.closest('.lg-entry'));
+        });
+      });
 
       stream.querySelectorAll('.lg-entry-del').forEach(function (btn) {
         wireConfirmDelete(btn, function () {
           var ts = parseInt(btn.dataset.ts, 10);
-          if (btn.dataset.cid === '') {
+          if (btn.dataset.exp !== '') {
+            // an experiment reflection — the note goes, the saved
+            // experiment stays
+            var fav = favs.find(function (x) { return x.id === parseInt(btn.dataset.exp, 10); });
+            if (fav) {
+              fav.notesLog = (fav.notesLog || []).filter(function (n) { return n.ts !== ts; });
+              if (fav.note && (fav.noteTs || fav.savedAt) === ts) { delete fav.note; delete fav.noteTs; }
+              persistFavs();
+            }
+          } else if (btn.dataset.cid === '') {
             // a class-less note lives in its own store
             logNotes = logNotes.filter(function (n) { return n.ts !== ts; });
             persistLog();
@@ -350,6 +444,91 @@
         });
       });
       fsGhostSettle(stream, hadGhosts);
+    }
+
+    // every note in the stream lives in one of three stores — resolve
+    // the row's address back to the live object and its persist
+    function noteRef(cid, exp, ts) {
+      if (exp !== '') {
+        var fav = favs.find(function (x) { return x.id === parseInt(exp, 10); });
+        if (!fav) return null;
+        var n = (fav.notesLog || []).find(function (x) { return x.ts === ts; });
+        if (!n && fav.note && (fav.noteTs || fav.savedAt) === ts) {
+          // brief single-note shape — fold it into the log on touch
+          fav.notesLog = fav.notesLog || [];
+          n = { ts: ts, text: fav.note };
+          fav.notesLog.push(n);
+          delete fav.note;
+          delete fav.noteTs;
+        }
+        return n ? { note: n, save: persistFavs } : null;
+      }
+      if (cid === '') {
+        var n2 = logNotes.find(function (x) { return x.ts === ts; });
+        return n2 ? { note: n2, save: persistLog } : null;
+      }
+      var c = classes.find(function (x) { return x.id === parseInt(cid, 10); });
+      if (!c) return null;
+      var n3 = (c.notesLog || []).find(function (x) { return x.ts === ts; });
+      return n3 ? { note: n3, save: persist } : null;
+    }
+
+    // the note grammar from Your Classes, on the stream: the words
+    // become the well, check keeps them, x or Esc keeps the old ones,
+    // clicking away saves too
+    function startLogNoteEdit(row) {
+      var ref = noteRef(row.dataset.cid, row.dataset.exp, parseInt(row.dataset.ts, 10));
+      if (!ref || row.classList.contains('editing')) return;
+      row.classList.add('editing');
+      var main = row.querySelector('.lg-entry-main');
+      var head = row.querySelector('.lg-entry-head');
+      main.innerHTML = head.outerHTML +
+        '<textarea class="lg-note-edit" aria-label="Note"></textarea>';
+      row.querySelector('.lg-entry-act').remove();
+      row.querySelector('.lg-entry-del').outerHTML =
+        '<button type="button" class="lg-entry-act" data-act="save" title="Save note" aria-label="Save note"><span class="material-symbols-sharp i-sm">check</span></button>' +
+        '<button type="button" class="lg-entry-act" data-act="cancel" title="Cancel" aria-label="Cancel"><span class="material-symbols-sharp i-sm">close</span></button>';
+
+      var area = row.querySelector('.lg-note-edit');
+      area.value = ref.note.text;
+      fsAutoGrow(area);
+      area.focus();
+      area.setSelectionRange(area.value.length, area.value.length);
+      area.addEventListener('input', function () { fsAutoGrow(area); });
+
+      var closed = false;
+      function done() {
+        if (closed) return;
+        closed = true;
+        render();
+      }
+      function save() {
+        if (closed) return;
+        var t = area.value.trim();
+        if (!t || t === ref.note.text) { done(); return; }
+        ref.note.text = t;
+        ref.save();
+        done();
+        toast('Note updated.');
+      }
+
+      area.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { e.stopPropagation(); done(); }
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); save(); }
+      });
+      row.querySelector('[data-act="save"]').addEventListener('click', save);
+      row.querySelector('[data-act="cancel"]').addEventListener('click', done);
+
+      var cancelDown = false;
+      row.querySelector('[data-act="cancel"]').addEventListener('mousedown', function () {
+        cancelDown = true;
+      });
+      area.addEventListener('blur', function () {
+        setTimeout(function () {
+          if (cancelDown) { cancelDown = false; return; }
+          save();
+        }, 0);
+      });
     }
 
     // ─── COMPOSER — a note belongs to a class ────────────────────────
@@ -444,6 +623,16 @@
     });
 
     var searchT; // the list changes at typing pauses, not per keystroke
+    document.getElementById('log-filter').addEventListener('click', function (e) {
+      var chip = e.target.closest('.filter-chip');
+      if (!chip) return;
+      logFilter = chip.dataset.filter;
+      document.querySelectorAll('#log-filter .filter-chip').forEach(function (c) {
+        c.classList.toggle('active', c === chip);
+      });
+      render();
+    });
+
     document.getElementById('log-search').addEventListener('input', function () {
       clearTimeout(searchT);
       searchT = setTimeout(render, 140);

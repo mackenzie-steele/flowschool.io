@@ -165,6 +165,140 @@
       color: var(--text-1);
     }
 
+    /* notes on an experiment — the classes' note grammar, whole:
+       quiet add row, well composer, dated entries with touchable
+       words, pencil and x on the row, the same well to edit in */
+    .reflect-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      background: none;
+      border: none;
+      padding: 8px 0;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: var(--text-ui);
+      font-weight: var(--weight-medium);
+      color: var(--text-3);
+      transition: color var(--transition-base);
+    }
+
+    .reflect-add .material-symbols-sharp { font-size: var(--icon-sm); }
+    .reflect-add:hover { color: var(--text-1); }
+
+    .reflect-composer { margin-top: 14px; }
+
+    .reflect-area {
+      width: 100%;
+      display: block;
+      min-height: 84px;
+      background: var(--well-bg);
+      box-shadow: var(--well), inset 0 0 0 1px rgba(var(--ink-rgb), .12);
+      border: none;
+      border-radius: var(--r);
+      padding: 14px 16px;
+      color: var(--text-1);
+      font-family: var(--font);
+      font-size: var(--text-body-sm);
+      line-height: 1.6;
+      resize: none;
+      overflow: hidden;
+      outline: none;
+      transition: box-shadow var(--transition-base), background var(--transition-base);
+    }
+
+    .reflect-area::placeholder { color: var(--text-3); font-style: italic; }
+
+    .reflect-area:focus {
+      background: rgba(var(--ink-rgb), .06);
+      box-shadow: var(--well), inset 0 0 0 1px rgba(var(--accent-rgb), .60);
+    }
+
+    .reflect-composer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .reflect-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 0;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .reflect-note:first-child { margin-top: 14px; }
+    .reflect-note-main { flex: 1; min-width: 0; }
+
+    .reflect-note-date {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 6px;
+    }
+
+    .reflect-note-text {
+      font-size: var(--text-body-sm);
+      line-height: 1.6;
+      color: var(--text-2);
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      cursor: pointer;
+      transition: opacity var(--transition-base);
+    }
+
+    .reflect-note-text:hover { opacity: .65; }
+
+    .reflect-note-act,
+    .reflect-note-del {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      color: var(--text-3);
+      cursor: pointer;
+      padding: 2px 8px;
+      font-size: 13px;
+      line-height: 1;
+      border-radius: var(--r-cta);
+      transition: color var(--transition-base);
+      font-family: var(--font);
+    }
+
+    .reflect-note-act:hover { color: var(--text-1); }
+    .reflect-note-del:hover,
+    .reflect-note-del.confirm-delete-armed { color: var(--danger); }
+
+    .reflect-note-edit {
+      width: 100%;
+      display: block;
+      margin-top: 4px;
+      min-height: 64px;
+      background: var(--well-bg);
+      box-shadow: var(--well), inset 0 0 0 1px rgba(var(--ink-rgb), .12);
+      border: none;
+      border-radius: var(--r);
+      padding: 12px 14px;
+      color: var(--text-1);
+      font-family: var(--font);
+      font-size: var(--text-body-sm);
+      line-height: 1.6;
+      resize: none;
+      overflow: hidden;
+      outline: none;
+      transition: box-shadow var(--transition-base), background var(--transition-base);
+    }
+
+    .reflect-note-edit:focus {
+      background: rgba(var(--ink-rgb), .06);
+      box-shadow: var(--well), inset 0 0 0 1px rgba(var(--accent-rgb), .60);
+    }
+
     @media (max-width: 580px) {
       .experiment-card {
         padding: 28px 24px;
@@ -185,6 +319,7 @@
   <script src="lib/telemetry.js"></script>
   <script src="lib/sync.js"></script>
   <script src="lib/motion.js"></script>
+  <script src="lib/confirm-delete.js"></script>
   <div class="toast" id="toast"></div>
 
   <main>
@@ -246,6 +381,17 @@
       <div class="reflect-block">
         <div class="section-label label-1">Reflect</div>
         <p class="reflect-q" id="exp-reflect"></p>
+        <button type="button" class="reflect-add" id="exp-add-note">
+          <span class="material-symbols-sharp">add</span>Add a Note
+        </button>
+        <div class="reflect-composer" id="exp-composer" hidden>
+          <textarea class="reflect-area" id="exp-note" placeholder="What&#8217;s your takeaway? What did you find?" aria-label="Your reflection"></textarea>
+          <div class="reflect-composer-actions">
+            <button class="btn-ghost" id="exp-note-cancel">Cancel</button>
+            <button class="btn-secondary" id="exp-note-save">Save Note</button>
+          </div>
+        </div>
+        <div class="reflect-log" id="exp-notes-log"></div>
       </div>
     </div>
 
@@ -1001,6 +1147,16 @@
       });
       localStorage.setItem('flowschool_favs', JSON.stringify(favorites));
     }
+    // Migrate the brief single-note shape (note/noteTs) into notesLog
+    favorites.forEach(f => {
+      if (f && f.note) {
+        f.notesLog = f.notesLog || [];
+        f.notesLog.push({ ts: f.noteTs || f.savedAt || Date.now(), text: f.note });
+        delete f.note;
+        delete f.noteTs;
+        localStorage.setItem('flowschool_favs', JSON.stringify(favorites));
+      }
+    });
 
     // ─── RENDER ──────────────────────────────────────────────────────────────────
 
@@ -1034,8 +1190,11 @@
         insightEl.innerHTML = exp.teachingInsight.split('\n\n')
           .map(p => `<p>${p}</p>`).join('');
 
-        // Reflection
+        // Reflection — prompt, a fresh composer, and this
+        // experiment's dated notes
         document.getElementById('exp-reflect').textContent = exp.reflectionPrompt;
+        closeComposer();
+        renderExpNotes(exp.id);
 
         // Watch link — visible only when this experiment has a video
         const watchBtn = document.getElementById('watch-btn');
@@ -1074,6 +1233,145 @@
         fsSwapCard(card, fill);
       }
     }
+
+    // ─── REFLECTIONS — dated notes on the saved experiment ───────────────────────
+    // The classes' note grammar, whole: add, edit in place, arm-to-
+    // confirm delete. Notes live on the favorites entry (synced with
+    // it); the first note on an unsaved experiment saves it — words
+    // worth writing are worth keeping. Notes surface in the Teaching Log.
+
+    function fmtDate(ts) {
+      return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function autoGrowNote(el) {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    }
+
+    function closeComposer() {
+      document.getElementById('exp-composer').hidden = true;
+      document.getElementById('exp-add-note').hidden = false;
+      document.getElementById('exp-note').value = '';
+    }
+
+    function renderExpNotes(id) {
+      const log = document.getElementById('exp-notes-log');
+      const f = favorites.find(x => x.id === id);
+      const notes = ((f && f.notesLog) || []).slice().sort((a, b) => b.ts - a.ts);
+      log.innerHTML = notes.map(n =>
+        `<div class="reflect-note" data-ts="${n.ts}">
+          <div class="reflect-note-main">
+            <span class="reflect-note-date">${fmtDate(n.ts)}</span>
+            <p class="reflect-note-text" title="Edit note">${escHtml(n.text)}</p>
+          </div>
+          <button type="button" class="reflect-note-act" title="Edit note" aria-label="Edit note"><span class="material-symbols-sharp i-sm">edit</span></button>
+          <button type="button" class="reflect-note-del" data-ts="${n.ts}" title="Delete note"><span class="material-symbols-sharp i-sm">close</span></button>
+        </div>`
+      ).join('');
+      log.querySelectorAll('.reflect-note-text, .reflect-note-act').forEach(el => {
+        el.addEventListener('click', () => startExpNoteEdit(el.closest('.reflect-note'), id));
+      });
+      log.querySelectorAll('.reflect-note-del').forEach(btn => {
+        wireConfirmDelete(btn, () => {
+          const fav = favorites.find(x => x.id === id);
+          if (!fav) return;
+          fav.notesLog = (fav.notesLog || []).filter(n => n.ts !== parseInt(btn.dataset.ts, 10));
+          saveFavorites();
+          renderExpNotes(id);
+          toast('Note removed.');
+        });
+      });
+    }
+
+    function startExpNoteEdit(row, id) {
+      const ts = parseInt(row.dataset.ts, 10);
+      const f = favorites.find(x => x.id === id);
+      const note = f && (f.notesLog || []).find(n => n.ts === ts);
+      if (!note || row.classList.contains('editing')) return;
+      row.classList.add('editing');
+      row.innerHTML =
+        `<div class="reflect-note-main">
+          <span class="reflect-note-date">${fmtDate(ts)}</span>
+          <textarea class="reflect-note-edit" aria-label="Reflection note"></textarea>
+        </div>
+        <button type="button" class="reflect-note-act" data-act="save" title="Save note" aria-label="Save note"><span class="material-symbols-sharp i-sm">check</span></button>
+        <button type="button" class="reflect-note-act" data-act="cancel" title="Cancel" aria-label="Cancel"><span class="material-symbols-sharp i-sm">close</span></button>`;
+
+      const area = row.querySelector('.reflect-note-edit');
+      area.value = note.text;
+      autoGrowNote(area);
+      area.focus();
+      area.setSelectionRange(area.value.length, area.value.length);
+      area.addEventListener('input', () => autoGrowNote(area));
+
+      let closed = false;
+      function done() {
+        if (closed) return;
+        closed = true;
+        renderExpNotes(id);
+      }
+      function save() {
+        if (closed) return;
+        const t = area.value.trim();
+        if (!t || t === note.text) { done(); return; }
+        note.text = t;
+        saveFavorites();
+        done();
+        toast('Note updated.');
+      }
+
+      area.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { e.stopPropagation(); done(); }
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); save(); }
+      });
+      row.querySelector('[data-act="save"]').addEventListener('click', save);
+      row.querySelector('[data-act="cancel"]').addEventListener('click', done);
+
+      let cancelDown = false;
+      row.querySelector('[data-act="cancel"]').addEventListener('mousedown', () => { cancelDown = true; });
+      area.addEventListener('blur', () => {
+        setTimeout(() => {
+          if (cancelDown) { cancelDown = false; return; }
+          save();
+        }, 0);
+      });
+    }
+
+    document.getElementById('exp-add-note').addEventListener('click', function () {
+      this.hidden = true;
+      document.getElementById('exp-composer').hidden = false;
+      const area = document.getElementById('exp-note');
+      autoGrowNote(area);
+      area.focus();
+    });
+
+    document.getElementById('exp-note-cancel').addEventListener('click', closeComposer);
+    document.getElementById('exp-note').addEventListener('input', e => autoGrowNote(e.target));
+
+    document.getElementById('exp-note-save').addEventListener('click', () => {
+      const text = document.getElementById('exp-note').value.trim();
+      if (!text || lastId == null) { closeComposer(); return; }
+      let f = favorites.find(x => x.id === lastId);
+      if (!f) {
+        const exp = EXPERIMENTS.find(e => e.id === lastId);
+        f = { id: lastId, title: exp ? exp.title : String(lastId), savedAt: Date.now() };
+        favorites.push(f);
+        updateSaveBtn(lastId);
+        toast('Experiment saved with your note.');
+      } else {
+        toast('Noted.');
+      }
+      f.notesLog = f.notesLog || [];
+      f.notesLog.push({ ts: Date.now(), text });
+      saveFavorites();
+      closeComposer();
+      renderExpNotes(lastId);
+    });
 
     // ─── GENERATE ────────────────────────────────────────────────────────────────
 

@@ -1661,7 +1661,7 @@ input[type=range].range-slider:disabled {
    on --transition-exit (~0.7x the entrance) — leaving never makes
    anyone wait. Browsers without @starting-style (pre-2024) show and
    hide instantly — the old behavior, no fallback needed. */
-.tv-menu, .fl-menu, .st-menu,
+.tv-menu, .fl-menu, .st-menu, .ws-menu,
 .sh-suggest, .cw-type-menu, .lg-class-menu {
   transition:
     opacity var(--transition-base),
@@ -1669,7 +1669,7 @@ input[type=range].range-slider:disabled {
     display var(--transition-base) allow-discrete;
 }
 
-.tv-menu[hidden], .fl-menu[hidden], .st-menu[hidden],
+.tv-menu[hidden], .fl-menu[hidden], .st-menu[hidden], .ws-menu[hidden],
 .sh-suggest[hidden], .cw-type-menu[hidden], .lg-class-menu[hidden] {
   display: none;
   opacity: 0;
@@ -1681,7 +1681,7 @@ input[type=range].range-slider:disabled {
 }
 
 @starting-style {
-  .tv-menu:not([hidden]), .fl-menu:not([hidden]), .st-menu:not([hidden]),
+  .tv-menu:not([hidden]), .fl-menu:not([hidden]), .st-menu:not([hidden]), .ws-menu:not([hidden]),
   .sh-suggest:not([hidden]), .cw-type-menu:not([hidden]), .lg-class-menu:not([hidden]) {
     opacity: 0;
     transform: translateY(6px);
@@ -1690,15 +1690,15 @@ input[type=range].range-slider:disabled {
 
 @media (prefers-reduced-motion: reduce) {
   /* the movement goes, the fade stays — and it gets quicker */
-  .tv-menu, .fl-menu, .st-menu, .sh-suggest, .cw-type-menu, .lg-class-menu,
-  .tv-menu[hidden], .fl-menu[hidden], .st-menu[hidden],
+  .tv-menu, .fl-menu, .st-menu, .ws-menu, .sh-suggest, .cw-type-menu, .lg-class-menu,
+  .tv-menu[hidden], .fl-menu[hidden], .st-menu[hidden], .ws-menu[hidden],
   .sh-suggest[hidden], .cw-type-menu[hidden], .lg-class-menu[hidden] {
     transform: none;
     transition-duration: .1s;
   }
 
   @starting-style {
-    .tv-menu:not([hidden]), .fl-menu:not([hidden]), .st-menu:not([hidden]),
+    .tv-menu:not([hidden]), .fl-menu:not([hidden]), .st-menu:not([hidden]), .ws-menu:not([hidden]),
     .sh-suggest:not([hidden]), .cw-type-menu:not([hidden]), .lg-class-menu:not([hidden]) {
       transform: none;
     }
@@ -3174,7 +3174,7 @@ body.has-sidebar {
 
 /* ── Item action menu (⋯) — the tv-/fl-/st- prefixes are per-page
       wiring; the look is one component ── */
-.tv-menu, .fl-menu, .st-menu {
+.tv-menu, .fl-menu, .st-menu, .ws-menu {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
@@ -3190,7 +3190,7 @@ body.has-sidebar {
   box-shadow: var(--crest), var(--shadow-float);
 }
 
-.tv-menu-item, .fl-menu-item, .st-menu-item {
+.tv-menu-item, .fl-menu-item, .st-menu-item, .ws-menu-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -3205,14 +3205,15 @@ body.has-sidebar {
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.tv-menu-item:hover, .fl-menu-item:hover, .st-menu-item:hover {
+.tv-menu-item:hover, .fl-menu-item:hover, .st-menu-item:hover, .ws-menu-item:hover {
   background: rgba(var(--ink-rgb), .05);
   color: var(--text-1);
 }
 
 .tv-menu-item .material-symbols-sharp,
 .fl-menu-item .material-symbols-sharp,
-.st-menu-item .material-symbols-sharp { font-size: var(--icon-md); color: var(--text-3); }
+.st-menu-item .material-symbols-sharp,
+.ws-menu-item .material-symbols-sharp { font-size: var(--icon-md); color: var(--text-3); }
 
 .tv-menu-item:hover .material-symbols-sharp,
 .fl-menu-item:hover .material-symbols-sharp,
@@ -3317,7 +3318,10 @@ body.has-sidebar {
   box-shadow: var(--well);
   border: 1px solid rgba(var(--ink-rgb), .14);
   border-radius: var(--r);
-  padding: 12px 40px 12px 42px;
+  /* 15px pad + 19px line + 1px borders = the primary button's height
+     (16px pad + 16px/1.2 line) — bars and buttons sit as one rank */
+  padding: 15px 40px 15px 42px;
+  line-height: 19px;
   color: var(--text-1);
   font-family: var(--font);
   font-size: var(--text-body-sm);

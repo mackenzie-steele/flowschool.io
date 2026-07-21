@@ -6,7 +6,7 @@
   <style>html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F7F6F4;color-scheme:light}</style>
   <link rel="icon" href="img/flow-school-favicon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verb / Your Body Part / Direction — Flow School</title>
+  <title>Your Cues — Flow School</title>
   <link rel="stylesheet" href="global.css">
   <script src="lib/icons.js"></script>
   <style>
@@ -140,6 +140,58 @@
     }
 
     /* ── Worksheet container ── */
+    .ws-more-wrap { position: relative; }
+
+    /* the imported flow above the worksheet — reference, not workspace */
+    .ws-flowref {
+      box-shadow: var(--crest);
+      border-radius: var(--r);
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top-color: rgba(var(--ink-rgb), .22);
+      background: var(--raised), rgba(var(--ink-rgb), .02);
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+
+    .ws-flowref-hdr {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ws-flowref-titles {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ws-flowref-name {
+      font-size: var(--text-body-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-1);
+    }
+
+    .ws-flowref-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    .ws-flowref-text {
+      margin-top: 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text-2);
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+
     .ws-card {
       border-radius: var(--r); overflow: hidden;
       border: 1px solid rgba(var(--ink-rgb), .12);
@@ -664,9 +716,9 @@
 
 <section class="hero">
   <div class="inner">
-    <p class="label-1">Make it make sense.</p>
-    <h3>Verb / Your Body Part / Direction</h3>
-    <p>A clear cue has three parts: the action, the body part, and the direction. Build yours here and cut the extra words. When your cues are clean, people stop looking around the room to copy someone else and start following you.</p>
+    <p class="label-1">The anatomy of a cue.</p>
+    <h3>Your Cues</h3>
+    <p>A clear cue has three parts: an action, body part, and direction of movement. When cued in this order, students can better understand what you&#8217;re saying and feel like you&#8217;re speaking directly to them. Write your flow, then fill out the worksheet with the directions to guide that flow. Save it and practice saying it out loud before you&#8217;re in front of a class.</p>
   </div>
 </section>
 
@@ -688,22 +740,34 @@
         <span class="ws-autosave-dot"></span>
         Auto Saved
       </span>
-      <button class="btn-icon" id="ws-new-flow-btn" data-tooltip="New flow" style="display:none">
-        <span class="material-symbols-sharp">note_add</span>
-      </button>
-      <button class="btn-icon" id="ws-load-btn" data-tooltip="Load saved flow">
-        <span class="material-symbols-sharp">history</span>
-      </button>
       <button class="btn-icon" id="ws-save-btn" data-tooltip="Save">
         <span class="material-symbols-sharp save-icon" id="ws-save-icon">bookmark</span>
       </button>
-      <button class="btn-icon" id="btn-pdf" data-tooltip="Copy script">
-        <span class="material-symbols-sharp">content_copy</span>
-      </button>
+      <div class="ws-more-wrap">
+        <button class="btn-icon" id="ws-more-btn" data-tooltip="More" title="More actions">
+          <span class="material-symbols-sharp">more_horiz</span>
+        </button>
+        <div class="ws-menu" id="ws-menu" hidden></div>
+      </div>
     </div>
   </div>
 
   <!-- ── WORKSHEET CARD ─────────────────────────────────────────── -->
+
+  <!-- the imported flow — the poses this poem moves people through.
+       Linked from Your Flows; the link rides with the saved worksheet. -->
+  <div class="ws-flowref" id="ws-flowref" hidden>
+    <div class="ws-flowref-hdr">
+      <div class="ws-flowref-titles">
+        <span class="ws-flowref-name" id="ws-flowref-name"></span>
+        <span class="ws-flowref-tag" id="ws-flowref-tag"></span>
+      </div>
+      <button class="btn-icon" id="ws-flowref-x" data-tooltip="Detach flow" title="Detach flow">
+        <span class="material-symbols-sharp i-sm">close</span>
+      </button>
+    </div>
+    <div class="ws-flowref-text" id="ws-flowref-text"></div>
+  </div>
 
   <div class="ws-card" id="ws-card">
     <div class="ws-scroll" id="ws-scroll">
@@ -766,7 +830,7 @@
 
 <div class="modal-backdrop" id="ws-modal" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ws-modal-heading">
-    <h3 id="ws-modal-heading">Name your flow</h3>
+    <h3 id="ws-modal-heading">Name your Cue Sheet</h3>
     <p class="modal-hint">Give it a name so you can find it later.</p>
     <input type="text" class="modal-input" id="ws-modal-input" placeholder="Flow name" maxlength="80" autocomplete="off" aria-label="Flow name">
     <div class="modal-actions">
@@ -793,11 +857,24 @@
 
 <div class="modal-backdrop" id="ws-load-modal" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ws-load-modal-heading">
-    <h3 id="ws-load-modal-heading">Load a flow</h3>
-    <p class="modal-hint">Select a previously saved flow to load it into the worksheet.</p>
+    <h3 id="ws-load-modal-heading">Load Saved Cues</h3>
+    <p class="modal-hint">Select previously saved cues to load them into the worksheet.</p>
     <div class="flow-list" id="ws-flow-list"></div>
     <div class="modal-actions">
       <button class="btn-ghost" id="ws-load-modal-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── IMPORT A FLOW MODAL ────────────────────────────────────── -->
+
+<div class="modal-backdrop" id="ws-import-modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ws-import-modal-heading">
+    <h3 id="ws-import-modal-heading">Attach a Flow</h3>
+    <p class="modal-hint">Pick a flow from your library. It rides above the worksheet while you write the words that move people through it.</p>
+    <div class="flow-list" id="ws-import-list"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="ws-import-modal-cancel">Cancel</button>
     </div>
   </div>
 </div>
@@ -864,21 +941,7 @@
 
 const WB = {
   verbs: [
-    'Anchor','Angle','Backstroke','Balance','Begin','Bend','Bloom','Bow',
-    'Bring','Broaden','Cactus','Circle','Come','Connect','Continue','Counterbalance',
-    'Crawl','Create','Crisscross','Cross','Drag','Drape','Draw','Drop','Ease',
-    'Elephant-trunk','Engage','Extend','Face','Fan','Find','Firm','Flex',
-    'Float','Fly','Fold','Follow','Frame','Get','Glide','Grab','Ground','Guide',
-    'Heft','Hover','Hug','Imagine','Juice','Keep','Kick','Land','Lay','Lean',
-    'Lengthen','Let','Level','Lie','Lift','Look','Lower','Make','Meet','Melt',
-    'Open','Pick','Pivot','Place','Plant','Point','Pop','Press','Pretend',
-    'Pull','Push','Put','Rainbow','Reach','Read','Relax','Release','Repeat',
-    'Return','Rise','Rock','Roll','Root','Rotate','Round','Scoop','Send','Set',
-    'Shift','Shine','Sit','Slide','Soften','Spin','Spread','Square','Squeeze',
-    'Stack','Stand','Starburst','Start','Stay','Step','Straighten','Straighten-ish',
-    'Stretch','Sweep','Swim','Swing','Switch','Swoop','Swoosh','Take','Tap',
-    'Thread','Throw','Touch','Tuck','Turn','Twist','Unfurl','Untuck','Unwind',
-    'Use','Wiggle','Wrap','Yawn','Yield',
+    'Airplane','Align','Allow','Anchor','Angle','Arch','Arrange','Articulate','Backstroke','Balance','Begin','Bend','Bind','Bloom','Blossom','Bow','Brace','Breathe','Bring','Broaden','Cactus','Cartwheel','Catch','Choose','Circle','Come','Connect','Continue','Contract','Counterbalance','Crawl','Create','Crisscross','Cross','Dance','Dial','Direct','Dive','Drag','Drape','Draw','Drift','Drive','Drop','Ease','Elephant-trunk','Engage','Exaggerate','Experiment','Explore','Extend','Face','Fan','Feel','Find','Firm','Flex','Flip','Float','Flutter','Fly','Fold','Follow','Frame','Funkify','Gaze','Get','Glide','Go','Grab','Grip','Ground','Grow','Guide','Heft','Helicopter','Hinge','Hold','Hollow','Hop','Hover','Hug','Imagine','Interlace','Juice','Jump','Keep','Kick','Land','Lay','Lean','Lengthen','Let','Level','Lie','Lift','Look','Lower','Lunge','Make','Meet','Melt','Move','Ninja','Open','Pick','Pivot','Place','Plant','Play','Point','Pop','Pour','Press','Pretend','Pull','Pulse','Push','Put','Radiate','Rainbow','Reach','Read','Relax','Release','Repeat','Return','Rise','Rock','Roll','Root','Rotate','Round','Scoop','Scrub','Send','Serve','Set','Settle','Shift','Shine','Sink','Sit','Slide','Smooth','Soften','Spank','Spin','Spiral','Split','Spread','Spring','Square','Squeeze','Stack','Stand','Starburst','Start','Stay','Step','Stop','Straighten','Straighten-ish','Stretch','Strike','Sweep','Swim','Swing','Switch','Swivel','Swoop','Swoosh','Take','Tap','Thread','Throw','Tickle','Tilt','Tiptoe','Tornado','Touch','Trace','Tuck','Turn','Twirl','Twist','Undulate','Unfurl','Unravel','Untuck','Unwind','Use','Walk','Wave','Whirl','Wiggle','Windmill','Wrap','Yawn','Yield',
   ],
   body: [
     'both of your knees','the crown of your head','your armpits','your arms',
@@ -1018,11 +1081,22 @@ let flowName = '';
 function getFlowStore() {
   try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch(e) { return {}; }
 }
+
+// the flow library from Your Flows — read-only here
+const FLOW_TAGS = { warmup: 'Warm Up', bridge: 'Bridge', peak: 'Peak', workshop: 'Workshop', slomo: 'Slo Mo', restorative: 'Restorative' };
+function loadFlowLib() {
+  try {
+    const list = JSON.parse(localStorage.getItem('flowschool_flows') || '[]');
+    list.forEach(f => { if (f.type === 'nohands') f.type = 'bridge'; });
+    return list;
+  } catch (e) { return []; }
+}
 function setFlowStore(store) {
   localStorage.setItem(LS_KEY, JSON.stringify(store));
 }
 
 let rows = [];
+let linkedFlowId = null; // the Your Flows flow this poem moves people through
 let activeInput = null; // last focused .cue-input
 let polIndex = 0;
 let wbTab = 'verbs';
@@ -1284,8 +1358,8 @@ function copyScript() {
   if (!script) { showToast('No cues to copy.'); return; }
   navigator.clipboard.writeText(script)
     .then(() => {
-      fsCopied(document.querySelector('#btn-pdf .material-symbols-sharp'));
-      showToast('Script copied to clipboard.');
+      fsCopied(document.querySelector('#ws-more-btn .material-symbols-sharp'));
+      showToast('Cues copied to clipboard.');
     })
     .catch(() => showToast('Copy failed — try Export .txt.'));
 }
@@ -1304,6 +1378,43 @@ function closeSaveModal() {
   document.getElementById('ws-modal').setAttribute('hidden', '');
 }
 
+function renderFlowRef() {
+  const wrap = document.getElementById('ws-flowref');
+  const f = linkedFlowId != null ? loadFlowLib().find(x => x.id === linkedFlowId) : null;
+  if (!f) { wrap.setAttribute('hidden', ''); return; }
+  document.getElementById('ws-flowref-name').textContent = f.name || 'Untitled Flow';
+  document.getElementById('ws-flowref-tag').textContent = FLOW_TAGS[f.type] || '';
+  document.getElementById('ws-flowref-text').textContent = f.text || '';
+  wrap.removeAttribute('hidden');
+}
+
+function openImportModal() {
+  const flows = loadFlowLib().sort((a, b) => (b.editedAt || b.id) - (a.editedAt || a.id));
+  const list = document.getElementById('ws-import-list');
+  list.innerHTML = flows.length
+    ? flows.map(f => `<div class="flow-list-item" data-fid="${f.id}">
+        <div class="flow-list-info">
+          <div class="flow-list-name">${esc(f.name || 'Untitled Flow')}</div>
+          <div class="flow-list-date">${FLOW_TAGS[f.type] || ''}</div>
+        </div>
+      </div>`).join('')
+    : '<div class="flow-list-empty">No flows in your library yet. Write one in Your Flows first.</div>';
+  list.querySelectorAll('.flow-list-item').forEach(el => {
+    el.addEventListener('click', () => {
+      linkedFlowId = parseInt(el.dataset.fid, 10);
+      renderFlowRef();
+      closeImportModal();
+      markDirty();
+      showToast('Flow attached.');
+    });
+  });
+  document.getElementById('ws-import-modal').removeAttribute('hidden');
+}
+
+function closeImportModal() {
+  document.getElementById('ws-import-modal').setAttribute('hidden', '');
+}
+
 function openLoadModal() {
   renderFlowList();
   document.getElementById('ws-load-modal').removeAttribute('hidden');
@@ -1319,7 +1430,7 @@ function renderFlowList() {
   const list = document.getElementById('ws-flow-list');
 
   if (!entries.length) {
-    list.innerHTML = '<div class="flow-list-empty">No saved flows yet.</div>';
+    list.innerHTML = '<div class="flow-list-empty">No saved cues yet.</div>';
     return;
   }
 
@@ -1343,6 +1454,8 @@ function renderFlowList() {
       if (!entry) return;
       flowName = entry.name;
       rows = (entry.rows || []).map(r => Object.assign(makeRow(), r));
+      linkedFlowId = entry.flowId != null ? entry.flowId : null;
+      renderFlowRef();
       renderRows();
       setSaved(true);
       setFlowTitle(flowName);
@@ -1366,12 +1479,10 @@ function setFlowTitle(name) {
   const wrap      = document.getElementById('ws-flow-title-wrap');
   const el        = document.getElementById('ws-flow-title');
   const indicator = document.getElementById('ws-autosave-indicator');
-  const newBtn    = document.getElementById('ws-new-flow-btn');
   if (!wrap || !el) return;
   el.textContent = name || '';
   wrap.classList.toggle('visible', !!name);
   if (indicator) indicator.classList.toggle('visible', !!name);
-  if (newBtn) newBtn.style.display = name ? '' : 'none';
 }
 
 // Starts a blank flow. Only offered while viewing an already-saved flow —
@@ -1379,10 +1490,12 @@ function setFlowTitle(name) {
 function startNewFlow() {
   initRows(INITIAL_ROWS);
   renderRows();
+  linkedFlowId = null;
+  renderFlowRef();
   flowName = '';
   setFlowTitle('');
   setSaved(false);
-  showToast('Started a new flow.');
+  showToast('Started a new cue sheet.');
 }
 
 function startRename() {
@@ -1495,17 +1608,33 @@ function autosaveFlow() {
   try {
     const store = getFlowStore();
     if (!store[flowName]) return;
-    store[flowName] = { name: flowName, rows, savedAt: new Date().toISOString() };
+    store[flowName] = { name: flowName, rows, flowId: linkedFlowId, savedAt: new Date().toISOString() };
     setFlowStore(store);
     setSaved(true);
   } catch (e) {}
 }
 
+// leaving with unsaved work — a named sheet autosaves on every edit,
+// so the only losable work is an UNNAMED sheet with something real on
+// it: typed cues or an attached flow. That gets the browser's hand up
+// before it's thrown away (the popcorn rule). A named sheet just gets
+// any pending autosave flushed on the way out.
+window.addEventListener('beforeunload', function (e) {
+  if (flowName) {
+    clearTimeout(_autosaveTimer);
+    autosaveFlow();
+    return;
+  }
+  const hasWork = linkedFlowId != null ||
+    rows.some(r => (r.pose || '').trim() || (r.verb || '').trim() || (r.body || '').trim() || (r.dir || '').trim());
+  if (hasWork) { e.preventDefault(); e.returnValue = ''; }
+});
+
 function saveToLocal(name) {
   flowName = name;
   try {
     const store = getFlowStore();
-    store[name] = { name, rows, savedAt: new Date().toISOString() };
+    store[name] = { name, rows, flowId: linkedFlowId, savedAt: new Date().toISOString() };
     setFlowStore(store);
     showToast('Flow saved.');
     setSaved(true);
@@ -2012,15 +2141,43 @@ function init() {
   });
 
   // Check my cues
-  document.getElementById('btn-pdf').addEventListener('click', copyScript);
+
 
   // Export / save
-  document.getElementById('ws-new-flow-btn').addEventListener('click', startNewFlow);
-  document.getElementById('ws-load-btn').addEventListener('click', openLoadModal);
+  const wsMenu = fsWireItemMenu(document.getElementById('ws-menu'), {
+    items: () => {
+      const items = [];
+      if (flowName) items.push({ act: 'new', icon: 'note_add', label: 'New Cue Sheet' });
+      items.push({ act: 'attach', icon: 'airline_stops', label: 'Attach a Flow' });
+      items.push({ act: 'load', icon: 'history', label: 'Load Saved Cues' });
+      items.push({ act: 'copy', icon: 'content_copy', label: 'Copy Cues' });
+      return items;
+    },
+    on: act => {
+      if (act === 'new') startNewFlow();
+      else if (act === 'attach') openImportModal();
+      else if (act === 'load') openLoadModal();
+      else if (act === 'copy') copyScript();
+    },
+  });
+  document.getElementById('ws-more-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    wsMenu.toggle();
+  });
   document.getElementById('ws-edit-btn').addEventListener('click', startRename);
   document.getElementById('ws-load-modal-cancel').addEventListener('click', closeLoadModal);
   document.getElementById('ws-load-modal').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeLoadModal();
+  });
+  document.getElementById('ws-import-modal-cancel').addEventListener('click', closeImportModal);
+  document.getElementById('ws-import-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeImportModal();
+  });
+  document.getElementById('ws-flowref-x').addEventListener('click', () => {
+    linkedFlowId = null;
+    renderFlowRef();
+    markDirty();
+    showToast('Flow detached.');
   });
   document.getElementById('ws-save-btn').addEventListener('click', openSaveModal);
   document.getElementById('ws-modal-cancel').addEventListener('click', closeSaveModal);

@@ -6,6 +6,11 @@
       "source": "/",
       "destination": "/dashboard",
       "permanent": false
+    },
+    {
+      "source": "/verb-your-body-part-direction",
+      "destination": "/your-cues",
+      "permanent": true
     }
   ],
   "rewrites": [

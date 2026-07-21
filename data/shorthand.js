@@ -102,6 +102,7 @@ const SHORTHAND = [
   { id:71, short:'W3', full:'Warrior 3', category:'single-leg', notes:'' },
   { id:72, short:'AIR W3', full:'Airplane Arms Reach Back Warrior 3', category:'single-leg', notes:'' },
   { id:73, short:'REV W3', full:'Twisted Warrior 3', category:'single-leg', notes:'' },
+  { id:168, short:'TWIST W3', full:'Twisted Warrior 3', category:'single-leg', notes:'' },
   { id:74, short:'RUN W3', full:'Running Arms Warrior 3', category:'single-leg', notes:'' },
   { id:144, short:'PRAY W3', full:'Prayer Hands Warrior 3', category:'single-leg', notes:'' },
   { id:75, short:'HM', full:'Half Moon', category:'single-leg', notes:'' },

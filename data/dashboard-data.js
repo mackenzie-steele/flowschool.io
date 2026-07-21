@@ -21,11 +21,11 @@ var NEXT_STEPS = [
     trigger: 'playlist-builder',
     title:   'Write your cues',
     desc:    "You have the music. Now sharpen the language. Use Verb / Your Body Part / Direction to map out your verb, body part, and direction cues for each section of your class.",
-    href:    'verb-your-body-part-direction',
+    href:    'your-cues',
     label:   'Open Verb / Your Body Part / Direction',
   },
   {
-    trigger: 'verb-your-body-part-direction',
+    trigger: 'your-cues',
     title:   'Put it into shorthand',
     desc:    "You've been writing your cues. Now encode your sequences using Flow School shorthand so you can track and recall them over time.",
     href:    'pose-library',

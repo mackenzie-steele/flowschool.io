@@ -210,11 +210,33 @@
     .cw-wrap-wide { max-width: 1060px; }
 
     /* the margin remembers — past teaching notes ride along while you
-       revise. Read here; the words are edited in the teach view. */
+       revise, editable in place: the date line carries the pencil and
+       the x, the words are touchable, the editor is the same well */
     .cw-note {
       padding: 12px 0;
       border-top: 1px solid var(--border-light);
     }
+
+    .cw-note-hdr {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-bottom: 6px;
+    }
+
+    .cw-note-hdr .cw-note-date {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .cw-note-text {
+      cursor: pointer;
+      transition: opacity var(--transition-base);
+    }
+
+    .cw-note-text:hover { opacity: .65; }
+
+    .cw-notes .tv-note-edit { margin-top: 0; }
 
     .cw-note:first-child { border-top: none; }
     .cw-note:last-child { padding-bottom: 0; }
@@ -698,6 +720,41 @@
 
     .tv-title-fav svg { fill: currentColor; }
 
+    /* the poem of the flow — the words that move people through the
+       poses above, folded away until wanted mid-teach */
+    .tv-poem-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      padding: 0;
+      margin-top: 12px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-3);
+      transition: color var(--transition-base);
+    }
+
+    .tv-poem-toggle:hover { color: var(--text-1); }
+    .tv-poem-toggle .material-symbols-sharp { transition: transform var(--transition-base); }
+    .tv-poem-toggle[aria-expanded="true"] .material-symbols-sharp { transform: rotate(180deg); }
+
+    .tv-poem {
+      margin-top: 12px;
+      padding-left: 14px;
+      border-left: 1px solid var(--border-light);
+    }
+
+    .tv-poem p {
+      font-size: var(--text-body-sm);
+      line-height: 1.7;
+      color: var(--text-2);
+    }
+
     .tv-flow-name {
       font-family: var(--font-mono);
       font-size: 11px;
@@ -995,7 +1052,7 @@
 
       /* the sheet is the teaching view and nothing else */
       .app-sidebar, .sidebar-toggle, .sidebar-overlay, .nav-sheet, .mobile-brand, nav,
-      .post-bar, footer, .post-actions, .tv-notes, .toast, .tv-menu,
+      .post-bar, footer, .post-actions, .tv-notes, .toast, .tv-menu, .tv-poem-toggle,
       #list-view, #edit-view, #empty-view { display: none !important; }
 
       #teach-view[hidden] { display: none !important; }

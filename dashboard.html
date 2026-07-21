@@ -1494,7 +1494,7 @@
     var AXIS_STEPS = {
       play:     { title: 'Deal yourself a rule',      desc: 'Play is your quietest edge. One arbitrary constraint is the fastest way back into curiosity.', href: 'arbitrary-rules', label: 'Draw a Rule' },
       sequence: { title: 'Name one small flow',        desc: 'Sequence has room to grow. Take a chain you already love and give it a name in Your Flows.', href: 'your-flows?new=1', label: 'Build a Flow' },
-      cue:      { title: 'Find the words',             desc: 'Cue is your quietest edge. Ten minutes of Verb / Your Body Part / Direction sharpens everything you say.', href: 'verb-your-body-part-direction', label: 'Write Cues' },
+      cue:      { title: 'Find the words',             desc: 'Cue is your quietest edge. Ten minutes in Your Cues sharpens everything you say.', href: 'your-cues', label: 'Write Cues' },
       story:    { title: 'Tell one story',             desc: 'Story is waiting. Draw a starter and tell it the way you\u2019d tell it in class.', href: 'story-starters', label: 'Draw a Starter' },
       sound:    { title: 'Score one class',            desc: 'Sound is your quietest edge. Build a playlist for a class you already teach.', href: 'playlist-builder', label: 'Build a Playlist' },
       reflect:  { title: 'Close the loop',             desc: 'Reflect is the missing beat. One honest note after your next class is all it takes.', href: 'teaching-log', label: 'Add a Note' },
@@ -1651,7 +1651,7 @@
         var flows = JSON.parse(localStorage.getItem('fs-cue-flows') || '{}');
         Object.values(flows).forEach(function (fl) {
           var time = fl.savedAt ? new Date(fl.savedAt).getTime() : 0;
-          items.push({ icon: 'edit_note', name: fl.name || 'Untitled Flow', sub: 'Verb / Your Body Part / Direction', href: 'verb-your-body-part-direction?flow=' + encodeURIComponent(fl.name), time: time });
+          items.push({ icon: 'edit_note', name: fl.name || 'Untitled Flow', sub: 'Your Cues', href: 'your-cues?flow=' + encodeURIComponent(fl.name), time: time });
         });
       } catch (_) {}
       try {

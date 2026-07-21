@@ -167,10 +167,108 @@
       margin-bottom: 48px;
     }
 
-    .fd-usedin {
-      border-top: 1px solid var(--border-light);
-      padding-top: 24px;
+    /* the cue sheet under the poses — mono register for the controls,
+       reading type for the words, a hairline rail to mark the aside */
+    .fd-flow { margin-bottom: 20px; }
+
+    .fd-cues { margin-bottom: 48px; }
+
+    /* the drawer — the Word Bank's folded-shelf anatomy from Your Cues:
+       mono title, context on the right, chevron; the panel unfolds
+       beneath and the corners split between them while open */
+    .fd-cues-head {
+      border-radius: var(--r);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(var(--ink-rgb), .02);
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top-color: rgba(var(--ink-rgb), .22);
+      font-family: var(--font);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color var(--transition-base);
     }
+
+    .fd-cues-head:hover { border-color: rgba(var(--ink-rgb), .30); }
+    .fd-cues-head[aria-expanded="true"] { border-radius: var(--r) var(--r) 0 0; }
+
+    .fd-cues-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-2);
+      line-height: 1;
+    }
+
+    .fd-cues-context {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: var(--fs-label-2);
+      color: var(--text-3);
+      line-height: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .fd-cues-chev { color: var(--text-3); transition: transform var(--transition-base); }
+    .fd-cues-head[aria-expanded="true"] .fd-cues-chev { transform: rotate(180deg); }
+
+    .fd-cues-attach,
+    .fd-cues-foot a,
+    .fd-cues-foot button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-3);
+      transition: color var(--transition-base);
+    }
+
+    .fd-cues-attach:hover,
+    .fd-cues-foot a:hover,
+    .fd-cues-foot button:hover { color: var(--text-1); }
+
+    .fd-cues-body {
+      border-radius: 0 0 var(--r) var(--r);
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top: none;
+      padding: 16px 20px 20px;
+    }
+
+    .fd-cues-body p {
+      font-size: var(--text-body-sm);
+      line-height: 1.7;
+      color: var(--text-2);
+    }
+
+    .fd-cues-none { font-style: italic; color: var(--text-3); }
+
+    .fd-cues-foot { display: flex; gap: 20px; margin-top: 14px; }
+
+    /* the picker rows borrow the class-row anatomy */
+    .fd-cues-row {
+      width: 100%;
+      background: none;
+      border: none;
+      font-family: var(--font);
+      cursor: pointer;
+    }
+
+    .fd-usedin { padding-top: 24px; }
 
     .fd-usedin .label-1 { display: block; margin-bottom: 8px; }
 
@@ -393,11 +491,16 @@
       background: rgba(var(--ink-rgb), .02);
       border: 1px solid rgba(var(--ink-rgb), .12);
       border-top-color: rgba(var(--ink-rgb), .22);
+      border-radius: var(--r);
       font-family: var(--font);
       text-align: left;
       cursor: pointer;
       transition: border-color var(--transition-base);
     }
+
+    /* open, the head and panel read as one module — the head keeps the
+       top corners, the panel keeps the bottom ones */
+    .ef-head[aria-expanded="true"] { border-radius: var(--r) var(--r) 0 0; }
     .ef-head:hover { border-color: rgba(var(--ink-rgb), .30); }
     .ef-title {
       font-family: var(--font-mono);
@@ -421,7 +524,7 @@
     .ef-head[aria-expanded="true"] .ef-chev { transform: rotate(180deg); }
 
     .ef-body {
-      border-radius: var(--r);
+      border-radius: 0 0 var(--r) var(--r);
       border: 1px solid rgba(var(--ink-rgb), .12);
       border-top: none;
       padding: 0 20px 16px;
@@ -454,7 +557,12 @@
       padding-top: 16px;
     }
     .ef-sec-items { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
-    @media (max-width: 580px) { .ef-sec-items { grid-template-columns: 1fr; } }
+    /* body positions read down each column, not across the rows */
+    .ef-sec-items[data-sec="bp"] { grid-auto-flow: column; grid-template-rows: repeat(7, auto); }
+    @media (max-width: 580px) {
+      .ef-sec-items { grid-template-columns: 1fr; }
+      .ef-sec-items[data-sec="bp"] { grid-auto-flow: row; grid-template-rows: none; }
+    }
     .ef-item {
       display: flex;
       align-items: flex-start;
@@ -610,6 +718,22 @@
         </div>
         <div class="fd-flow" id="fd-flow"></div>
 
+        <!-- the cue sheet — the words that move people through the poses
+             above. One link, owned by the sheet (fs-cue-flows entry.flowId):
+             attaching here writes the same link Your Cues' Attach a Flow
+             does, so both doors open the same room. Folded until wanted. -->
+        <div class="fd-cues">
+          <button type="button" class="fd-cues-head" id="fd-cues-toggle" aria-expanded="false" aria-controls="fd-cues-body" hidden>
+            <span class="fd-cues-title">Cues</span>
+            <span class="fd-cues-context" id="fd-cues-label"></span>
+            <span class="material-symbols-sharp fd-cues-chev i-md">expand_more</span>
+          </button>
+          <button type="button" class="fd-cues-attach" id="fd-cues-attach" hidden>
+            <span class="material-symbols-sharp i-sm">edit_note</span>Attach cues
+          </button>
+          <div class="fd-cues-body" id="fd-cues-body" hidden></div>
+        </div>
+
         <div class="fd-usedin">
           <span class="label-1">In Your Classes</span>
           <div id="fd-usedin-list"></div>
@@ -667,6 +791,21 @@
           <textarea class="fl-area" id="fl-area" rows="3" placeholder="SEATED TWIST / BOAT / PIGEON / SL DD"></textarea>
         </div>
 
+        <!-- the cue sheet rides along in the editor too — same drawer
+             as the viewer, same link. Hidden for unsaved flows: there's
+             no flow id to attach to yet. -->
+        <div class="fd-cues" id="fl-cues" hidden>
+          <button type="button" class="fd-cues-head" id="fl-cues-toggle" aria-expanded="false" aria-controls="fl-cues-body" hidden>
+            <span class="fd-cues-title">Cues</span>
+            <span class="fd-cues-context" id="fl-cues-label"></span>
+            <span class="material-symbols-sharp fd-cues-chev i-md">expand_more</span>
+          </button>
+          <button type="button" class="fd-cues-attach" id="fl-cues-attach" hidden>
+            <span class="material-symbols-sharp i-sm">edit_note</span>Attach cues
+          </button>
+          <div class="fd-cues-body" id="fl-cues-body" hidden></div>
+        </div>
+
         <!-- Elements of Flow — Peak Flows only. Optional checklist; checked
              state saves on the flow itself (f.elements) and syncs with it.
              The canon lives in data/elements-of-flow.js. -->
@@ -679,6 +818,18 @@
           <div class="ef-body" id="ef-body" hidden></div>
         </div>
 
+        <!-- Pillars of a Warm Up — Warm Up Flows only. Same optional-
+             checklist pattern as Elements of Flow; checked state saves
+             on the flow itself (f.pillars) and syncs with it. -->
+        <div class="fl-section" id="fl-pillars" hidden>
+          <button type="button" class="ef-head" id="pw-toggle" aria-expanded="false" aria-controls="pw-body">
+            <span class="ef-title">Pillars of a Warm Up</span>
+            <span class="ef-progress" id="pw-progress">0/5</span>
+            <span class="material-symbols-sharp ef-chev i-md">expand_more</span>
+          </button>
+          <div class="ef-body" id="pw-body" hidden></div>
+        </div>
+
         <!-- where this flow already lives — same module as the viewer;
              a new, unsaved flow has no classes yet, so it stays hidden -->
         <div class="fd-usedin" id="fl-usedin" hidden>
@@ -688,6 +839,18 @@
 
       </div>
 
+    </div>
+  </div>
+
+  <!-- ── ATTACH CUES MODAL ── -->
+  <div class="modal-backdrop" id="fd-cues-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="fd-cues-modal-heading">
+      <h3 id="fd-cues-modal-heading">Attach cues</h3>
+      <p class="modal-hint">Pick a cue sheet from Your Cues. It sits under the poses, folded until wanted.</p>
+      <div id="fd-cues-list"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="fd-cues-modal-cancel">Cancel</button>
+      </div>
     </div>
   </div>
 
@@ -713,7 +876,7 @@
     // the taxonomy, in class order
     var FLOW_TYPES = [
       { key: 'warmup',   name: 'Warm Up Flow',      desc: 'Begin the class connected to the earth.' },
-      { key: 'bridge',   name: 'Bridge Flow',       desc: 'Great for the middle of a class to bridge the warm up and peak flows.' },
+      { key: 'bridge',   name: 'Bridge Flow',       desc: 'Great for the middle of a class to bridge the warm up and peak flows. Might be a No Hands Flow.' },
       { key: 'peak',     name: 'Peak Flow',         desc: 'Every body position, moving in all directions, including on and off the ground.' },
       { key: 'workshop', name: 'Mid Class Workshop', desc: 'Teach the small things that make a big difference.' },
       { key: 'slomo',    name: 'Slo Mo Flow',       desc: 'Think “slow and strong” and one-ish times per side.' },
@@ -1027,6 +1190,119 @@
         : '<p class="fl-usedin-empty">Not part of a class yet.</p>';
     }
 
+    // ─── THE CUE SHEET UNDER THE POSES ───────────────────────────────────────────
+    // Cue building mirrors Your Cues' own buildCue, so every surface
+    // speaks identical lines.
+    function cueStore() {
+      try { return JSON.parse(localStorage.getItem('fs-cue-flows') || '{}'); } catch (e) { return {}; }
+    }
+    function setCueStore(store) {
+      localStorage.setItem('fs-cue-flows', JSON.stringify(store));
+    }
+    function cueSheetFor(flowId) {
+      var store = cueStore();
+      var hits = Object.keys(store).map(function (k) { return store[k]; })
+        .filter(function (e) { return e && e.flowId === flowId; })
+        .sort(function (a, b) { return new Date(b.savedAt) - new Date(a.savedAt); });
+      return hits[0] || null;
+    }
+    function cueLines(entry) {
+      return (entry.rows || []).map(function (r) {
+        var verb = (r.verb || '').trim();
+        var body = (r.body || '').trim();
+        var dir  = (r.dir  || '').trim();
+        if (!verb && !body && !dir) return '';
+        var bodyNorm = body && !/\byour\b/i.test(body) ? 'your ' + body : body;
+        var cue = [verb, bodyNorm, dir].filter(Boolean).join(' ');
+        if (cue.slice(-1) !== '.') cue += '.';
+        return cue.charAt(0).toUpperCase() + cue.slice(1);
+      }).filter(Boolean);
+    }
+
+    // one drawer, two rooms — the viewer ('fd') and the editor ('fl')
+    // render through the same code against their own ids
+    function renderCuesUI(p, f) {
+      var toggle = document.getElementById(p + '-cues-toggle');
+      var attach = document.getElementById(p + '-cues-attach');
+      var body   = document.getElementById(p + '-cues-body');
+      body.hidden = true;
+      body._fsUnfoldOpen = false;
+      toggle.setAttribute('aria-expanded', 'false');
+      var entry = cueSheetFor(f.id);
+      toggle.hidden = !entry;
+      attach.hidden = !!entry;
+      if (!entry) { body.innerHTML = ''; return; }
+      document.getElementById(p + '-cues-label').textContent = entry.name;
+      var lines = cueLines(entry);
+      body.innerHTML =
+        (lines.length
+          ? lines.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('')
+          : '<p class="fd-cues-none">Nothing written on this sheet yet.</p>') +
+        '<div class="fd-cues-foot">' +
+          '<a href="your-cues?flow=' + encodeURIComponent(entry.name) + '">Edit in Your Cues</a>' +
+          '<button type="button" data-cues-detach>Detach</button>' +
+        '</div>';
+      body.querySelector('[data-cues-detach]').addEventListener('click', function () {
+        var store = cueStore();
+        if (store[entry.name]) { store[entry.name].flowId = null; setCueStore(store); }
+        renderCuesUI(p, f);
+        toast('Cues detached.');
+      });
+    }
+
+    function renderFdCues(f) { renderCuesUI('fd', f); }
+
+    ['fd', 'fl'].forEach(function (p) {
+      document.getElementById(p + '-cues-toggle').addEventListener('click', function () {
+        var open = this.getAttribute('aria-expanded') !== 'true';
+        fsUnfold(document.getElementById(p + '-cues-body'), open);
+        this.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.getElementById(p + '-cues-attach').addEventListener('click', function () {
+        openCuesModal(p);
+      });
+    });
+
+    function closeCuesModal() {
+      document.getElementById('fd-cues-modal').setAttribute('hidden', '');
+    }
+
+    function openCuesModal(p) {
+      var f = byId(p === 'fd' ? currentId : editingId);
+      if (!f) return;
+      var store = cueStore();
+      var entries = Object.keys(store).map(function (k) { return store[k]; })
+        .sort(function (a, b) { return new Date(b.savedAt) - new Date(a.savedAt); });
+      var list = document.getElementById('fd-cues-list');
+      list.innerHTML = entries.length
+        ? entries.map(function (e) {
+            var d = new Date(e.savedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            return '<button type="button" class="fl-class-row fd-cues-row" data-name="' + esc(e.name) + '">' +
+              '<span class="fl-class-title">' + esc(e.name) + '</span>' +
+              '<span class="fl-class-meta">' + d + '</span>' +
+            '</button>';
+          }).join('')
+        : '<p class="fd-cues-none">Nothing in Your Cues yet. Write a sheet there first.</p>';
+      list.querySelectorAll('.fd-cues-row').forEach(function (row) {
+        row.addEventListener('click', function () {
+          var store = cueStore();
+          var entry = store[row.dataset.name];
+          if (!entry) return;
+          entry.flowId = f.id;
+          setCueStore(store);
+          closeCuesModal();
+          renderCuesUI(p, f);
+          toast('Cues attached.');
+        });
+      });
+      document.getElementById('fd-cues-modal').removeAttribute('hidden');
+    }
+
+    document.getElementById('fd-cues-modal-cancel').addEventListener('click', closeCuesModal);
+    document.getElementById('fd-cues-modal').addEventListener('click', function (e) {
+      if (e.target === e.currentTarget) closeCuesModal();
+    });
+
     function showDetail(id, push) {
       var f = byId(id);
       if (!f) { showList(); return; }
@@ -1040,6 +1316,7 @@
         document.getElementById('fd-challenge').hidden = !challenge.length;
         document.getElementById('fd-challenge-body').innerHTML = challengeRows(challenge);
         document.getElementById('fd-flow').textContent = f.text || '';
+        renderFdCues(f);
         renderUsedIn(f, document.getElementById('fd-usedin-list'));
       });
 
@@ -1083,12 +1360,19 @@
         efRender();
         efUpdateVisibility();
         efCollapse(); // arrives folded — it's an offer, not an assignment
+        pwLoad(f);
+        pwRender();
+        pwUpdateVisibility();
+        pwCollapse();
         renderCount();
         autoGrow(area);
         editChallenge = f && f.challenge ? f.challenge.slice() : [];
 
         document.getElementById('fl-usedin').hidden = !f;
         if (f) renderUsedIn(f, document.getElementById('fl-usedin-list'));
+
+        document.getElementById('fl-cues').hidden = !f;
+        if (f) renderCuesUI('fl', f);
 
         dirty = false;
         setSaveButton(f ? 'saved' : 'idle');
@@ -1156,7 +1440,7 @@
             '<h4>' + s.label + '</h4>' +
             '<span>' + got + ' of ' + s.items.length + '</span>' +
           '</div>' +
-          '<div class="ef-sec-items">' + s.items.map(function (item) {
+          '<div class="ef-sec-items" data-sec="' + s.key + '">' + s.items.map(function (item) {
             var on = efState[s.key].has(item.id);
             return '<div class="ef-item' + (on ? ' on' : '') + '" data-sec="' + s.key + '" data-id="' + item.id + '">' +
               '<span class="ef-box"><span class="material-symbols-sharp ef-check">check</span></span>' +
@@ -1174,6 +1458,110 @@
       progress.textContent = n + '/' + EF_TOTAL;
       progress.classList.toggle('done', n === EF_TOTAL);
     }
+
+    // ─── PILLARS OF A WARM UP (Warm Up Flows only) ──────────────────────────────
+    // Same optional-checklist pattern as Elements of Flow. The foundation
+    // is pick-one — checking one releases the others — and all four
+    // pillars want a check: one foundation + four pillars = 5.
+
+    var PW_SECTIONS = [
+      { key: 'foundation', label: 'Foundation', hint: 'pick one', pickOne: true, items: [
+        { id: 'seated',   label: 'Seated' },
+        { id: 'kneeling', label: 'Kneeling' },
+        { id: 'back',     label: 'Back' },
+        { id: 'belly',    label: 'Belly' },
+      ]},
+      { key: 'pillars', label: 'Pillars', hint: 'need all 4', items: [
+        { id: 'hip-er',   label: 'Hip External Rotation' },
+        { id: 'ffold',    label: 'Forward Fold' },
+        { id: 'backbend', label: 'Backward Bend' },
+        { id: 'twist',    label: 'Twist' },
+      ]},
+    ];
+    var PW_TOTAL = 5;
+    var pwState = {};
+
+    function pwLoad(f) {
+      var saved = (f && f.pillars) || {};
+      pwState = {};
+      PW_SECTIONS.forEach(function (s) {
+        pwState[s.key] = new Set(Array.isArray(saved[s.key]) ? saved[s.key] : []);
+      });
+    }
+
+    function pwSerialize() {
+      var out = {};
+      PW_SECTIONS.forEach(function (s) { out[s.key] = Array.from(pwState[s.key]); });
+      return out;
+    }
+
+    function pwCount() {
+      return (pwState.foundation.size ? 1 : 0) + pwState.pillars.size;
+    }
+
+    function pwRender() {
+      var n = pwCount();
+      document.getElementById('pw-body').innerHTML = PW_SECTIONS.map(function (s) {
+        var right = s.pickOne
+          ? (pwState[s.key].size ? '1 of 1' : s.hint)
+          : pwState[s.key].size + ' of ' + s.items.length;
+        return '<div class="ef-sec">' +
+          '<div class="ef-sec-hdr">' +
+            '<h4>' + s.label + '</h4>' +
+            '<span>' + right + '</span>' +
+          '</div>' +
+          '<div class="ef-sec-items" data-sec="' + s.key + '">' + s.items.map(function (item) {
+            var on = pwState[s.key].has(item.id);
+            return '<div class="ef-item' + (on ? ' on' : '') + '" data-sec="' + s.key + '" data-id="' + item.id + '">' +
+              '<span class="ef-box"><span class="material-symbols-sharp ef-check">check</span></span>' +
+              '<span><span class="ef-item-label">' + item.label + '</span></span>' +
+            '</div>';
+          }).join('') + '</div>' +
+        '</div>';
+      }).join('') +
+      '<div class="ef-foot">' +
+        '<button type="button" class="btn-ghost sm" id="pw-reset"' + (n ? '' : ' disabled') + '>' +
+          '<span class="material-symbols-sharp i-sm" style="margin-right:6px">restart_alt</span>Reset</button>' +
+      '</div>';
+      var progress = document.getElementById('pw-progress');
+      progress.textContent = n + '/' + PW_TOTAL;
+    }
+
+    function pwUpdateVisibility() {
+      document.getElementById('fl-pillars').hidden = editType !== 'warmup';
+    }
+
+    function pwCollapse() {
+      document.getElementById('pw-body').hidden = true;
+      document.getElementById('pw-body')._fsUnfoldOpen = false;
+      document.getElementById('pw-toggle').setAttribute('aria-expanded', 'false');
+    }
+
+    document.getElementById('pw-toggle').addEventListener('click', function () {
+      var open = this.getAttribute('aria-expanded') !== 'true';
+      fsUnfold(document.getElementById('pw-body'), open);
+      this.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    document.getElementById('pw-body').addEventListener('click', function (e) {
+      if (e.target.closest('#pw-reset')) {
+        PW_SECTIONS.forEach(function (s) { pwState[s.key].clear(); });
+        pwRender();
+        markDirty();
+        return;
+      }
+      var row = e.target.closest('.ef-item');
+      if (!row) return;
+      var sec = PW_SECTIONS.find(function (s) { return s.key === row.dataset.sec; });
+      var set = pwState[row.dataset.sec];
+      if (set.has(row.dataset.id)) set.delete(row.dataset.id);
+      else {
+        if (sec && sec.pickOne) set.clear();
+        set.add(row.dataset.id);
+      }
+      pwRender();
+      markDirty();
+    });
 
     // the module only exists for Peak Flows
     function efUpdateVisibility() {
@@ -1245,6 +1633,7 @@
         f.type = editType;
         f.text = text;
         f.elements = efSerialize();
+        f.pillars = pwSerialize();
         f.challenge = editChallenge.slice();
         f.editedAt = Date.now();
       } else {
@@ -1254,6 +1643,7 @@
           type: editType,
           text: text,
           elements: efSerialize(),
+          pillars: pwSerialize(),
           challenge: editChallenge.slice(),
           editedAt: Date.now(),
         };
@@ -1339,6 +1729,7 @@
       renderTypes();
       setTypeCollapsed(true);
       efUpdateVisibility();
+      pwUpdateVisibility();
       markDirty();
       document.getElementById('fl-area').focus();
     });
