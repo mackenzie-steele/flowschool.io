@@ -204,6 +204,16 @@
     }
 
     .db-row-2   { grid-template-columns: 1fr 1fr; }
+
+    /* a column of stacked cards inside a row — shares the row's gap */
+    .db-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .db-col .db-card { flex: 1; }
     .db-row-3-2 { grid-template-columns: 3fr 2fr; }
     .db-row-2-3 { grid-template-columns: 2fr 3fr; }
 
@@ -327,7 +337,7 @@
       margin-top: 3px;
     }
 
-    /* ── Teaching Log ─────────────────────────────────────── */
+    /* ── Teaching Notes ───────────────────────────────────── */
     .db-log-item {
       display: block;
       padding: 12px 0;
@@ -900,6 +910,32 @@
     }
     .db-event-signup:hover { color: var(--text-1) !important; }
 
+    /* ── Weekly Story Starter ────────────────────────────── */
+    #db-starter-card { display: flex; flex-direction: column; }
+
+    .db-starter-text {
+      font-size: var(--text-body-lg);
+      font-style: italic;
+      font-weight: var(--weight-medium);
+      color: var(--text-1);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .db-starter-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      text-decoration: none;
+      font-size: var(--text-small);
+      font-weight: var(--weight-medium);
+      color: var(--text-3);
+      transition: color var(--transition-base);
+    }
+
+    .db-starter-link:hover { color: var(--text-1); }
+
     /* ── New Drop module ─────────────────────────────────── */
     .db-new-drop {
       display: block;
@@ -1029,7 +1065,7 @@
              to true (or remove the flag) to bring the strip back -->
         <div class="db-milestones" id="db-milestones" hidden></div>
 
-        <!-- 2. Sequence Starters + Upcoming Events -->
+        <!-- 2. Sequence Starters + (Story Starter over Upcoming) -->
         <div class="db-row db-row-3-2">
 
           <div class="db-card">
@@ -1038,9 +1074,21 @@
             <p class="db-sst-intro">Use this sequence starter pose combo to light up something new in your play. Let that inspire what you plan and teach.</p>
           </div>
 
-          <div class="db-card">
-            <span class="db-eyebrow">Upcoming</span>
-            <div id="db-events-list"></div>
+          <div class="db-col">
+
+            <!-- one prompt a week, from the story starters bank; the
+                 link seeds the stories composer with it -->
+            <div class="db-card" id="db-starter-card">
+              <span class="db-eyebrow">Weekly Story Starter</span>
+              <p class="db-starter-text" id="db-starter-text"></p>
+              <a class="db-starter-link" id="db-starter-link" href="stories">Write the Story <span class="material-symbols-sharp i-sm" style="vertical-align:-2px">arrow_forward</span></a>
+            </div>
+
+            <div class="db-card">
+              <span class="db-eyebrow">Upcoming</span>
+              <div id="db-events-list"></div>
+            </div>
+
           </div>
 
         </div>
@@ -1082,13 +1130,13 @@
 
         </div>
 
-        <!-- 6. Teaching Log + Recently Saved -->
+        <!-- 6. Teaching Notes + Recently Saved -->
         <div class="db-row db-row-2">
 
           <div class="db-card db-card-pin">
-            <span class="db-eyebrow">Teaching Log</span>
+            <span class="db-eyebrow">Teaching Notes</span>
             <div id="db-log-list"></div>
-            <a href="teaching-log" class="db-view-all">View the log <span class="material-symbols-sharp i-sm" style="vertical-align:-2px">arrow_forward</span></a>
+            <a href="teaching-notes" class="db-view-all">View your notes <span class="material-symbols-sharp i-sm" style="vertical-align:-2px">arrow_forward</span></a>
           </div>
 
           <div class="db-card db-card-pin">
@@ -1155,6 +1203,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="lib/toast.js"></script>
+  <script src="data/story-starters.js"></script>
   <script src="data/dashboard-content.js"></script>
   <script src="data/dashboard-daily-quotes.js"></script>
   <script src="data/sequence-starters.js"></script>
@@ -1386,7 +1435,7 @@
       }).join('');
     }
 
-    // ── Teaching Log — recent notes across all classes ───────────
+    // ── Teaching Notes — recent notes across all classes ─────────
     function renderTeachingLog() {
       var el = document.getElementById('db-log-list');
       var MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -1495,9 +1544,9 @@
       play:     { title: 'Deal yourself a rule',      desc: 'Play is your quietest edge. One arbitrary constraint is the fastest way back into curiosity.', href: 'arbitrary-rules', label: 'Draw a Rule' },
       sequence: { title: 'Name one small flow',        desc: 'Sequence has room to grow. Take a chain you already love and give it a name in Your Flows.', href: 'your-flows?new=1', label: 'Build a Flow' },
       cue:      { title: 'Find the words',             desc: 'Cue is your quietest edge. Ten minutes in Your Cues sharpens everything you say.', href: 'your-cues', label: 'Write Cues' },
-      story:    { title: 'Tell one story',             desc: 'Story is waiting. Draw a starter and tell it the way you\u2019d tell it in class.', href: 'story-starters', label: 'Draw a Starter' },
+      story:    { title: 'Tell one story',             desc: 'Story is waiting. Take this week\u2019s starter and tell it the way you\u2019d tell it in class.', href: 'stories', label: 'Write a Story' },
       sound:    { title: 'Score one class',            desc: 'Sound is your quietest edge. Build a playlist for a class you already teach.', href: 'playlist-builder', label: 'Build a Playlist' },
-      reflect:  { title: 'Close the loop',             desc: 'Reflect is the missing beat. One honest note after your next class is all it takes.', href: 'teaching-log', label: 'Add a Note' },
+      reflect:  { title: 'Close the loop',             desc: 'Reflect is the missing beat. One honest note after your next class is all it takes.', href: 'teaching-notes', label: 'Add a Note' },
     };
 
     function renderNextStep() {
@@ -1743,6 +1792,17 @@
         '</a>';
     }
 
+    // one prompt a week, same week for everyone — the bank rotates on
+    // epoch weeks, and the link seeds the stories composer with it
+    function renderStarter() {
+      var card = document.getElementById('db-starter-card');
+      var bank = window.STORY_STARTERS;
+      if (!bank || !bank.length) { card.hidden = true; return; }
+      var starter = bank[Math.floor(Date.now() / 604800000) % bank.length];
+      document.getElementById('db-starter-text').textContent = starter.text;
+      document.getElementById('db-starter-link').href = 'stories?new=' + starter.id;
+    }
+
     function renderMonth() {
       var card = document.getElementById('db-month-card');
       var entries = window.THIS_MONTH || {};
@@ -1779,6 +1839,7 @@
       renderSaved();
       renderEvents();
       renderDrop();
+      renderStarter();
       renderMonth();
       renderMoon();
     }
