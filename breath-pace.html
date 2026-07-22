@@ -60,6 +60,39 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
       margin-top: 12px;
     }
 
+    .bp-transport-wrap { position: relative; display: inline-flex; }
+
+    /* the breath drawn around the transport — fills on the inhale,
+       retreats on the exhale. 2px of air between button and line. */
+    .bp-ring {
+      display: none;
+      position: absolute;
+      inset: -4px;
+      width: 72px;
+      height: 72px;
+      pointer-events: none;
+      transform: rotate(-90deg);
+    }
+
+    .pacer-section.cues-face .bp-ring { display: block; }
+
+    .bp-ring-track {
+      fill: none;
+      stroke: rgba(var(--ink-rgb), .10);
+      stroke-width: 2;
+    }
+
+    .bp-ring-fill {
+      fill: none;
+      stroke: var(--ink-solid);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-dasharray: 219.91;
+      stroke-dashoffset: 219.91;
+    }
+
+    [data-theme="dark"] .bp-ring-fill { stroke: var(--accent); }
+
     .bp-transport {
       width: 64px;
       height: 64px;
@@ -92,6 +125,325 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
 
 
 
+    /* hidden must always win — the views set their own display */
+    [hidden] { display: none !important; }
+
+    /* ── The two faces — a quiet segmented pill ── */
+    .bp-views {
+      display: inline-flex;
+      align-self: center;
+      border: 1px solid rgba(var(--ink-rgb), .14);
+      border-radius: var(--rb);
+      padding: 3px;
+      gap: 2px;
+      margin-bottom: 24px;
+    }
+
+    .bp-view-btn {
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 6px 16px;
+      border-radius: calc(var(--rb) - 3px);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-3);
+      transition: color var(--transition-base), background var(--transition-base);
+    }
+
+    .bp-view-btn:hover { color: var(--text-1); }
+
+    .bp-view-btn.active {
+      background: var(--ink-solid);
+      color: var(--paper-solid);
+    }
+
+    /* ── The script — cues in reading type, one line per breath ── */
+    /* the script face and the dial share one frame height, so the
+       page below never moves when the faces swap */
+    .bp-script {
+      width: min(560px, 92vw);
+      height: calc(min(300px, 80vw) + 48px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pacer-svg { margin-block: 24px; }
+
+    .bp-script-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding: 130px 4px;
+      /* the reading window fades at its edges — the current line owns
+         the middle */
+      -webkit-mask-image: linear-gradient(transparent, black 18%, black 82%, transparent);
+      mask-image: linear-gradient(transparent, black 18%, black 82%, transparent);
+    }
+
+    .bp-script-body::-webkit-scrollbar { display: none; }
+
+    /* the Practice Out Loud register, one size down — inactive lines
+       recede by color, the current line carries weight */
+    .bp-line {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      padding: 12px 8px;
+      cursor: pointer;
+    }
+
+    .bp-line-text {
+      flex: 1;
+      min-width: 0;
+      font-size: var(--fs-h5);
+      line-height: 1.3;
+      letter-spacing: -.01em;
+      color: rgba(var(--ink-rgb), .26);
+      overflow-wrap: break-word;
+      transition: color .2s ease;
+    }
+
+    .bp-line.current .bp-line-text {
+      color: var(--text-1);
+      font-weight: var(--weight-medium);
+    }
+
+    .bp-line-breath {
+      flex-shrink: 0;
+      width: 52px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: rgba(var(--ink-rgb), .26);
+      transition: color .2s ease;
+    }
+
+    .bp-line.current .bp-line-breath { color: var(--text-3); }
+
+    @media (max-width: 580px) {
+      .bp-line-text { font-size: var(--text-body-lg); }
+    }
+
+    .bp-script-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .bp-sheet-name {
+      min-width: 0;
+      font-size: var(--text-body-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-1);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    /* nothing chosen — the dashed door, the app's empty-slot language */
+    .bp-choose {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      padding: 16px 20px;
+      margin: auto 0;
+      background: none;
+      border: 1px dashed rgba(var(--ink-rgb), .12);
+      border-radius: var(--r);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color var(--transition-base);
+    }
+
+    .bp-choose:hover { border-color: rgba(var(--ink-rgb), .30); }
+
+    .bp-choose-name {
+      flex: 1;
+      min-width: 0;
+      font-family: var(--font);
+      font-size: var(--text-body-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-2);
+      transition: color var(--transition-base);
+    }
+
+    .bp-choose:hover .bp-choose-name { color: var(--text-1); }
+
+    .bp-choose-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-2);
+      line-height: 1;
+    }
+
+    .bp-choose-plus { color: var(--text-3); }
+
+    /* the picker rows */
+    .bp-sheet-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      width: 100%;
+      padding: 12px 0;
+      background: none;
+      border: none;
+      border-bottom: 1px solid var(--border-light);
+      font-family: var(--font);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .bp-sheet-row:last-child { border-bottom: none; }
+
+    .bp-sheet-title {
+      flex: 1;
+      min-width: 0;
+      font-size: var(--text-body-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-1);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      transition: opacity var(--transition-base);
+    }
+
+    .bp-sheet-row:hover .bp-sheet-title { opacity: .65; }
+
+    .bp-sheet-date {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
+    .bp-sheet-empty {
+      font-size: var(--text-body-sm);
+      color: var(--text-3);
+      font-style: italic;
+      padding: 8px 0;
+    }
+
+    .bp-script-top-btns { display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* ── The distraction-free room — the teleprompter's overlay design,
+          expressed as a state of the SAME instrument: nothing moves,
+          the page just falls away ── */
+    .bp-full-progress {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(var(--ink-rgb), .08);
+      z-index: 302;
+    }
+
+    .bp-full-progress i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width .3s ease;
+    }
+
+    .bp-full-close {
+      display: none;
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 302;
+      background: none;
+      border: none;
+      color: var(--text-3);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: var(--r-cta);
+      transition: color var(--transition-base);
+    }
+
+    .bp-full-close:hover { color: var(--text-1); }
+
+    /* the page behind the room doesn't scroll — html is the real
+       scroller, so it gets the lock too (the :has pattern icons.js
+       already relies on) */
+    body.bp-full { overflow: hidden; }
+    html:has(body.bp-full) { overflow: hidden; }
+
+    /* the app chrome leaves the room — the overlay lives inside main's
+       stacking context, so the sidebar would otherwise paint over it */
+    body.bp-full .app-sidebar,
+    body.bp-full .sidebar-toggle,
+    body.bp-full .sidebar-overlay,
+    body.bp-full .mobile-brand,
+    body.bp-full .nav-sheet { display: none !important; }
+
+    body.bp-full .pacer-section {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      margin: 0;
+      padding: 56px clamp(24px, 6vw, 80px) 40px;
+      background: var(--paper-solid);
+      align-items: center;
+      justify-content: center;
+    }
+
+    body.bp-full .bp-full-progress,
+    body.bp-full .bp-full-close { display: block; }
+
+    body.bp-full #bp-faces { display: none; }
+
+    /* the room's window holds ~5 lines, like the inline face — a
+       fixed frame, never flex-grown: growth is what let the body's
+       padding floor overflow onto the transport */
+    body.bp-full .bp-script {
+      width: min(880px, 94vw);
+      height: 440px;
+      flex: none;
+      margin-inline: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.bp-full .bp-script-body {
+      flex: 1;
+      min-height: 0;
+      /* runway for first/last cues to reach center; the breath drives
+         the scroll — the wheel doesn't */
+      overflow: hidden;
+      padding-block: 190px;
+    }
+
+    body.bp-full .bp-line-text { font-size: 40px; }
+    body.bp-full .bp-line { padding: 14px 8px; gap: 20px; }
+    body.bp-full .bp-line-breath { width: 64px; }
+
+    body.bp-full #bp-full-btn,
+    body.bp-full #bp-change-btn { display: none; }
+
+    /* the sheet's name keeps the room's upper-left corner, opposite
+       the close */
+    body.bp-full .bp-script-top {
+      position: fixed;
+      top: 28px;
+      left: 32px;
+      z-index: 302;
+      margin: 0;
+    }
+
+    body.bp-full .bp-sheet-name { max-width: 40vw; }
+
     /* ── Controls card ── */
     .controls-card {
       margin-bottom: 20px;
@@ -114,6 +466,20 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
       display: flex;
       gap: 8px;
     }
+
+    /* ── First breath ── */
+    .ctl-first {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .ctl-first .ctl-label { margin: 0; }
+    .bp-first { margin-bottom: 0; align-self: auto; }
 
     /* ── Audio ── */
     .audio-btn {
@@ -190,18 +556,64 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
 
   <div class="wrap">
 
-    <!-- The instrument -->
-    <div class="pacer-section">
+    <!-- The instrument — one engine, two faces: the dial, or your
+         cues advancing one line per breath -->
+    <div class="pacer-section" id="pacer-section">
+
+      <!-- the distraction-free room's chrome — the teleprompter's
+           progress bar and close, visible only in full screen -->
+      <div class="bp-full-progress"><i id="bp-full-fill"></i></div>
+      <button type="button" class="bp-full-close" id="bp-full-close" title="Exit full screen" aria-label="Exit full screen">
+        <span class="material-symbols-sharp i-md">close</span>
+      </button>
+
+      <div class="bp-views" id="bp-faces" role="tablist" aria-label="Pacer view">
+        <button class="bp-view-btn active" data-view="breath" role="tab" aria-selected="true">Counter</button>
+        <button class="bp-view-btn" data-view="cues" role="tab" aria-selected="false">Cues</button>
+      </div>
+
       <svg class="pacer-svg" id="pacer-svg" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
         <g id="ticks"></g>
         <text id="svg-count" x="140" y="131">—</text>
         <text id="svg-label" x="140" y="173">READY</text>
       </svg>
+
+      <div class="bp-script" id="bp-script" hidden>
+
+        <div class="bp-script-top" id="bp-script-top" hidden>
+          <span class="bp-sheet-name" id="bp-sheet-name"></span>
+          <div class="bp-script-top-btns">
+            <button type="button" class="btn-icon" id="bp-change-btn" title="Change cue sheet" data-tooltip="Change sheet">
+              <span class="material-symbols-sharp i-sm">swap_horiz</span>
+            </button>
+            <button type="button" class="btn-icon" id="bp-full-btn" title="Full screen" data-tooltip="Full screen">
+              <span class="material-symbols-sharp i-sm">fullscreen</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="bp-script-body" id="bp-script-body" hidden></div>
+
+        <!-- nothing chosen yet — the door stands open -->
+        <button type="button" class="bp-choose" id="bp-choose-btn" hidden>
+          <span class="bp-choose-name">Read your cues</span>
+          <span class="bp-choose-label">Cues</span>
+          <span class="material-symbols-sharp bp-choose-plus i-md">add</span>
+        </button>
+
+      </div>
+
       <div class="bp-transport-row">
+        <div class="bp-transport-wrap">
+        <svg class="bp-ring" viewBox="0 0 72 72" aria-hidden="true">
+          <circle class="bp-ring-track" cx="36" cy="36" r="35" />
+          <circle class="bp-ring-fill" id="bp-ring-fill" cx="36" cy="36" r="35" />
+        </svg>
         <button class="bp-transport" id="toggle-btn" title="Start" aria-label="Start or stop the pacer">
           <!-- transport hero glyph: the one sanctioned off-token icon size -->
           <span class="material-symbols-sharp" id="toggle-icon" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;font-size:26px">play_arrow</span>
         </button>
+        </div>
       </div>
     </div>
     <div class="controls-card">
@@ -232,6 +644,16 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
 
 
       </div>
+
+      <!-- which breath the session opens on — a marked cue sheet sets
+           this itself when it loads -->
+      <div class="ctl-first">
+        <span class="ctl-label label-1">First Breath</span>
+        <div class="bp-views bp-first">
+          <button type="button" class="bp-view-btn active" data-first="inhale">Inhale</button>
+          <button type="button" class="bp-view-btn" data-first="exhale">Exhale</button>
+        </div>
+      </div>
     </div>
 
     <div class="why-card">
@@ -249,11 +671,23 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
   </div>
   </main>
 
+  <!-- ── CHOOSE A CUE SHEET ── -->
+  <div class="modal-backdrop" id="bp-sheet-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="bp-sheet-modal-heading">
+      <h3 id="bp-sheet-modal-heading">Read your cues</h3>
+      <p class="modal-hint">Pick a cue sheet. It advances one line per breath while the pacer runs.</p>
+      <div id="bp-sheet-list"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="bp-sheet-modal-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
 
   <script>
     // ─── STATE ───────────────────────────────────────────────────────────────────
 
-    const settings = { inhale: 4, exhale: 4, pause: 0 };
+    const settings = { inhale: 4, exhale: 4, pause: 0, firstBreath: 'inhale' };
 
     let running = false;
     let bpSessionTimer = null;
@@ -332,10 +766,11 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
 
     function getPhases() {
       const p = [];
-      p.push({ id: 'inhale', label: 'Inhale', dur: settings.inhale });
-      if (settings.pause > 0) p.push({ id: 'hold', label: 'Hold', dur: settings.pause });
-      p.push({ id: 'exhale', label: 'Exhale', dur: settings.exhale });
-      if (settings.pause > 0) p.push({ id: 'hold', label: 'Hold', dur: settings.pause });
+      const order = settings.firstBreath === 'exhale' ? ['exhale', 'inhale'] : ['inhale', 'exhale'];
+      order.forEach(id => {
+        p.push({ id: id, label: id === 'inhale' ? 'Inhale' : 'Exhale', dur: settings[id] });
+        if (settings.pause > 0) p.push({ id: 'hold', label: 'Hold', dur: settings.pause });
+      });
       return p;
     }
 
@@ -365,8 +800,12 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
 
     let lastTickState = { progress: 0, fromEnd: false };
 
+    const RING_C = 219.91; // 2πr, r = 35
+
     function setTickOpacity(progress, baseOpacity = 0.16, fromEnd = false) {
       lastTickState = { progress: progress, fromEnd: fromEnd };
+      const ring = document.getElementById('bp-ring-fill');
+      if (ring) ring.style.strokeDashoffset = (RING_C * (1 - progress)).toFixed(1);
       const litCount = Math.round(progress * TICK_COUNT);
       document.querySelectorAll('#ticks line').forEach((l, i) => {
         const lit = fromEnd ? i >= TICK_COUNT - litCount : i < litCount;
@@ -464,16 +903,214 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
         phaseIdx = (phaseIdx + 1) % phases.length;
         const nextPhase = phases[phaseIdx];
         lastPhaseSec = 0;
+        advanceScript(); // one breath, one line — may end the session
+        if (!running) return;
         playTick(nextPhase.id);
       }
 
       rafId = requestAnimationFrame(loop);
     }
 
+    // ─── CUES — the script face of the instrument ────────────────────────────────
+    // A cue sheet from Your Cues, read one line per breath: each phase
+    // change advances the script. The choice is remembered.
+
+    const BP_SHEET_KEY = 'fs-bp-sheet';
+    const INEX_LABELS = { IN: 'Inhale', EX: 'Exhale' };
+    let bpView = 'breath';
+    let bpSheet = null;      // the chosen sheet entry
+    let bpLines = [];        // [{breath, text}]
+    let bpLineIdx = 0;
+
+    function escHtml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function bpSheets() {
+      try {
+        const raw = JSON.parse(localStorage.getItem('fs-cue-flows') || '[]');
+        const list = Array.isArray(raw) ? raw : Object.keys(raw || {}).map(k => raw[k]);
+        return list.filter(Boolean).map((e, i) => {
+          if (e.id == null) e.id = (Date.parse(e.savedAt) || 0) + i;
+          return e;
+        });
+      } catch (e) { return []; }
+    }
+
+    // mirrors the cue pages' sentence builder, so every surface speaks
+    // identical lines
+    function bpBuildLine(r) {
+      const verb = (r.verb || '').trim();
+      const body = (r.body || '').trim();
+      const dir  = (r.dir  || '').trim();
+      if (!verb && !body && !dir) return null;
+      const bodyNorm = body && !/\byour\b/i.test(body) ? 'your ' + body : body;
+      let cue = [verb, bodyNorm, dir].filter(Boolean).join(' ');
+      if (cue.slice(-1) !== '.') cue += '.';
+      cue = cue.charAt(0).toUpperCase() + cue.slice(1);
+      return { breath: r.inex && INEX_LABELS[r.inex] ? INEX_LABELS[r.inex] : '', text: cue };
+    }
+
+    function setFirstBreath(v) {
+      settings.firstBreath = v;
+      document.querySelectorAll('.bp-first .bp-view-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.first === v);
+      });
+    }
+
+    function bpLoadSheet(id) {
+      bpSheet = bpSheets().find(e => e.id === id) || null;
+      bpLines = bpSheet ? (bpSheet.rows || []).map(bpBuildLine).filter(Boolean) : [];
+      bpLineIdx = 0;
+      if (bpSheet) localStorage.setItem(BP_SHEET_KEY, String(bpSheet.id));
+      // a marked sheet sets the session's first breath: the first line
+      // with an IN/EX mark decides, walked back to line one — breaths
+      // alternate, so a mark anywhere fixes the opening
+      for (let i = 0; i < bpLines.length; i++) {
+        if (!bpLines[i].breath) continue;
+        const marked = bpLines[i].breath === 'Exhale' ? 'exhale' : 'inhale';
+        const flip = v => (v === 'inhale' ? 'exhale' : 'inhale');
+        setFirstBreath(i % 2 === 0 ? marked : flip(marked));
+        break;
+      }
+      renderScript();
+    }
+
+    function renderScript() {
+      const has = !!(bpSheet && bpLines.length);
+      document.getElementById('bp-script-body').hidden = !has;
+      document.getElementById('bp-script-top').hidden = !has;
+      document.getElementById('bp-choose-btn').hidden = has;
+      if (!has) return;
+      document.getElementById('bp-sheet-name').textContent = bpSheet.name || 'Untitled';
+      const body = document.getElementById('bp-script-body');
+      body.innerHTML = bpLines.map((l, i) =>
+        '<div class="bp-line" data-idx="' + i + '">' +
+          '<span class="bp-line-breath">' + escHtml(l.breath) + '</span>' +
+          '<span class="bp-line-text">' + escHtml(l.text) + '</span>' +
+        '</div>'
+      ).join('');
+      body.querySelectorAll('.bp-line').forEach(el => {
+        el.addEventListener('click', () => {
+          if (running) return; // mid-session the breath owns the script
+          bpLineIdx = parseInt(el.dataset.idx, 10);
+          markScriptLine(false);
+        });
+      });
+      markScriptLine(true);
+    }
+
+    function markScriptLine(instant) {
+      const body = document.getElementById('bp-script-body');
+      body.querySelectorAll('.bp-line').forEach((el, i) => {
+        el.classList.toggle('current', i === bpLineIdx);
+        el.classList.toggle('past', i < bpLineIdx);
+      });
+      const cur = body.querySelector('.bp-line.current');
+      if (cur) {
+        // scroll the reading window only — never the page under it —
+        // measuring within the window, whatever the offset parent is
+        const rel = cur.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop;
+        const top = rel - body.clientHeight / 2 + cur.offsetHeight / 2;
+        body.scrollTo({ top: top, behavior: instant ? 'auto' : 'smooth' });
+      }
+      updateFullProgress();
+    }
+
+    // one breath, one line — called at every phase change while running.
+    // When the last line has had its full breath, the session ends
+    // itself: sound quiets, the transport returns to play.
+    function advanceScript() {
+      if (!bpLines.length) return;
+      if (bpLineIdx < bpLines.length - 1) {
+        bpLineIdx++;
+        markScriptLine(false);
+      } else if (bpView === 'cues') {
+        stopPacer();
+      }
+    }
+
+    function setView(view) {
+      bpView = view;
+      document.querySelectorAll('#bp-faces .bp-view-btn').forEach(b => {
+        const on = b.dataset.view === view;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.getElementById('pacer-svg').style.display = view === 'breath' ? '' : 'none';
+      document.getElementById('bp-script').hidden = view !== 'cues';
+      document.getElementById('pacer-section').classList.toggle('cues-face', view === 'cues');
+      if (view === 'cues' && bpSheet) markScriptLine(true);
+    }
+
+    document.querySelectorAll('#bp-faces .bp-view-btn').forEach(b => {
+      b.addEventListener('click', () => setView(b.dataset.view));
+    });
+
+    // ── the picker ──
+    function openSheetModal() {
+      const sheets = bpSheets().sort((a, b) => (Date.parse(b.savedAt) || 0) - (Date.parse(a.savedAt) || 0));
+      const list = document.getElementById('bp-sheet-list');
+      list.innerHTML = sheets.length
+        ? sheets.map(e => {
+            const d = new Date(e.savedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            return '<button type="button" class="bp-sheet-row" data-id="' + e.id + '">' +
+              '<span class="bp-sheet-title">' + escHtml(e.name || 'Untitled') + '</span>' +
+              '<span class="bp-sheet-date">' + d + '</span>' +
+            '</button>';
+          }).join('')
+        : '<p class="bp-sheet-empty">Nothing in Your Cues yet. Write a sheet there first.</p>';
+      list.querySelectorAll('.bp-sheet-row').forEach(row => {
+        row.addEventListener('click', () => {
+          bpLoadSheet(parseInt(row.dataset.id, 10));
+          closeSheetModal();
+        });
+      });
+      document.getElementById('bp-sheet-modal').removeAttribute('hidden');
+    }
+
+    function closeSheetModal() {
+      document.getElementById('bp-sheet-modal').setAttribute('hidden', '');
+    }
+
+    document.querySelectorAll('.bp-first .bp-view-btn').forEach(b => {
+      b.addEventListener('click', () => { if (!b.disabled) setFirstBreath(b.dataset.first); });
+    });
+
+    // ── the distraction-free room ──
+    function setFull(on) {
+      document.body.classList.toggle('bp-full', on);
+      if (on) {
+        setView('cues');
+        updateFullProgress();
+        if (bpSheet) markScriptLine(true);
+      }
+    }
+
+    function updateFullProgress() {
+      if (!document.body.classList.contains('bp-full')) return;
+      const pct = bpLines.length ? ((bpLineIdx + 1) / bpLines.length) * 100 : 0;
+      document.getElementById('bp-full-fill').style.width = pct + '%';
+    }
+
+    document.getElementById('bp-full-btn').addEventListener('click', () => setFull(true));
+    document.getElementById('bp-full-close').addEventListener('click', () => setFull(false));
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && document.body.classList.contains('bp-full')) setFull(false);
+    });
+
+    document.getElementById('bp-choose-btn').addEventListener('click', openSheetModal);
+    document.getElementById('bp-change-btn').addEventListener('click', openSheetModal);
+    document.getElementById('bp-sheet-modal-cancel').addEventListener('click', closeSheetModal);
+    document.getElementById('bp-sheet-modal').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeSheetModal();
+    });
+
     // ─── CONTROLS ────────────────────────────────────────────────────────────────
 
     function setControlsDisabled(disabled) {
       document.querySelectorAll('.time-btn').forEach(b => b.disabled = disabled);
+      document.querySelectorAll('.bp-first .bp-view-btn').forEach(b => b.disabled = disabled);
       document.getElementById('inhale-slider').disabled = disabled;
       document.getElementById('exhale-slider').disabled = disabled;
     }
@@ -485,19 +1122,24 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
       btn.classList.toggle('running', isRunning);
     }
 
+    function stopPacer() {
+      clearTimeout(bpSessionTimer);
+      running = false;
+      cancelAnimationFrame(rafId);
+      phaseIdx = 0;
+      elapsed = 0;
+      lastTs = null;
+      lastPhaseSec = -1;
+      resetDisplay(true);
+      bpLineIdx = 0;
+      if (bpSheet) markScriptLine(false);
+      setControlsDisabled(false);
+      setToggleState(false);
+    }
+
     document.getElementById('toggle-btn').addEventListener('click', async () => {
       if (running) {
-        // Stop — full reset
-        clearTimeout(bpSessionTimer);
-        running = false;
-        cancelAnimationFrame(rafId);
-        phaseIdx = 0;
-        elapsed = 0;
-        lastTs = null;
-        lastPhaseSec = -1;
-        resetDisplay(true);
-        setControlsDisabled(false);
-        setToggleState(false);
+        stopPacer();
       } else {
         // Start fresh — it counts as a session after 60 real seconds
         clearTimeout(bpSessionTimer);
@@ -563,6 +1205,17 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
     // ─── INIT ────────────────────────────────────────────────────────────────────
 
     buildTicks();
+    // arriving from a cue sheet's Practice button: that sheet loads
+    // and the script face is already up
+    const _bpParam = parseInt(new URLSearchParams(window.location.search).get('sheet'), 10);
+    if (!isNaN(_bpParam)) {
+      bpLoadSheet(_bpParam);
+      if (bpSheet) setView('cues');
+    } else {
+      const _bpRemembered = parseInt(localStorage.getItem(BP_SHEET_KEY), 10);
+      if (!isNaN(_bpRemembered)) bpLoadSheet(_bpRemembered);
+    }
+    renderScript();
   </script>
   <script src="lib/tracker.js"></script>
 

@@ -2476,7 +2476,11 @@ function init() {
   document.getElementById('cd-edit-btn').addEventListener('click', () => {
     if (sheetId != null) openEdit(sheetId, true);
   });
-  document.getElementById('cd-pol-btn').addEventListener('click', openPOL);
+  // practice moved home: the breath pacer reads this sheet, paced by
+  // breath instead of words-per-minute
+  document.getElementById('cd-pol-btn').addEventListener('click', () => {
+    if (sheetId != null) window.location.href = 'breath-pace?sheet=' + sheetId;
+  });
   const cdMenu = fsWireItemMenu(document.getElementById('cd-menu'), {
     items: () => {
       const e = getSheets().find(x => x.id === sheetId) || {};
