@@ -311,13 +311,13 @@
     }
 
     .cw-story-item-title {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: .04em;
-      color: var(--text-3);
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+      font-size: var(--fs-h6);
+      font-weight: var(--weight-medium);
+      letter-spacing: -.01em;
+      line-height: var(--lh-heading);
+      color: var(--text-1);
+      overflow-wrap: break-word;
+      min-width: 0;
     }
 
     .cw-story-item-text {
@@ -735,6 +735,16 @@
     .tv-title-fav svg { fill: currentColor; }
 
     /* attached stories carry their formatting into the teach view */
+    .tv-story-title {
+      font-size: var(--fs-h6);
+      font-weight: var(--weight-medium);
+      letter-spacing: -.01em;
+      line-height: var(--lh-heading);
+      color: var(--text-1);
+      overflow-wrap: break-word;
+      margin-bottom: 8px;
+    }
+
     .tv-story-text p { margin: 0 0 .9em; }
     .tv-story-text p:last-child { margin-bottom: 0; }
     .tv-story-text ul { list-style: disc; }

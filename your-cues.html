@@ -1188,6 +1188,7 @@ const WB = {
     'your left arm','your right arm','your left foot','your right foot',
     'your left hand','your right hand','your left knee','your right knee',
     'your left leg','your right leg','your left shoulder','your right shoulder',
+    'your left toes','your right toes',
     'your left wrist','your right wrist','your low belly','your low ribs',
     'your palms','your pelvis','your ribs','your shin','your shoulder blades',
     'your shoulders','your sit bones','your spine','your tailbone','your toes',
@@ -1431,6 +1432,20 @@ function addRow() {
     const inp = last.querySelector('.verb-input');
     if (inp) inp.focus();
   }
+}
+
+// right-click's gift: a row lands exactly where you asked, its
+// breath prefilled opposite its upstairs neighbor
+function insertRowAt(i) {
+  const next = makeRow();
+  const prev = rows[i - 1];
+  if (prev && prev.inex === 'IN') next.inex = 'EX';
+  else if (prev && prev.inex === 'EX') next.inex = 'IN';
+  rows.splice(i, 0, next);
+  renderRows();
+  markDirty();
+  const el = document.querySelectorAll('.cue-row')[i];
+  if (el) { const inp = el.querySelector('.verb-input'); if (inp) inp.focus(); }
 }
 
 function removeRow(i) {
@@ -2266,7 +2281,10 @@ const CUE_SH = (function () {
 
   function onKey(ev) {
     if (panel.hidden || state.el !== ev.target) return;
-    if (ev.key === 'Tab') { ev.preventDefault(); insert(state.sel === -1 ? 0 : state.sel); }
+    // Tab is for the grid, not the menu: it dismisses the panel and
+    // walks to the next column, so free typing never gets hijacked.
+    // Enter (or arrows + Enter) is how a suggestion is taken.
+    if (ev.key === 'Tab') { state.dismissedEl = ev.target; state.dismissedVal = ev.target.value; hide(); }
     else if (ev.key === 'ArrowDown') { ev.preventDefault(); state.sel = (state.sel + 1) % state.items.length; render(); }
     else if (ev.key === 'ArrowUp') { ev.preventDefault(); state.sel = state.sel <= 0 ? state.items.length - 1 : state.sel - 1; render(); }
     else if (ev.key === 'Enter') { ev.preventDefault(); insert(state.sel === -1 ? 0 : state.sel); }
@@ -2352,7 +2370,11 @@ document.getElementById('wb-toggle').addEventListener('click', function () {
     if (e.key === 'Enter') {
       e.preventDefault();
       if (e.shiftKey) { if (ri > 0) focusCell(allRows[ri - 1], ci); return; }
-      if (ri < allRows.length - 1) { focusCell(allRows[ri + 1], ci); return; }
+      // Enter is a carriage return from anywhere in the row — the
+      // next row starts at its verb. (When the suggest panel is open
+      // it consumes Enter first, so taking a suggestion still wins.)
+      const tc = 1;
+      if (ri < allRows.length - 1) { focusCell(allRows[ri + 1], tc); return; }
       // the sheet grows from its last row — same guard as Tab: only a
       // row with something in it earns a new one
       const r = rows[rows.length - 1];
@@ -2360,7 +2382,7 @@ document.getElementById('wb-toggle').addEventListener('click', function () {
       addRow();
       markDirty();
       const grown = rowsEl.querySelectorAll('.cue-row');
-      focusCell(grown[grown.length - 1], ci);
+      focusCell(grown[grown.length - 1], tc);
       return;
     }
 
@@ -2465,6 +2487,43 @@ function init() {
       this.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
   });
+
+  // ── right-click on a row: add above / below ──
+  const ctxMenu = document.createElement('div');
+  ctxMenu.className = 'ws-menu';
+  ctxMenu.hidden = true;
+  ctxMenu.style.position = 'fixed';
+  ctxMenu.style.right = 'auto';
+  document.body.appendChild(ctxMenu);
+  let ctxIdx = null;
+
+  function closeCtx() { ctxMenu.hidden = true; }
+
+  document.getElementById('ws-scroll').addEventListener('contextmenu', e => {
+    const row = e.target.closest('.cue-row');
+    if (!row) return;
+    e.preventDefault();
+    ctxIdx = parseInt(row.dataset.idx, 10);
+    ctxMenu.innerHTML =
+      '<button class="ws-menu-item" data-ctx="above"><span class="material-symbols-sharp">keyboard_arrow_up</span>Add row above</button>' +
+      '<button class="ws-menu-item" data-ctx="below"><span class="material-symbols-sharp">keyboard_arrow_down</span>Add row below</button>';
+    ctxMenu.hidden = false;
+    // seat it at the cursor, nudged inside the viewport
+    const mw = 214, mh = 96;
+    ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - mw - 8) + 'px';
+    ctxMenu.style.top = Math.min(e.clientY, window.innerHeight - mh - 8) + 'px';
+  });
+
+  ctxMenu.addEventListener('click', e => {
+    const item = e.target.closest('.ws-menu-item');
+    if (!item || ctxIdx == null) return;
+    closeCtx();
+    insertRowAt(item.dataset.ctx === 'above' ? ctxIdx : ctxIdx + 1);
+  });
+
+  document.addEventListener('click', () => { if (!ctxMenu.hidden) closeCtx(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCtx(); });
+  window.addEventListener('scroll', closeCtx, true);
 
   // the editor's draft controls — the sibling editors' contract
   document.getElementById('cancel-btn').addEventListener('click', leaveSheet);
