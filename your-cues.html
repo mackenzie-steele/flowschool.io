@@ -999,22 +999,7 @@
       <h4 class="cd-title" id="cd-title"></h4>
       <p class="cd-meta" id="cd-meta"></p>
 
-      <div class="wsf cd-flowref" id="cd-flowref" hidden>
-        <button type="button" class="wsf-head" id="cd-flowref-toggle" aria-expanded="false" aria-controls="cd-flowref-body">
-          <span class="wsf-context">
-            <span class="wsf-name" id="cd-flowref-name"></span>
-            <span class="flow-tag" id="cd-flowref-tag"></span>
-          </span>
-          <span class="wsf-title">Flow</span>
-          <span class="material-symbols-sharp wsf-chev i-md">expand_more</span>
-        </button>
-        <div class="wsf-body" id="cd-flowref-body" hidden>
-          <div class="ws-flowref-text" id="cd-flowref-text"></div>
-          <div class="wsf-foot">
-            <a id="cd-flowref-open" href="your-flows">Open in Your Flows</a>
-          </div>
-        </div>
-      </div>
+      <div class="cd-flowref" id="cd-flowrefs"></div>
 
       <div class="cd-cues" id="cd-cues"></div>
 
@@ -1052,7 +1037,7 @@
 
   <!-- nothing linked yet — the empty drawer stands where the flow
        will: same bar, dashed, holding the door open -->
-  <button type="button" class="wsf-head wsf-empty" id="ws-attach-btn" hidden>
+  <button type="button" class="wsf-head wsf-empty" id="ws-attach-btn">
     <span class="wsf-name wsf-empty-name">Attach a flow</span>
     <span class="wsf-title">Flow</span>
     <span class="material-symbols-sharp wsf-chev i-md">add</span>
@@ -1062,25 +1047,7 @@
 
   <!-- the imported flow — the poses this poem moves people through.
        Linked from Your Flows; the link rides with the saved worksheet. -->
-  <div class="wsf wsf-editable" id="ws-flowref" hidden>
-    <button type="button" class="wsf-head" id="ws-flowref-toggle" aria-expanded="false" aria-controls="ws-flowref-body">
-      <span class="wsf-context">
-        <span class="wsf-name" id="ws-flowref-name"></span>
-        <span class="flow-tag" id="ws-flowref-tag"></span>
-      </span>
-      <span class="wsf-title">Flow</span>
-      <span class="material-symbols-sharp wsf-chev i-md">expand_more</span>
-    </button>
-    <button type="button" class="wsf-x" id="ws-flowref-x" title="Detach flow" data-tooltip="Detach flow" aria-label="Detach flow">
-      <span class="material-symbols-sharp i-sm">close</span>
-    </button>
-    <div class="wsf-body" id="ws-flowref-body" hidden>
-      <div class="ws-flowref-text" id="ws-flowref-text"></div>
-      <div class="wsf-foot">
-        <a id="ws-flowref-open" href="your-flows">Open in Your Flows</a>
-      </div>
-    </div>
-  </div>
+  <div id="ws-flowrefs"></div>
 
   <div class="ws-card" id="ws-card">
     <div class="ws-scroll" id="ws-scroll">
@@ -1377,7 +1344,9 @@ let sheetId = null; // the open sheet's id; null = a new, unsaved sheet
 
 // fs-cue-flows history: originally an object keyed by sheet NAME. The
 // library restructure (Jul 2026) made sheets id-keyed — an ARRAY of
-// {id, name, rows, flowId, savedAt} — so renames stop breaking links.
+// {id, name, rows, flowIds: [], savedAt} — so renames stop breaking
+// links. flowIds is many-to-many (Jul 2026): a sheet may serve several
+// flows; the single legacy flowId folds into the array on read.
 // Ids derive deterministically from savedAt, so every reader that
 // normalizes the old shape lands on the same ids.
 function normalizeSheets(raw) {
@@ -1385,6 +1354,8 @@ function normalizeSheets(raw) {
   return list.filter(Boolean).map((e, i) => {
     if (e.id == null) e.id = (Date.parse(e.savedAt) || 0) + i;
     if (e.editedAt == null) e.editedAt = Date.parse(e.savedAt) || e.id;
+    if (e.flowIds == null) e.flowIds = (e.flowId != null ? [e.flowId] : []);
+    delete e.flowId;
     return e;
   });
 }
@@ -1405,7 +1376,7 @@ function setSheets(list) {
 
 let rows = [];
 const confirmDiscard = typeof fsWireDiscardModal === 'function' ? fsWireDiscardModal() : (cb => cb(true));
-let linkedFlowId = null; // the Your Flows flow this poem moves people through
+let linkedFlowIds = []; // the Your Flows flows this sheet moves people through
 let activeInput = null; // last focused .cue-input
 let polIndex = 0;
 let wbTab = 'verbs';
@@ -1726,13 +1697,19 @@ function renderList() {
     const f = id != null ? lib.find(x => x.id === id) : null;
     return f ? (f.name || 'Untitled Flow') : '';
   };
+  // several flows summarize as the first name plus a count
+  const flowNamesFor = e => {
+    const names = (e.flowIds || []).map(flowNameOf).filter(Boolean);
+    if (!names.length) return '';
+    return names[0] + (names.length > 1 ? ' +' + (names.length - 1) : '');
+  };
 
   let sheets = all.slice().sort(fsSorterFor(fsSortMode(SORT_KEY)));
   if (favOnly) sheets = sheets.filter(e => e.pinned);
   if (q) {
     sheets = sheets.filter(e =>
       (e.name || '').toLowerCase().indexOf(q) !== -1 ||
-      flowNameOf(e.flowId).toLowerCase().indexOf(q) !== -1);
+      (e.flowIds || []).some(fid => flowNameOf(fid).toLowerCase().indexOf(q) !== -1));
   }
 
   document.getElementById('result-count').textContent =
@@ -1748,7 +1725,7 @@ function renderList() {
 
   index.innerHTML = sheets.map(e => {
     const n = (e.rows || []).filter(rowHasWork).length;
-    const meta = [n + (n === 1 ? ' cue' : ' cues'), flowNameOf(e.flowId), fsFmtDate(Date.parse(e.savedAt))]
+    const meta = [n + (n === 1 ? ' cue' : ' cues'), flowNamesFor(e), fsFmtDate(Date.parse(e.savedAt))]
       .filter(Boolean).join(' \u00B7 ');
     // the card speaks the sheet's first sentences — the artifact,
     // not just its filing
@@ -1779,27 +1756,18 @@ function showList(push) {
 function renderDetail(e) {
   document.getElementById('cd-title').innerHTML = esc(e.name || 'Untitled') +
     (e.pinned ? '<span class="material-symbols-sharp fav-mark lg">favorite</span>' : '');
-  const flow = e.flowId != null ? loadFlowLib().find(x => x.id === e.flowId) : null;
+  const lib2 = loadFlowLib();
+  const names = (e.flowIds || [])
+    .map(fid => { const f2 = lib2.find(x => x.id === fid); return f2 ? (f2.name || 'Untitled Flow') : ''; })
+    .filter(Boolean);
+  const nameSummary = names.length ? names[0] + (names.length > 1 ? ' +' + (names.length - 1) : '') : '';
   const n = (e.rows || []).filter(rowHasWork).length;
   document.getElementById('cd-meta').textContent =
-    [n + (n === 1 ? ' cue' : ' cues'), flow ? (flow.name || 'Untitled Flow') : '', fsFmtDate(Date.parse(e.savedAt))]
+    [n + (n === 1 ? ' cue' : ' cues'), nameSummary, fsFmtDate(Date.parse(e.savedAt))]
       .filter(Boolean).join(' \u00B7 ');
 
-  // the linked flow rides along, read-only here
-  const ref = document.getElementById('cd-flowref');
-  const refBody = document.getElementById('cd-flowref-body');
-  refBody.hidden = true;
-  refBody._fsUnfoldOpen = false;
-  document.getElementById('cd-flowref-toggle').setAttribute('aria-expanded', 'false');
-  if (flow) {
-    document.getElementById('cd-flowref-name').textContent = flow.name || 'Untitled Flow';
-    document.getElementById('cd-flowref-tag').textContent = FLOW_TAGS[flow.type] || '';
-    document.getElementById('cd-flowref-text').textContent = flow.text || '';
-    document.getElementById('cd-flowref-open').href = 'your-flows?id=' + flow.id;
-    ref.removeAttribute('hidden');
-  } else {
-    ref.setAttribute('hidden', '');
-  }
+  // the linked flows ride along, read-only here — one drawer each
+  renderFlowStack('cd-flowrefs', e.flowIds || [], false);
 
   // every worked row displays: full sentences read as prose, rows
   // holding only a pose read as shorthand
@@ -1836,7 +1804,7 @@ function showDetail(id, push) {
   sheetId = e.id;
   flowName = e.name || '';
   rows = (e.rows || []).map(r => Object.assign(makeRow(), r));
-  linkedFlowId = e.flowId != null ? e.flowId : null;
+  linkedFlowIds = (e.flowIds || []).slice();
   fsSwapView(cueViews(), document.getElementById('detail-view'), () => renderDetail(e));
   document.title = (flowName || 'Untitled') + ' \u2014 Flow School';
   if (push) history.pushState({}, '', 'your-cues?id=' + id);
@@ -1848,7 +1816,7 @@ function openEdit(id, push) {
   sheetId = e.id;
   flowName = e.name || '';
   rows = (e.rows || []).map(r => Object.assign(makeRow(), r));
-  linkedFlowId = e.flowId != null ? e.flowId : null;
+  linkedFlowIds = (e.flowIds || []).slice();
   fsSwapView(cueViews(), document.getElementById('sheet-view'), () => {
     document.getElementById('cue-title').value = flowName;
     renderRows();
@@ -1865,7 +1833,7 @@ function openEdit(id, push) {
 function newSheet(push) {
   sheetId = null;
   flowName = '';
-  linkedFlowId = null;
+  linkedFlowIds = [];
   initRows(INITIAL_ROWS);
   fsSwapView(cueViews(), document.getElementById('sheet-view'), () => {
     document.getElementById('cue-title').value = '';
@@ -1915,47 +1883,83 @@ function route() {
   showList(false);
 }
 
-// the attached flow in the editor — the card when linked, the quiet
-// attach line when not
-function renderFlowRef() {
-  const wrap = document.getElementById('ws-flowref');
-  const attach = document.getElementById('ws-attach-btn');
-  const body = document.getElementById('ws-flowref-body');
-  const f = linkedFlowId != null ? loadFlowLib().find(x => x.id === linkedFlowId) : null;
-  attach.hidden = !!f;
-  body.hidden = true;
-  body._fsUnfoldOpen = false;
-  document.getElementById('ws-flowref-toggle').setAttribute('aria-expanded', 'false');
-  if (!f) { wrap.setAttribute('hidden', ''); return; }
-  document.getElementById('ws-flowref-name').textContent = f.name || 'Untitled Flow';
-  document.getElementById('ws-flowref-tag').textContent = FLOW_TAGS[f.type] || '';
-  document.getElementById('ws-flowref-text').textContent = f.text || '';
-  document.getElementById('ws-flowref-open').href = 'your-flows?id=' + f.id;
-  wrap.removeAttribute('hidden');
+// one drawer per attached flow — the same anatomy, stacked. The
+// attach door stays open below; a sheet may serve several flows.
+function flowDrawerHtml(f, editable) {
+  return '<div class="wsf' + (editable ? ' wsf-editable' : '') + '" data-fid="' + f.id + '">' +
+    '<button type="button" class="wsf-head" aria-expanded="false">' +
+      '<span class="wsf-context">' +
+        '<span class="wsf-name">' + esc(f.name || 'Untitled Flow') + '</span>' +
+        '<span class="flow-tag">' + esc(FLOW_TAGS[f.type] || '') + '</span>' +
+      '</span>' +
+      '<span class="wsf-title">Flow</span>' +
+      '<span class="material-symbols-sharp wsf-chev i-md">expand_more</span>' +
+    '</button>' +
+    (editable ? '<button type="button" class="wsf-x" data-detach="' + f.id + '" title="Detach flow" data-tooltip="Detach flow" aria-label="Detach flow"><span class="material-symbols-sharp i-sm">close</span></button>' : '') +
+    '<div class="wsf-body" hidden>' +
+      '<div class="ws-flowref-text">' + esc(f.text || '') + '</div>' +
+      '<div class="wsf-foot"><a href="your-flows?id=' + f.id + '">Open in Your Flows</a></div>' +
+    '</div>' +
+  '</div>';
 }
+
+function renderFlowStack(containerId, ids, editable) {
+  const lib = loadFlowLib();
+  const flows = ids.map(id => lib.find(x => x.id === id)).filter(Boolean);
+  document.getElementById(containerId).innerHTML =
+    flows.map(f => flowDrawerHtml(f, editable)).join('');
+}
+
+function renderFlowRef() {
+  renderFlowStack('ws-flowrefs', linkedFlowIds, true);
+}
+
+// one delegated ear per stack: heads unfold, the x detaches (editor)
+['ws-flowrefs', 'cd-flowrefs'].forEach(cid => {
+  document.getElementById(cid).addEventListener('click', e => {
+    const x = e.target.closest('.wsf-x');
+    if (x) {
+      linkedFlowIds = linkedFlowIds.filter(id => id !== parseInt(x.dataset.detach, 10));
+      renderFlowRef();
+      markDirty();
+      showToast('Flow detached.');
+      return;
+    }
+    const head = e.target.closest('.wsf-head');
+    if (!head) return;
+    const body = head.parentElement.querySelector('.wsf-body');
+    const open = head.getAttribute('aria-expanded') !== 'true';
+    fsUnfold(body, open);
+    head.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+});
 
 function openImportModal() {
   const flows = loadFlowLib().sort((a, b) => (b.editedAt || b.id) - (a.editedAt || a.id));
   const list = document.getElementById('ws-import-list');
-  // one flow, one sheet — a flow with another sheet is spoken for
-  const takenBy = {};
+  // links are many-to-many now — a flow's other sheets are information,
+  // not a lock; only flows already on THIS sheet sit out
+  const linkedBy = {};
   getSheets().forEach(e => {
-    if (e.flowId != null && e.id !== sheetId) takenBy[e.flowId] = e.name || 'Untitled';
+    if (e.id === sheetId) return;
+    (e.flowIds || []).forEach(fid => { if (!linkedBy[fid]) linkedBy[fid] = e.name || 'Untitled'; });
   });
   list.innerHTML = flows.length
     ? flows.map(f => {
-        const taken = takenBy[f.id] != null;
-        return `<div class="flow-list-item${taken ? ' taken' : ''}"${taken ? '' : ` data-fid="${f.id}"`}>
+        const attached = linkedFlowIds.indexOf(f.id) !== -1;
+        const info = attached ? 'Attached'
+          : (linkedBy[f.id] ? 'Also cued by ' + esc(linkedBy[f.id]) : (FLOW_TAGS[f.type] || ''));
+        return `<div class="flow-list-item${attached ? ' taken' : ''}"${attached ? '' : ` data-fid="${f.id}"`}>
           <div class="flow-list-info">
             <div class="flow-list-name">${esc(f.name || 'Untitled Flow')}</div>
-            <div class="flow-list-date">${taken ? 'Linked to ' + esc(takenBy[f.id]) : (FLOW_TAGS[f.type] || '')}</div>
+            <div class="flow-list-date">${info}</div>
           </div>
         </div>`;
       }).join('')
     : '<div class="flow-list-empty">No flows in your library yet. Write one in Your Flows first.</div>';
   list.querySelectorAll('.flow-list-item:not(.taken)').forEach(el => {
     el.addEventListener('click', () => {
-      linkedFlowId = parseInt(el.dataset.fid, 10);
+      linkedFlowIds.push(parseInt(el.dataset.fid, 10));
       renderFlowRef();
       closeImportModal();
       markDirty();
@@ -2009,13 +2013,9 @@ function saveSheet() {
     }
     e.name = name;
     e.rows = rows;
-    e.flowId = linkedFlowId;
+    e.flowIds = linkedFlowIds.slice();
     e.savedAt = new Date().toISOString();
     e.editedAt = Date.now();
-    // one flow, one sheet — saving this link releases any other sheet's
-    if (linkedFlowId != null) {
-      list.forEach(o => { if (o.id !== e.id && o.flowId === linkedFlowId) o.flowId = null; });
-    }
     setSheets(list);
     dirty = false;
     setSaveButton('saved');
@@ -2540,15 +2540,6 @@ function init() {
   // Check my cues
 
 
-  // the flow drawers unfold with their chevrons
-  [['ws-flowref-toggle', 'ws-flowref-body'], ['cd-flowref-toggle', 'cd-flowref-body']].forEach(pair => {
-    document.getElementById(pair[0]).addEventListener('click', function () {
-      const open = this.getAttribute('aria-expanded') !== 'true';
-      fsUnfold(document.getElementById(pair[1]), open);
-      this.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-  });
-
   // ── right-click on a row: add above / below ──
   const ctxMenu = document.createElement('div');
   ctxMenu.className = 'ws-menu';
@@ -2656,12 +2647,6 @@ function init() {
   document.getElementById('ws-import-modal-cancel').addEventListener('click', closeImportModal);
   document.getElementById('ws-import-modal').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeImportModal();
-  });
-  document.getElementById('ws-flowref-x').addEventListener('click', () => {
-    linkedFlowId = null;
-    renderFlowRef();
-    markDirty();
-    showToast('Flow detached.');
   });
 
 

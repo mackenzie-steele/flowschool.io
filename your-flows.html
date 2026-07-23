@@ -279,10 +279,45 @@
       padding: 16px 20px 20px;
     }
 
-    .fd-cues-body p {
+    .fd-cues-wrap .fd-cues { margin-bottom: 12px; }
+    .fd-cues-wrap:empty { display: none; }
+
+    .fd-cue {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 8px 0;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .fd-cue:first-child { border-top: none; padding-top: 0; }
+
+    .fd-cue-breath {
+      flex-shrink: 0;
+      width: 46px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    .fd-cue-text {
+      flex: 1;
+      min-width: 0;
       font-size: var(--text-body-sm);
-      line-height: 1.7;
-      color: var(--text-2);
+      line-height: 1.6;
+      color: var(--text-1);
+      overflow-wrap: break-word;
+    }
+
+    .fd-cue-pose {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--text-3);
     }
 
     .fd-cues-none { font-style: italic; color: var(--text-3); }
@@ -825,14 +860,7 @@
              above. One link, owned by the sheet (fs-cue-flows entry.flowId):
              attaching here writes the same link Your Cues' Attach a Flow
              does, so both doors open the same room. Folded until wanted. -->
-        <div class="fd-cues">
-          <button type="button" class="fd-cues-head" id="fd-cues-toggle" aria-expanded="false" aria-controls="fd-cues-body" hidden>
-            <span class="fd-cues-name" id="fd-cues-label"></span>
-            <span class="fd-cues-title">Cues</span>
-            <span class="material-symbols-sharp fd-cues-chev i-md">expand_more</span>
-          </button>
-          <div class="fd-cues-body" id="fd-cues-body" hidden></div>
-        </div>
+        <div class="fd-cues-wrap" id="fd-cues-stack"></div>
 
         <div class="fd-usedin">
           <span class="label-1">In Your Classes</span>
@@ -894,21 +922,13 @@
         <!-- the cue sheet rides along in the editor too — same drawer
              as the viewer, same link. Hidden for unsaved flows: there's
              no flow id to attach to yet. -->
-        <div class="fd-cues fd-cues-editable" id="fl-cues" hidden>
-          <button type="button" class="fd-cues-head" id="fl-cues-toggle" aria-expanded="false" aria-controls="fl-cues-body" hidden>
-            <span class="fd-cues-name" id="fl-cues-label"></span>
-            <span class="fd-cues-title">Cues</span>
-            <span class="material-symbols-sharp fd-cues-chev i-md">expand_more</span>
-          </button>
-          <button type="button" class="fd-cues-x" id="fl-cues-x" title="Detach cues" data-tooltip="Detach cues" aria-label="Detach cues" hidden>
-            <span class="material-symbols-sharp i-sm">close</span>
-          </button>
-          <button type="button" class="fd-cues-head fd-cues-empty" id="fl-cues-attach" hidden>
+        <div class="fl-section" id="fl-cues" hidden>
+          <div class="fd-cues-wrap" id="fl-cues-stack"></div>
+          <button type="button" class="fd-cues-head fd-cues-empty" id="fl-cues-attach">
             <span class="fd-cues-name fd-cues-empty-name">Attach cues</span>
             <span class="fd-cues-title">Cues</span>
             <span class="material-symbols-sharp fd-cues-chev i-md">add</span>
           </button>
-          <div class="fd-cues-body" id="fl-cues-body" hidden></div>
         </div>
 
         <!-- Elements of Flow — Peak Flows only. Optional checklist; checked
@@ -1309,6 +1329,8 @@
         var list = Array.isArray(raw) ? raw : Object.keys(raw || {}).map(function (k) { return raw[k]; });
         return list.filter(Boolean).map(function (e, i) {
           if (e.id == null) e.id = (Date.parse(e.savedAt) || 0) + i;
+          if (e.flowIds == null) e.flowIds = (e.flowId != null ? [e.flowId] : []);
+          delete e.flowId;
           return e;
         });
       } catch (e) { return []; }
@@ -1317,94 +1339,118 @@
       localStorage.setItem('fs-cue-flows', JSON.stringify(list));
     }
     function loadFlows2() { return flows; }
-    function cueSheetFor(flowId) {
-      var hits = cueStore()
-        .filter(function (e) { return e.flowId === flowId; })
+    function cueSheetsFor(flowId) {
+      return cueStore()
+        .filter(function (e) { return (e.flowIds || []).indexOf(flowId) !== -1; })
         .sort(function (a, b) { return new Date(b.savedAt) - new Date(a.savedAt); });
-      return hits[0] || null;
     }
-    function cueLines(entry) {
-      return (entry.rows || []).map(function (r) {
-        var verb = (r.verb || '').trim();
-        var body = (r.body || '').trim();
-        var dir  = (r.dir  || '').trim();
-        if (!verb && !body && !dir) {
-          // a row that's only a pose reads as shorthand
-          return (r.pose || '').trim().toUpperCase();
-        }
+    var CUE_INEX = { IN: 'Inhale', EX: 'Exhale' };
+
+    // one row's parts, the cue viewer's grammar: the sentence (pose
+    // appended with its own period), or the pose alone reading in line
+    function cueLineParts(r) {
+      var verb = (r.verb || '').trim();
+      var body = (r.body || '').trim();
+      var dir  = (r.dir  || '').trim();
+      var pose = (r.pose || '').trim();
+      if (!verb && !body && !dir && !pose) return null;
+      var sentence = '';
+      if (verb || body || dir) {
         var bodyNorm = body && !/\byour\b/i.test(body) ? 'your ' + body : body;
-        var cue = [verb, bodyNorm, dir].filter(Boolean).join(' ');
-        if (cue.slice(-1) !== '.') cue += '.';
-        return cue.charAt(0).toUpperCase() + cue.slice(1);
-      }).filter(Boolean);
+        sentence = [verb, bodyNorm, dir].filter(Boolean).join(' ');
+        if (sentence.slice(-1) !== '.') sentence += '.';
+        sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+      }
+      var line = sentence || pose;
+      if (sentence && pose) line = sentence + ' ' + pose + '.';
+      return { breath: CUE_INEX[r.inex] || '', line: line, pose: pose };
     }
 
-    // a NEW flow has no id for a cue sheet to point at yet, so its
-    // chosen sheet waits here and the link lands on first save.
-    // Dropped with the draft if the flow is discarded.
-    var pendingCueId = null;
+    // a NEW flow has no id for cue sheets to point at yet, so chosen
+    // sheets wait here and the links land on first save. Dropped with
+    // the draft if the flow is discarded.
+    var pendingCueIds = [];
 
-    function editorCueEntry() {
+    function editorCueEntries() {
       if (editingId != null) {
         var f = byId(editingId);
-        return f ? cueSheetFor(f.id) : null;
+        return f ? cueSheetsFor(f.id) : [];
       }
-      if (pendingCueId == null) return null;
-      return cueStore().find(function (x) { return x.id === pendingCueId; }) || null;
+      var all = cueStore();
+      return pendingCueIds
+        .map(function (id) { return all.find(function (x) { return x.id === id; }); })
+        .filter(Boolean);
     }
 
-    // one drawer, two rooms — the viewer ('fd') and the editor ('fl')
-    // render through the same code against their own ids
-    function renderCuesUI(p, entry) {
-      var toggle = document.getElementById(p + '-cues-toggle');
-      var attach = document.getElementById(p + '-cues-attach');
-      var body   = document.getElementById(p + '-cues-body');
-      var x      = document.getElementById(p + '-cues-x');
-      body.hidden = true;
-      body._fsUnfoldOpen = false;
-      toggle.setAttribute('aria-expanded', 'false');
-      toggle.hidden = !entry;
-      if (attach) attach.hidden = !!entry;
-      if (x) x.hidden = !entry;
-      if (!entry) { body.innerHTML = ''; return; }
-      document.getElementById(p + '-cues-label').textContent = entry.name || 'Untitled';
-      var lines = cueLines(entry);
-      body.innerHTML =
-        (lines.length
-          ? lines.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('')
-          : '<p class="fd-cues-none">Nothing written on this sheet yet.</p>') +
-        '<div class="fd-cues-foot">' +
-          '<a href="your-cues?edit=' + entry.id + '">Edit in Your Cues</a>' +
-        '</div>';
+    // a drawer per attached sheet, stacked; the editor's wear the x
+    function cueDrawerHtml(entry, editable) {
+      var parts = (entry.rows || []).map(cueLineParts).filter(Boolean);
+      var hasBreath2 = parts.some(function (x) { return x.breath; });
+      return '<div class="fd-cues' + (editable ? ' fd-cues-editable' : '') + '" data-sheet="' + entry.id + '">' +
+        '<button type="button" class="fd-cues-head" aria-expanded="false">' +
+          '<span class="fd-cues-name">' + esc(entry.name || 'Untitled') + '</span>' +
+          '<span class="fd-cues-title">Cues</span>' +
+          '<span class="material-symbols-sharp fd-cues-chev i-md">expand_more</span>' +
+        '</button>' +
+        (editable ? '<button type="button" class="fd-cues-x" data-detach="' + entry.id + '" title="Detach cues" data-tooltip="Detach cues" aria-label="Detach cues"><span class="material-symbols-sharp i-sm">close</span></button>' : '') +
+        '<div class="fd-cues-body" hidden>' +
+          (parts.length
+            ? parts.map(function (x) {
+                return '<div class="fd-cue">' +
+                  (hasBreath2 ? '<span class="fd-cue-breath">' + esc(x.breath) + '</span>' : '') +
+                  '<span class="fd-cue-text">' + esc(x.line) + '</span>' +
+                  (x.pose ? '<span class="fd-cue-pose">' + esc(x.pose) + '</span>' : '') +
+                '</div>';
+              }).join('')
+            : '<p class="fd-cues-none">Nothing written on this sheet yet.</p>') +
+          '<div class="fd-cues-foot">' +
+            '<a href="your-cues?edit=' + entry.id + '">Edit in Your Cues</a>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
     }
 
-    function renderFdCues(f) { renderCuesUI('fd', cueSheetFor(f.id)); }
-    function renderFlCues() { renderCuesUI('fl', editorCueEntry()); }
+    function renderCuesUI(p, entries) {
+      document.getElementById(p + '-cues-stack').innerHTML =
+        entries.map(function (e) { return cueDrawerHtml(e, p === 'fl'); }).join('');
+    }
 
-    // the editor's x detaches — same gesture as the cue editor's flow x
-    document.getElementById('fl-cues-x').addEventListener('click', function () {
-      if (editingId == null) {
-        pendingCueId = null;
-      } else {
-        var f = byId(editingId);
-        if (!f) return;
-        var entry = cueSheetFor(f.id);
-        if (entry) {
-          var list = cueStore();
-          var hit = list.find(function (x) { return x.id === entry.id; });
-          if (hit) { hit.flowId = null; setCueStore(list); }
+    function renderFdCues(f) { renderCuesUI('fd', cueSheetsFor(f.id)); }
+    function renderFlCues() { renderCuesUI('fl', editorCueEntries()); }
+
+    // one delegated ear per stack: heads unfold, the x detaches
+    ['fd', 'fl'].forEach(function (p) {
+      document.getElementById(p + '-cues-stack').addEventListener('click', function (ev) {
+        var x = ev.target.closest('.fd-cues-x');
+        if (x) {
+          var sid = parseInt(x.dataset.detach, 10);
+          if (editingId == null) {
+            pendingCueIds = pendingCueIds.filter(function (id) { return id !== sid; });
+          } else {
+            var f = byId(editingId);
+            if (!f) return;
+            var list = cueStore();
+            var hit = list.find(function (o) { return o.id === sid; });
+            if (hit) {
+              hit.flowIds = (hit.flowIds || []).filter(function (id) { return id !== f.id; });
+              setCueStore(list);
+            }
+          }
+          renderFlCues();
+          toast('Cues detached.');
+          return;
         }
-      }
-      renderFlCues();
-      toast('Cues detached.');
+        var head = ev.target.closest('.fd-cues-head');
+        if (!head) return;
+        var body = head.parentElement.querySelector('.fd-cues-body');
+        var open = head.getAttribute('aria-expanded') !== 'true';
+        fsUnfold(body, open);
+        head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
     });
 
+    // the attach doors
     ['fd', 'fl'].forEach(function (p) {
-      document.getElementById(p + '-cues-toggle').addEventListener('click', function () {
-        var open = this.getAttribute('aria-expanded') !== 'true';
-        fsUnfold(document.getElementById(p + '-cues-body'), open);
-        this.setAttribute('aria-expanded', open ? 'true' : 'false');
-      });
       var attachBtn = document.getElementById(p + '-cues-attach');
       if (attachBtn) attachBtn.addEventListener('click', function () { openCuesModal(p); });
     });
@@ -1419,17 +1465,26 @@
       var entries = cueStore()
         .sort(function (a, b) { return new Date(b.savedAt) - new Date(a.savedAt); });
       var list = document.getElementById('fd-cues-list');
-      // one sheet, one flow — a sheet linked elsewhere is spoken for
+      // links are many-to-many now — a sheet's other flows are
+      // information; only sheets already on THIS flow sit out
       var flowNames = {};
       loadFlows2().forEach(function (fl) { flowNames[fl.id] = fl.name || 'Untitled Flow'; });
+      var attachedIds = (p === 'fl' && editingId == null)
+        ? pendingCueIds.slice()
+        : (f ? cueSheetsFor(f.id).map(function (e) { return e.id; }) : []);
       list.innerHTML = entries.length
         ? entries.map(function (e) {
             var d = new Date(e.savedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-            var taken = e.flowId != null && !(f && e.flowId === f.id);
-            return '<button type="button" class="fl-class-row fd-cues-row' + (taken ? ' taken' : '') + '"' +
-              (taken ? ' disabled' : ' data-id="' + e.id + '"') + '>' +
+            var attached = attachedIds.indexOf(e.id) !== -1;
+            var others = (e.flowIds || []).filter(function (fid) { return !(f && fid === f.id); });
+            var info = attached ? 'Attached'
+              : (others.length
+                  ? 'Also cues ' + esc(flowNames[others[0]] || 'a flow') + (others.length > 1 ? ' +' + (others.length - 1) : '')
+                  : d);
+            return '<button type="button" class="fl-class-row fd-cues-row' + (attached ? ' taken' : '') + '"' +
+              (attached ? ' disabled' : ' data-id="' + e.id + '"') + '>' +
               '<span class="fl-class-title">' + esc(e.name || 'Untitled') + '</span>' +
-              '<span class="fl-class-meta">' + (taken ? 'Linked to ' + esc(flowNames[e.flowId] || 'a flow') : d) + '</span>' +
+              '<span class="fl-class-meta">' + info + '</span>' +
             '</button>';
           }).join('')
         : '<p class="fd-cues-none">Nothing in Your Cues yet. Write a sheet there first.</p>';
@@ -1440,12 +1495,11 @@
           if (!entry) return;
           if (p === 'fl' && editingId == null) {
             // the link waits for the flow to exist
-            pendingCueId = entry.id;
+            pendingCueIds.push(entry.id);
             markDirty();
           } else {
-            entry.flowId = f.id;
-            // one flow, one sheet — this claim releases any other's
-            all.forEach(function (o) { if (o.id !== entry.id && o.flowId === f.id) o.flowId = null; });
+            entry.flowIds = entry.flowIds || [];
+            if (entry.flowIds.indexOf(f.id) === -1) entry.flowIds.push(f.id);
             setCueStore(all);
           }
           closeCuesModal();
@@ -1530,7 +1584,7 @@
         document.getElementById('fl-usedin').hidden = !f;
         if (f) renderUsedIn(f, document.getElementById('fl-usedin-list'));
 
-        pendingCueId = null;
+        pendingCueIds = [];
         document.getElementById('fl-cues').hidden = false;
         renderFlCues();
 
@@ -1812,16 +1866,18 @@
         history.replaceState({}, '', 'your-flows?edit=' + entry.id);
       }
       persist();
-      // a cue sheet chosen before the flow existed gets its link now
-      if (pendingCueId != null) {
+      // cue sheets chosen before the flow existed get their links now
+      if (pendingCueIds.length) {
         var cues = cueStore();
-        var hit = cues.find(function (x) { return x.id === pendingCueId; });
-        if (hit) {
-          hit.flowId = editingId;
-          cues.forEach(function (o) { if (o.id !== hit.id && o.flowId === editingId) o.flowId = null; });
-          setCueStore(cues);
-        }
-        pendingCueId = null;
+        pendingCueIds.forEach(function (pid) {
+          var hit = cues.find(function (x) { return x.id === pid; });
+          if (hit && (hit.flowIds || []).indexOf(editingId) === -1) {
+            hit.flowIds = hit.flowIds || [];
+            hit.flowIds.push(editingId);
+          }
+        });
+        setCueStore(cues);
+        pendingCueIds = [];
         renderFlCues();
       }
       dirty = false;
