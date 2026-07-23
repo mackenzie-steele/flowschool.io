@@ -1972,6 +1972,7 @@
 
     var SH = fsShorthandSuggest({
       container: '.fl-editor',
+      sep: function () { return ''; }, // the writer places their own separators
       afterInsert: function () { renderCount(); markDirty(); },
     });
 

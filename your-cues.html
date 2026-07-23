@@ -2348,7 +2348,12 @@ const CUE_SH = (function () {
     if (ev.key === 'Tab') { state.dismissedEl = ev.target; state.dismissedVal = ev.target.value; hide(); }
     else if (ev.key === 'ArrowDown') { ev.preventDefault(); state.sel = (state.sel + 1) % state.items.length; render(); }
     else if (ev.key === 'ArrowUp') { ev.preventDefault(); state.sel = state.sel <= 0 ? state.items.length - 1 : state.sel - 1; render(); }
-    else if (ev.key === 'Enter') { ev.preventDefault(); insert(state.sel === -1 ? 0 : state.sel); }
+    // Enter takes only an ARMED row (arrow down first); unarmed, it
+    // falls through to the grid's carriage return
+    else if (ev.key === 'Enter') {
+      if (state.sel >= 0) { ev.preventDefault(); insert(state.sel); }
+      else { state.dismissedEl = ev.target; state.dismissedVal = ev.target.value; hide(); }
+    }
     else if (ev.key === 'Escape') { state.dismissedEl = ev.target; state.dismissedVal = ev.target.value; hide(); }
   }
 
