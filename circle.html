@@ -405,10 +405,17 @@
 
       const { data: { user } } = await db.auth.getUser();
 
-      const [{ data, error }, blocked] = await Promise.all([
-        db.from('circle_directory').select('*').order('updated_at', { ascending: false }),
+      // newest teachers first — profiles in the order they joined.
+      // If the circle_directory view doesn't expose created_at yet, the
+      // room still loads (recently-edited order) instead of erroring.
+      let [res, blocked] = await Promise.all([
+        db.from('circle_directory').select('*').order('created_at', { ascending: false }),
         fsCommunity.myBlocks(),
       ]);
+      if (res.error) {
+        res = await db.from('circle_directory').select('*').order('updated_at', { ascending: false });
+      }
+      const { data, error } = res;
 
       if (error) console.warn('The Circle could not load:', error.message || error);
       teachers = ((!error && data) ? data : []).filter(t => !blocked.has(t.id));

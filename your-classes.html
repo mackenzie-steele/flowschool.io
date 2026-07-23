@@ -734,6 +734,14 @@
 
     .tv-title-fav svg { fill: currentColor; }
 
+    /* attached stories carry their formatting into the teach view */
+    .tv-story-text p { margin: 0 0 .9em; }
+    .tv-story-text p:last-child { margin-bottom: 0; }
+    .tv-story-text ul { list-style: disc; }
+    .tv-story-text ol { list-style: decimal; }
+    .tv-story-text ul, .tv-story-text ol { padding-left: 1.4em; margin: 0 0 .9em; }
+    .tv-story-text ul:last-child, .tv-story-text ol:last-child { margin-bottom: 0; }
+
     .tv-flow-name {
       font-family: var(--font-mono);
       font-size: 11px;

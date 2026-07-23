@@ -373,7 +373,6 @@
       flex-wrap: wrap;
       gap: 16px;
       padding: 28px 0 24px;
-      border-bottom: 1px solid rgba(var(--ink-rgb), .08);
       margin-bottom: 2px;
     }
     /* Base stats styles — global.css. Accent accent in light mode only;
@@ -669,7 +668,7 @@
       // Keypoints are in normalized class time (0–1). Section boundaries for reference:
       // Warm Up ends 0.25 · Build ends 0.50 · Peak ends 0.80 · Cool Down ends 1.0
       'slow-build':    { name: 'Slow Build',      desc: 'Ease in. Let the energy find you.',             keys: [[0, 8],  [.45, 12], [.65, 85], [.82, 38], [1, 12]] },
-      'bell-curve':    { name: 'Bell Curve',       desc: 'Rise to the middle. Land softly.',              keys: [[0, 12], [.25, 52], [.55, 92], [.80, 48], [1, 12]] },
+      'bell-curve':    { name: 'Bell Curve',       desc: 'Rise to the middle. Land softly.',              keys: [[0, 12], [.25, 52], [.5, 92], [.75, 52], [1, 12]] },
       'strong-start':  { name: 'Strong Start',     desc: 'Lead with fire. Land with intention.',          keys: [[0, 88], [.08, 92], [.25, 75], [.50, 52], [.67, 32], [.87, 18], [1, 12]] },
       'wave':          { name: 'Wave',             desc: 'Multiple crests. Keeps them in their bodies.',  keys: [[0, 18], [.25, 75], [.42, 25], [.60, 82], [.80, 28], [1, 14]] },
       'gentle-steady': { name: 'Gentle & Steady',  desc: 'Consistent, supportive, sustainable.',         keys: [[0, 35], [.25, 42], [.55, 52], [.75, 50], [.90, 40], [1, 30]] }
@@ -691,8 +690,9 @@
     // as drawn. Song selection follows automatically: it reads S.pts.
     function shapedArc(key, times) {
       const f = S.intensity / 100;
-      // snap every preset handle to the 10-step gridlines — the same grid
-      // dragging snaps to, so presets start ON the lines, not near them
+      // every preset handle snaps to the 10-step gridlines — the same
+      // grid dragging snaps to, so points always sit ON a line, mid-drag
+      // included
       return sampleArc(key, times).map(e => Math.round(e * f / 10) * 10);
     }
 

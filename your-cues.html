@@ -734,6 +734,13 @@
       overflow-wrap: break-word;
     }
 
+    /* a row that's only a pose — the shorthand register at reading scale */
+    .cd-cue-onlypose {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      letter-spacing: .04em;
+    }
+
     .cd-cue-pose {
       flex-shrink: 0;
       font-family: var(--font-mono);
@@ -1326,12 +1333,10 @@ function getSheets() {
 }
 
 // the flow library from Your Flows — read-only here
-const FLOW_TAGS = { warmup: 'Warm Up', bridge: 'Bridge', peak: 'Peak', workshop: 'Workshop', slomo: 'Slo Mo', restorative: 'Restorative' };
+const FLOW_TAGS = { warmup: 'Warm Up', bridge: 'Bridge', nohands: 'No Hands', peak: 'Peak', workshop: 'Workshop', slomo: 'Slo Mo', restorative: 'Restorative' };
 function loadFlowLib() {
   try {
-    const list = JSON.parse(localStorage.getItem('flowschool_flows') || '[]');
-    list.forEach(f => { if (f.type === 'nohands') f.type = 'bridge'; });
-    return list;
+    return JSON.parse(localStorage.getItem('flowschool_flows') || '[]');
   } catch (e) { return []; }
 }
 function setSheets(list) {
@@ -1673,7 +1678,7 @@ function renderList() {
       .filter(Boolean).join(' \u00B7 ');
     // the card speaks the sheet's first sentences — the artifact,
     // not just its filing
-    const preview = (e.rows || []).map(r => buildCue(r)).filter(Boolean).slice(0, 3).join(' ');
+    const preview = (e.rows || []).map(r => buildCue(r) || (r.pose || '').trim().toUpperCase()).filter(Boolean).slice(0, 3).join(' ');
     return '<div class="cue-card" data-id="' + e.id + '">' +
       '<span class="cue-card-title">' + esc(e.name || 'Untitled') +
         (e.pinned ? '<span class="material-symbols-sharp fav-mark">favorite</span>' : '') +
@@ -1722,20 +1727,31 @@ function renderDetail(e) {
     ref.setAttribute('hidden', '');
   }
 
-  const cued = (e.rows || []).filter(r => buildCue(r));
-  document.getElementById('cd-cues').innerHTML = cued.length
-    ? cued.map(r => {
+  // every worked row displays: full sentences read as prose, rows
+  // holding only a pose read as shorthand
+  const worked = (e.rows || []).filter(rowHasWork);
+  // the breath margin only exists when the sheet marks breaths — an
+  // unmarked sheet reads flush left
+  const hasBreath = worked.some(r => r.inex && INEX_LABELS[r.inex]);
+  document.getElementById('cd-cues').innerHTML = worked.length
+    ? worked.map(r => {
         const breath = r.inex && INEX_LABELS[r.inex] ? INEX_LABELS[r.inex] : '';
+        const bSpan = hasBreath ? '<span class="cd-cue-breath">' + esc(breath) + '</span>' : '';
+        const sentence = buildCue(r);
         const pose = (r.pose || '').trim();
-        return '<div class="cd-cue">' +
-          '<span class="cd-cue-breath">' + esc(breath) + '</span>' +
-          '<span class="cd-cue-text">' + esc(buildCue(r)) + '</span>' +
+        if (!sentence) {
+          return '<div class="cd-cue">' + bSpan +
+            '<span class="cd-cue-text cd-cue-onlypose">' + esc(pose.toUpperCase()) + '</span>' +
+          '</div>';
+        }
+        return '<div class="cd-cue">' + bSpan +
+          '<span class="cd-cue-text">' + esc(sentence) + '</span>' +
           (pose ? '<span class="cd-cue-pose">' + esc(pose) + '</span>' : '') +
         '</div>';
       }).join('')
     : '<p class="cd-empty">Nothing written on this sheet yet.</p>';
 
-  document.getElementById('cd-pol-btn').disabled = !cued.length;
+  document.getElementById('cd-pol-btn').disabled = !worked.length;
 }
 
 function showDetail(id, push) {

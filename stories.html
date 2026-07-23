@@ -69,6 +69,18 @@
 
     .story-row:hover .story-row-title { opacity: .65; }
 
+    /* one line of the story itself */
+    .story-row-preview {
+      display: block;
+      font-size: var(--text-small);
+      line-height: 1.5;
+      color: var(--text-2);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      margin-bottom: 6px;
+    }
+
     .story-row-meta {
       font-family: var(--font-mono);
       font-size: 11px;
@@ -94,7 +106,19 @@
     .post-actions[hidden],
     .post-edit-actions[hidden] { display: none; }
 
-    .post-head .post-actions { position: relative; }
+    .post-bar .post-actions { position: relative; flex-shrink: 0; }
+
+    #story-back-label {
+      max-width: 240px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 768px) {
+      /* the story name yields so the tools and Save stay on screen */
+      #story-back-label { max-width: 84px; }
+    }
 
     .post {
       max-width: 640px;
@@ -108,7 +132,6 @@
     }
 
     .post-head-main { min-width: 0; }
-    .post-head .post-actions { flex-shrink: 0; margin-top: -4px; }
 
     .post-title {
       font-size: var(--fs-h4);
@@ -119,13 +142,27 @@
       margin-bottom: 12px;
     }
 
-    /* the starter is provenance, not the headline */
-    .post-starter-line {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: .04em;
-      color: var(--text-3);
-      margin-bottom: 8px;
+    /* ── the starter — the drawn card, above the title (the classes
+          margin's material, worn as a banner) ── */
+    .post-spec {
+      box-shadow: var(--crest);
+      border-radius: var(--r);
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top-color: rgba(var(--ink-rgb), .22);
+      background: var(--raised), rgba(var(--ink-rgb), .02);
+      padding: 16px 20px;
+      margin-bottom: 28px;
+    }
+
+    .post-spec[hidden] { display: none; }
+
+    .post-spec .label-1 { display: block; margin-bottom: 10px; }
+
+    .post-spec-starter {
+      font-size: var(--text-small);
+      line-height: 1.6;
+      color: var(--text-2);
+      overflow-wrap: break-word;
     }
 
     .post-title-input {
@@ -133,6 +170,9 @@
       background: transparent;
       border: none;
       outline: none;
+      resize: none;
+      overflow: hidden;
+      display: block;
       padding: 0 0 16px;
       color: var(--text-1);
       font-family: var(--font);
@@ -152,6 +192,44 @@
     }
 
     .post-body p:last-child { margin-bottom: 0; }
+
+    /* the writing page's paragraphs mirror the reading page's —
+       Enter opens a new paragraph, Shift+Enter stays on the line */
+    /* one rhythm for every block the browser can produce while
+       editing — p, or the stray div some engines make — so where you
+       paste never decides how it looks */
+    .post-edit-area p,
+    .post-edit-area div {
+      margin: 0 0 1.2em;
+      font-size: var(--text-body-lg);
+      line-height: 1.8;
+      color: var(--text-1);
+    }
+    .post-edit-area p:last-child,
+    .post-edit-area div:last-child { margin-bottom: 0; }
+
+    .post-body ul, .post-edit-area ul { list-style: disc; }
+    .post-body ol, .post-edit-area ol { list-style: decimal; }
+    .post-body ul, .post-body ol,
+    .post-edit-area ul, .post-edit-area ol {
+      padding-left: 1.5em;
+      margin: 0 0 1.2em;
+      font-size: var(--text-body-lg);
+      line-height: 1.8;
+      color: var(--text-1);
+    }
+    .post-body li + li, .post-edit-area li + li { margin-top: .3em; }
+    .post-body ul:last-child, .post-body ol:last-child,
+    .post-edit-area ul:last-child, .post-edit-area ol:last-child { margin-bottom: 0; }
+
+    .post-edit-area.is-empty::before {
+      content: attr(data-placeholder);
+      color: var(--text-3);
+      pointer-events: none;
+      position: absolute;
+    }
+
+    .post-edit-area { position: relative; }
 
     .post-meta {
       font-family: var(--font-mono);
@@ -178,6 +256,65 @@
       .post-title-input:not([hidden]) {
         opacity: 0;
       }
+    }
+
+    /* the format rail — the chrome bar's glass, slimmer, seated
+       directly beneath it so the two read as one stacked instrument */
+    .post-format-bar[hidden] { display: none; }
+
+    .post-format-bar {
+      position: sticky;
+      top: 81px; /* the chrome bar's exact height — the seam is shared */
+      z-index: 3;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      margin-bottom: 40px;
+      background: rgba(var(--paper-rgb), .52);
+      backdrop-filter: var(--glass);
+      -webkit-backdrop-filter: var(--glass);
+      border-bottom: 1px solid rgba(var(--ink-rgb), .09);
+    }
+
+    /* while the rail is up, the chrome bar's gap belongs below the rail */
+    .post-bar:has(+ .post-format-bar:not([hidden])) { margin-bottom: 0; }
+
+    .post-tools {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    /* the seam between tool groups */
+    .post-tools-sep {
+      width: 1px;
+      height: 16px;
+      background: rgba(var(--ink-rgb), .14);
+      margin: 0 6px;
+    }
+
+    .post-tool {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 30px;
+      background: none;
+      border: none;
+      border-radius: calc(var(--rb) - 3px);
+      color: var(--text-3);
+      cursor: pointer;
+      transition: color var(--transition-fast), background var(--transition-fast);
+    }
+
+    .post-tool:hover { color: var(--text-1); }
+
+
+    /* an active format wears the filled state — the pill language */
+    .post-tool.on {
+      background: var(--ink-solid);
+      color: var(--paper-solid);
     }
 
     .post-edit-area {
@@ -350,38 +487,62 @@
     <div class="post-bar">
       <button class="btn-ghost" id="back-btn">
       <span class="material-symbols-sharp i-md" style="margin-right:6px">arrow_back</span>
-      <span class="post-back-label">Your Stories</span>
+      <span class="post-back-label" id="story-back-label">Your Stories</span>
       </button>
+      <div class="post-actions" id="post-actions">
+        <button class="btn-icon" id="edit-btn" title="Edit story" data-tooltip="Edit">
+          <span class="material-symbols-sharp">edit</span>
+        </button>
+        <button class="btn-icon" id="story-more-btn" title="More actions" data-tooltip="More">
+          <span class="material-symbols-sharp">more_horiz</span>
+        </button>
+        <div class="st-menu" id="st-menu" hidden></div>
+      </div>
       <div class="post-edit-actions" id="post-edit-actions" hidden>
       <button class="btn-ghost" id="cancel-edit-btn">Cancel</button>
       <button class="btn-primary" id="save-edit-btn">Save Changes</button>
       </div>
     </div>
+
+    <!-- the format rail — its own sticky bar seated under the chrome
+         bar, one seam between them. Groups of tools live here; the
+         rail has room to grow. -->
+    <div class="post-format-bar" id="post-format-bar" hidden>
+      <div class="post-tools" role="toolbar" aria-label="Formatting">
+        <button type="button" class="post-tool" data-cmd="undo" data-tooltip="Undo &#8984;Z" aria-label="Undo"><span class="material-symbols-sharp i-sm">undo</span></button>
+        <button type="button" class="post-tool" data-cmd="redo" data-tooltip="Redo &#8679;&#8984;Z" aria-label="Redo"><span class="material-symbols-sharp i-sm">redo</span></button>
+        <span class="post-tools-sep" aria-hidden="true"></span>
+        <button type="button" class="post-tool" data-cmd="bold" data-tooltip="Bold &#8984;B" aria-label="Bold"><span class="material-symbols-sharp i-sm">format_bold</span></button>
+        <button type="button" class="post-tool" data-cmd="italic" data-tooltip="Italic &#8984;I" aria-label="Italic"><span class="material-symbols-sharp i-sm">format_italic</span></button>
+        <button type="button" class="post-tool" data-cmd="underline" data-tooltip="Underline &#8984;U" aria-label="Underline"><span class="material-symbols-sharp i-sm">format_underlined</span></button>
+        <span class="post-tools-sep" aria-hidden="true"></span>
+        <button type="button" class="post-tool" data-cmd="insertUnorderedList" data-tooltip="Bulleted list" aria-label="Bulleted list"><span class="material-symbols-sharp i-sm">format_list_bulleted</span></button>
+        <button type="button" class="post-tool" data-cmd="insertOrderedList" data-tooltip="Numbered list" aria-label="Numbered list"><span class="material-symbols-sharp i-sm">format_list_numbered</span></button>
+      </div>
+    </div>
+
     <div class="wrap" style="padding-top: 0;">
 
       <article class="post">
+
+        <!-- where the story began — the drawn starter, above the title -->
+        <div class="post-spec" id="post-margin" hidden>
+          <span class="label-1">Starter</span>
+          <p class="post-spec-starter" id="post-margin-starter"></p>
+        </div>
+
         <div class="post-head">
           <div class="post-head-main">
             <h4 class="post-title" id="post-title"></h4>
-            <p class="post-starter-line" id="post-starter-line" hidden></p>
             <p class="post-meta" id="post-meta" hidden></p>
-          </div>
-          <div class="post-actions" id="post-actions">
-            <button class="btn-icon" id="edit-btn" title="Edit story" data-tooltip="Edit">
-              <span class="material-symbols-sharp">edit</span>
-            </button>
-            <button class="btn-icon" id="story-more-btn" title="More actions" data-tooltip="More">
-              <span class="material-symbols-sharp">more_horiz</span>
-            </button>
-            <div class="st-menu" id="st-menu" hidden></div>
           </div>
         </div>
 
         <div class="post-body" id="post-body"></div>
 
         <div id="post-edit" hidden>
-          <input type="text" class="post-title-input" id="post-title-input" placeholder="Title your story&#8230;" maxlength="120" autocomplete="off" aria-label="Story title">
-          <textarea class="post-edit-area" id="post-edit-area" placeholder="Write it like you&#8217;d tell it in class&#8230;"></textarea>
+          <textarea class="post-title-input" id="post-title-input" placeholder="Title your story&#8230;" maxlength="120" rows="1" aria-label="Story title"></textarea>
+          <div class="post-edit-area" id="post-edit-area" contenteditable="true" data-placeholder="Write it like you&#8217;d tell it in class&#8230;" aria-label="Story text"></div>
         </div>
       </article>
 
@@ -435,6 +596,11 @@
     var dateMode = fsDateMode, toggleDateMode = fsToggleDateMode, stampFor = fsStampFor;
 
     var fmtDate = fsFmtDate, esc = fsEsc;
+
+    function setMarginStarter(text) {
+      document.getElementById('post-margin').hidden = !text;
+      document.getElementById('post-margin-starter').textContent = text || '';
+    }
 
     function firstLine(text) {
       var line = (text || '').split('\n')[0].trim();
@@ -493,11 +659,17 @@
         list.length + ' result' + (list.length !== 1 ? 's' : '');
 
       index.innerHTML = list.map(function (s) {
+        // one line of the story itself; an untitled row already leads
+        // with its first line, so the preview picks up after it
+        var body = (s.text || '').trim();
+        if (!s.title) body = body.slice(firstLine(body).length).trim();
+        var preview = body.split(/\n+/).join(' ');
         return '<a href="stories?id=' + s.id + '" class="story-row" data-id="' + s.id + '">' +
           '<span class="story-row-main">' +
             '<span class="story-row-title">' + esc(s.title || firstLine(s.text)) +
               (s.pinned ? '<span class="material-symbols-sharp fav-mark">favorite</span>' : '') +
             '</span>' +
+            (preview ? '<span class="story-row-preview">' + esc(preview) + '</span>' : '') +
             (s.starter ? '<span class="story-row-meta">' + esc(s.starter) + '</span>' : '') +
           '</span>' +
           '<span class="story-row-date">' + fmtDate(stampFor(s).ts) + '</span>' +
@@ -518,14 +690,8 @@
       document.getElementById('post-meta').hidden = false;
       document.getElementById('save-edit-btn').textContent = 'Save Changes';
       renderTitleWithFav(s);
-      var sl = document.getElementById('post-starter-line');
-      sl.hidden = !s.starter;
-      sl.textContent = s.starter || '';
-      document.getElementById('post-body').innerHTML = (s.text || '')
-        .split(/\n+/)
-        .filter(function (p) { return p.trim(); })
-        .map(function (p) { return '<p>' + esc(p) + '</p>'; })
-        .join('');
+      setMarginStarter(s.starter);
+      document.getElementById('post-body').innerHTML = fsStoryHtml(s);
       renderPostMeta(s);
       setEditing(false);
     }
@@ -551,11 +717,24 @@
       document.getElementById('post-actions').hidden = on;
       document.getElementById('post-edit-actions').hidden = !on;
       document.getElementById('post-title').hidden = on || !currentTitle();
+      // while editing, back names where it goes — the story itself
+      var backLabel = document.getElementById('story-back-label');
+      backLabel.textContent = (on && !composing)
+        ? (currentTitle() || 'Untitled Story')
+        : 'Your Stories';
+      // the starter lives in the margin box in both modes; the date is
+      // a reading detail and steps aside while editing
+      var pm = document.getElementById('post-meta');
+      document.getElementById('post-format-bar').hidden = !on;
+      pm.hidden = on || !pm.textContent;
       if (on && !composing) {
         var s = stories.find(function (x) { return x.id === currentId; });
         var area = document.getElementById('post-edit-area');
-        area.value = s ? s.text : '';
-        document.getElementById('post-title-input').value = s ? (s.title || '') : '';
+        area.innerHTML = (s && fsStoryHtml(s)) || '<p><br></p>';
+        area.classList.toggle('is-empty', !area.textContent.trim());
+        var ti = document.getElementById('post-title-input');
+        ti.value = s ? (s.title || '') : '';
+        fsAutoGrow(ti);
         editBaseline = baselineNow();
         updateSaveEnabled();
         autoGrow();
@@ -582,16 +761,16 @@
       currentId = null;
       fsSwapView(storyViews(), document.getElementById('detail-view'), function () {
         document.getElementById('post-title').hidden = true;
-        var csl = document.getElementById('post-starter-line');
-        csl.hidden = !st;
-        csl.textContent = st ? st.text : '';
+        setMarginStarter(st ? st.text : '');
         document.getElementById('post-body').innerHTML = '';
         document.getElementById('post-meta').hidden = true;
         document.getElementById('save-edit-btn').textContent = 'Save';
         setEditing(true);
         var area = document.getElementById('post-edit-area');
-        area.value = '';
+        area.innerHTML = '<p><br></p>';
+        area.classList.add('is-empty');
         document.getElementById('post-title-input').value = '';
+        fsAutoGrow(document.getElementById('post-title-input'));
         editBaseline = baselineNow();
         updateSaveEnabled();
         autoGrow();
@@ -660,23 +839,99 @@
     // ─── EVENTS ──────────────────────────────────────────────────────────────────
 
     var editArea = document.getElementById('post-edit-area');
-    function autoGrow() { fsAutoGrow(editArea); }
+    function autoGrow() {} // the writing page sizes itself now
 
     // save enables only when title or text differs from what's stored
     var editBaseline = '';
     function baselineNow() {
-      return document.getElementById('post-title-input').value.trim() + '\u0000' + editArea.value.trim();
+      return document.getElementById('post-title-input').value.trim() + '\u0000' + editArea.innerHTML.trim();
     }
+
+    // Enter opens a paragraph (the reading page's rhythm); Shift+Enter
+    // stays on the line — the convention every writing tool shares
+    try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (_) {}
+
+    // an empty contenteditable would start you in a bare text node,
+    // where the first Enter can only break a line — so the editor
+    // always holds a real paragraph, and every Enter opens another
+    function ensureBlock() {
+      if (!editArea.firstElementChild) {
+        var hadText = editArea.textContent;
+        editArea.innerHTML = '<p><br></p>';
+        if (hadText) editArea.firstElementChild.textContent = hadText;
+        var r = document.createRange();
+        r.selectNodeContents(editArea.firstElementChild);
+        r.collapse(false);
+        var sel = getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+      }
+      editArea.classList.toggle('is-empty', !editArea.textContent.trim());
+    }
+
+    editArea.addEventListener('focus', ensureBlock);
+
+    // paste arrives as words, not markup — outside formatting flattens.
+    // Multi-paragraph pastes are built into REAL paragraph structure
+    // (blank line = new paragraph, single newline = line break), so a
+    // paste lands in the same rhythm no matter where the caret sits.
+    editArea.addEventListener('paste', function (e) {
+      e.preventDefault();
+      var t = (e.clipboardData || window.clipboardData).getData('text/plain');
+      if (!t) return;
+      t = t.replace(/\r/g, '');
+      if (t.indexOf('\n') === -1) {
+        document.execCommand('insertText', false, t);
+      } else {
+        var html = t.split(/\n{2,}/).filter(function (p) { return p.trim(); })
+          .map(function (p) {
+            return '<p>' + p.split('\n').map(esc).join('<br>') + '</p>';
+          }).join('');
+        document.execCommand('insertHTML', false, html);
+      }
+      updateSaveEnabled();
+    });
+
+    // the three tools; mousedown keeps the selection alive
+    document.querySelectorAll('.post-tool').forEach(function (btn) {
+      btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      btn.addEventListener('click', function () {
+        editArea.focus();
+        document.execCommand(btn.dataset.cmd);
+        syncTools();
+        updateSaveEnabled();
+      });
+    });
+
+    function syncTools() {
+      document.querySelectorAll('.post-tool').forEach(function (btn) {
+        var on = false;
+        try { on = document.queryCommandState(btn.dataset.cmd); } catch (_) {}
+        btn.classList.toggle('on', on);
+      });
+    }
+
+    document.addEventListener('selectionchange', function () {
+      if (document.activeElement === editArea) syncTools();
+    });
     function updateSaveEnabled() {
       document.getElementById('save-edit-btn').disabled = baselineNow() === editBaseline;
     }
 
     editArea.addEventListener('input', function () {
-      autoGrow();
+      ensureBlock();
       updateSaveEnabled();
     });
 
-    document.getElementById('post-title-input').addEventListener('input', updateSaveEnabled);
+    var titleInput = document.getElementById('post-title-input');
+    titleInput.addEventListener('input', function () {
+      fsAutoGrow(titleInput);
+      updateSaveEnabled();
+    });
+    // a title has no line breaks — Enter carries you into the story
+    titleInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); editArea.focus(); }
+    });
 
     var searchT; // the list changes at typing pauses, not per keystroke
     document.getElementById('stories-search').addEventListener('input', function (e) {
@@ -727,12 +982,16 @@
       if (push) history.pushState({}, '', 'stories?id=' + currentId);
     }
 
+    // back steps OUT one layer, like the sibling editors: editing an
+    // existing story returns to reading it; composing or reading
+    // returns to the list
     document.getElementById('back-btn').addEventListener('click', function () {
-      if (isStoryDirty()) {
-        confirmDiscard(function (yes) { if (yes) { editing = false; composing = false; showList(true); } });
-      } else {
-        showList(true);
+      function leave() {
+        if (editing && !composing) { stopEditing(true); }
+        else { editing = false; composing = false; showList(true); }
       }
+      if (isStoryDirty()) { confirmDiscard(function (yes) { if (yes) leave(); }); }
+      else { leave(); }
     });
 
     document.getElementById('edit-btn').addEventListener('click', function () {
@@ -750,7 +1009,9 @@
     });
 
     document.getElementById('save-edit-btn').addEventListener('click', function () {
-      var text = document.getElementById('post-edit-area').value.trim();
+      var html = fsStorySanitize(document.getElementById('post-edit-area').innerHTML);
+      var text = document.getElementById('post-edit-area').innerText
+        .replace(/\n{3,}/g, '\n\n').trim();
       if (!text) { toast('A story needs at least a line.'); return; }
       if (composing) {
         var entry = {
@@ -759,6 +1020,7 @@
           starter: composeStarter ? composeStarter.text : '',
           title: document.getElementById('post-title-input').value.trim(),
           text: text,
+          html: html,
         };
         stories.push(entry);
         persist(stories);
@@ -770,6 +1032,7 @@
       var s = stories.find(function (x) { return x.id === currentId; });
       if (!s) return;
       s.text = text;
+      s.html = html;
       s.title = document.getElementById('post-title-input').value.trim();
       s.editedAt = Date.now();
       persist(stories);
@@ -812,12 +1075,12 @@
           // opens unsaved — nothing exists until they save the retelling
           showCompose(null, true, function () {
             composeStarter = src.starter ? { id: src.starterId || null, text: src.starter } : null;
-            var csl = document.getElementById('post-starter-line');
-            csl.hidden = !src.starter;
-            csl.textContent = src.starter || '';
-            document.getElementById('post-title-input').value = (src.title || 'Untitled Story') + ' \u2014 copy';
+            setMarginStarter(src.starter || '');
+            var dti = document.getElementById('post-title-input');
+            dti.value = (src.title || 'Untitled Story') + ' \u2014 copy';
+            fsAutoGrow(dti);
             var area = document.getElementById('post-edit-area');
-            area.value = src.text || '';
+            area.innerHTML = fsStoryHtml(src);
             editBaseline = '\u0000never';
             updateSaveEnabled();
             autoGrow();

@@ -763,11 +763,6 @@
             <span class="fd-cues-title">Cues</span>
             <span class="material-symbols-sharp fd-cues-chev i-md">expand_more</span>
           </button>
-          <button type="button" class="fd-cues-head fd-cues-empty" id="fd-cues-attach" hidden>
-            <span class="fd-cues-name fd-cues-empty-name">Attach cues</span>
-            <span class="fd-cues-title">Cues</span>
-            <span class="material-symbols-sharp fd-cues-chev i-md">add</span>
-          </button>
           <div class="fd-cues-body" id="fd-cues-body" hidden></div>
         </div>
 
@@ -919,6 +914,7 @@
     var FLOW_TYPES = [
       { key: 'warmup',   name: 'Warm Up Flow',      desc: 'Begin the class connected to the earth.' },
       { key: 'bridge',   name: 'Bridge Flow',       desc: 'Great for the middle of a class to bridge the warm up and peak flows. Might be a No Hands Flow.' },
+      { key: 'nohands',  name: 'No Hands Flow',     desc: 'Standing flows without your hands on the ground.' },
       { key: 'peak',     name: 'Peak Flow',         desc: 'Every body position, moving in all directions, including on and off the ground.' },
       { key: 'workshop', name: 'Mid Class Workshop', desc: 'Teach the small things that make a big difference.' },
       { key: 'slomo',    name: 'Slo Mo Flow',       desc: 'Think “slow and strong” and one-ish times per side.' },
@@ -931,10 +927,7 @@
 
     function loadFlows() {
       try {
-        var list = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-        // legacy: No Hands flows became Bridge flows (Jul 2026)
-        list.forEach(function (f) { if (f.type === 'nohands') f.type = 'bridge'; });
-        return list;
+        return JSON.parse(localStorage.getItem(LS_KEY) || '[]');
       } catch (_) { return []; }
     }
 
@@ -972,7 +965,7 @@
 
     // ─── LIST ────────────────────────────────────────────────────────────────────
 
-    var TAG_NAMES = { warmup: 'Warm Up', bridge: 'Bridge', peak: 'Peak', workshop: 'Workshop', slomo: 'Slo Mo', restorative: 'Restorative' };
+    var TAG_NAMES = { warmup: 'Warm Up', bridge: 'Bridge', nohands: 'No Hands', peak: 'Peak', workshop: 'Workshop', slomo: 'Slo Mo', restorative: 'Restorative' };
     var listFilter = 'all';
     var searchQ = '';
 
@@ -1263,7 +1256,10 @@
         var verb = (r.verb || '').trim();
         var body = (r.body || '').trim();
         var dir  = (r.dir  || '').trim();
-        if (!verb && !body && !dir) return '';
+        if (!verb && !body && !dir) {
+          // a row that's only a pose reads as shorthand
+          return (r.pose || '').trim().toUpperCase();
+        }
         var bodyNorm = body && !/\byour\b/i.test(body) ? 'your ' + body : body;
         var cue = [verb, bodyNorm, dir].filter(Boolean).join(' ');
         if (cue.slice(-1) !== '.') cue += '.';
@@ -1296,7 +1292,7 @@
       body._fsUnfoldOpen = false;
       toggle.setAttribute('aria-expanded', 'false');
       toggle.hidden = !entry;
-      attach.hidden = !!entry;
+      if (attach) attach.hidden = !!entry;
       if (x) x.hidden = !entry;
       if (!entry) { body.innerHTML = ''; return; }
       document.getElementById(p + '-cues-label').textContent = entry.name || 'Untitled';
@@ -1337,9 +1333,8 @@
         fsUnfold(document.getElementById(p + '-cues-body'), open);
         this.setAttribute('aria-expanded', open ? 'true' : 'false');
       });
-      document.getElementById(p + '-cues-attach').addEventListener('click', function () {
-        openCuesModal(p);
-      });
+      var attachBtn = document.getElementById(p + '-cues-attach');
+      if (attachBtn) attachBtn.addEventListener('click', function () { openCuesModal(p); });
     });
 
     function closeCuesModal() {

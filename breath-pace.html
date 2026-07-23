@@ -212,6 +212,13 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
       font-weight: var(--weight-medium);
     }
 
+    /* pose-only rows speak shorthand — mono, a step smaller */
+    .bp-line-onlypose {
+      font-family: var(--font-mono);
+      letter-spacing: .04em;
+      font-size: .85em;
+    }
+
     .bp-line-breath {
       flex-shrink: 0;
       width: 52px;
@@ -943,12 +950,17 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
       const verb = (r.verb || '').trim();
       const body = (r.body || '').trim();
       const dir  = (r.dir  || '').trim();
-      if (!verb && !body && !dir) return null;
+      const breath = r.inex && INEX_LABELS[r.inex] ? INEX_LABELS[r.inex] : '';
+      if (!verb && !body && !dir) {
+        // a row that's only a pose still gets its breath
+        const pose = (r.pose || '').trim();
+        return pose ? { breath: breath, text: pose.toUpperCase(), poseOnly: true } : null;
+      }
       const bodyNorm = body && !/\byour\b/i.test(body) ? 'your ' + body : body;
       let cue = [verb, bodyNorm, dir].filter(Boolean).join(' ');
       if (cue.slice(-1) !== '.') cue += '.';
       cue = cue.charAt(0).toUpperCase() + cue.slice(1);
-      return { breath: r.inex && INEX_LABELS[r.inex] ? INEX_LABELS[r.inex] : '', text: cue };
+      return { breath: breath, text: cue };
     }
 
     function setFirstBreath(v) {
@@ -984,10 +996,12 @@ html{background:#14161B;color-scheme:dark}html[data-theme="light"]{background:#F
       if (!has) return;
       document.getElementById('bp-sheet-name').textContent = bpSheet.name || 'Untitled';
       const body = document.getElementById('bp-script-body');
+      // the breath margin only exists when the sheet marks breaths
+      const hasBreath = bpLines.some(l => l.breath);
       body.innerHTML = bpLines.map((l, i) =>
         '<div class="bp-line" data-idx="' + i + '">' +
-          '<span class="bp-line-breath">' + escHtml(l.breath) + '</span>' +
-          '<span class="bp-line-text">' + escHtml(l.text) + '</span>' +
+          (hasBreath ? '<span class="bp-line-breath">' + escHtml(l.breath) + '</span>' : '') +
+          '<span class="bp-line-text' + (l.poseOnly ? ' bp-line-onlypose' : '') + '">' + escHtml(l.text) + '</span>' +
         '</div>'
       ).join('');
       body.querySelectorAll('.bp-line').forEach(el => {

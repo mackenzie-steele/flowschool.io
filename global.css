@@ -1909,7 +1909,9 @@ textarea.fs-autogrow {
 }
 
 /* the confirmed check — the feedback modal's settle, at half the
-   drama; put .fs-check-in on a check glyph when a state earns it */
+   drama; put .fs-check-in on a check glyph when a state earns it.
+   .fs-glyph-back is the return trip: the original glyph settles home
+   with the same ease, quieter. */
 @keyframes fsCheckIn {
   from { opacity: 0; transform: scale(.6); }
 }
@@ -1918,8 +1920,16 @@ textarea.fs-autogrow {
   animation: fsCheckIn .25s cubic-bezier(.34, 1.56, .64, 1) backwards;
 }
 
+@keyframes fsGlyphBack {
+  from { opacity: 0; transform: scale(.8); }
+}
+
+.fs-glyph-back {
+  animation: fsGlyphBack .2s ease-out backwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .fs-check-in { animation: none; }
+  .fs-check-in, .fs-glyph-back { animation: none; }
 }
 
 @keyframes fadeUp {
@@ -3223,14 +3233,17 @@ body.has-sidebar {
 
 .tv-menu-item.armed, .tv-menu-item.armed:hover,
 .fl-menu-item.armed, .fl-menu-item.armed:hover,
-.st-menu-item.armed, .st-menu-item.armed:hover { color: var(--danger); }
+.st-menu-item.armed, .st-menu-item.armed:hover,
+.ws-menu-item.armed, .ws-menu-item.armed:hover { color: var(--danger); }
 
 .tv-menu-item.armed .material-symbols-sharp,
 .tv-menu-item.armed:hover .material-symbols-sharp,
 .fl-menu-item.armed .material-symbols-sharp,
 .fl-menu-item.armed:hover .material-symbols-sharp,
 .st-menu-item.armed .material-symbols-sharp,
-.st-menu-item.armed:hover .material-symbols-sharp { color: var(--danger); }
+.st-menu-item.armed:hover .material-symbols-sharp,
+.ws-menu-item.armed .material-symbols-sharp,
+.ws-menu-item.armed:hover .material-symbols-sharp { color: var(--danger); }
 
 /* ── Date stamp toggle — click flips Created ↔ Edited (persisted) ── */
 .date-toggle {
