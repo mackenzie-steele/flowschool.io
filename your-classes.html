@@ -126,19 +126,16 @@
     }
 
     .class-index.list-view .class-card:hover { background: rgba(var(--ink-rgb), .03); }
-    /* the tag zone is a fixed lead column — tagged or not, every
-       title starts on the same line */
+    /* the tag zone is a lead column sized to the widest tag actually
+       in the list (set per render) — tagged or not, every title starts
+       on the same line; with no tags anywhere the zone stands down */
     .class-index.list-view .cc-top {
       margin: 0;
       min-height: 0;
-      width: 96px;
+      width: var(--tag-col, 96px);
       flex-shrink: 0;
     }
-    .class-index.list-view .cc-top .cc-tag {
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .class-index.list-view.no-tags .cc-top { display: none; }
     .class-index.list-view .cc-title {
       margin: 0;
       flex: 1;

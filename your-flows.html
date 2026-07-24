@@ -98,7 +98,16 @@
     }
 
     #flow-index.list-view .flow-card:hover { background: rgba(var(--ink-rgb), .03); }
-    #flow-index.list-view .fc-top { margin: 0; gap: 8px; }
+    /* the tag zone is a lead column sized to the widest tag actually
+       in the list (set per render) — every title starts on the same
+       line without dead air */
+    #flow-index.list-view .fc-top {
+      margin: 0;
+      gap: 8px;
+      width: var(--tag-col, 96px);
+      flex-shrink: 0;
+      justify-content: flex-start;
+    }
     #flow-index.list-view .fc-title {
       margin: 0;
       flex: 1;
@@ -1104,7 +1113,7 @@
     // the taxonomy, in class order
     var FLOW_TYPES = [
       { key: 'warmup',   name: 'Warm Up Flow',      desc: 'Begin the class connected to the earth.' },
-      { key: 'bridge',   name: 'Bridge Flow',       desc: 'Great for the middle of a class to bridge the warm up and peak flows. Might be a No Hands Flow.' },
+      { key: 'bridge',   name: 'Bridge Flow',       desc: 'Great for the middle of a class to bridge the warm up and peak flows.' },
       { key: 'nohands',  name: 'No Hands Flow',     desc: 'Standing flows without your hands on the ground.' },
       { key: 'peak',     name: 'Peak Flow',         desc: 'Every body position, moving in all directions, including on and off the ground.' },
       { key: 'workshop', name: 'Mid Class Workshop', desc: 'Teach the small things that make a big difference.' },
@@ -1254,8 +1263,21 @@
           showDetail(parseInt(el.dataset.id, 10), true);
         });
       });
+      sizeTagCol();
       fsGhostSettle(index, hadGhosts);
     }
+
+    // the list's tag column hugs the widest tag actually present —
+    // re-measured once the mono font lands (widths shift a pixel)
+    function sizeTagCol() {
+      var index = document.getElementById('flow-index');
+      var tagW = 0;
+      index.querySelectorAll('.flow-tag').forEach(function (t) {
+        tagW = Math.max(tagW, Math.ceil(t.getBoundingClientRect().width));
+      });
+      index.style.setProperty('--tag-col', tagW + 'px');
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeTagCol);
 
     // ─── ACTIONS MENU — favorite / duplicate / delete ────────────────────────────
 
