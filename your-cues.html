@@ -744,6 +744,8 @@
     }
     .cue-index.list-view .cue-card-preview { display: none; }
     .cue-index.list-view .cue-card-meta { border: none; padding: 0; white-space: nowrap; }
+    .cue-index.list-view .cue-fav { position: static; order: 5; margin: 0; }
+    .cue-index.list-view .cue-card.pinned .cue-card-title { padding-right: 0; }
 
     .cue-card-title {
       font-size: var(--fs-h5);
@@ -756,6 +758,12 @@
       white-space: nowrap;
       text-overflow: ellipsis;
     }
+
+    /* the heart floats in the corner — the classes anatomy, one seat
+       across all three libraries. No tag row here, so a pinned card's
+       title yields the corner */
+    .cue-fav { position: absolute; top: 19px; right: 20px; margin: 0; }
+    .cue-card.pinned .cue-card-title { padding-right: 28px; }
 
     /* the sheet's opening sentences — reading type, two lines */
     .cue-card-preview {
@@ -1762,15 +1770,14 @@ function renderList() {
 
   index.innerHTML = sheets.map(e => {
     const n = (e.rows || []).filter(rowHasWork).length;
-    const meta = [n + (n === 1 ? ' cue' : ' cues'), flowNamesFor(e), fsFmtDate(Date.parse(e.savedAt))]
+    const meta = [n + (n === 1 ? ' cue' : ' cues'), flowNamesFor(e), fsFmtDate(fsStampFor(e).ts)]
       .filter(Boolean).join(' \u00B7 ');
     // the card speaks the sheet's first sentences — the artifact,
     // not just its filing
     const preview = (e.rows || []).map(r => buildCue(r) || (r.pose || '').trim().toUpperCase()).filter(Boolean).slice(0, 3).join(' ');
-    return '<div class="cue-card" data-id="' + e.id + '">' +
-      '<span class="cue-card-title">' + esc(e.name || 'Untitled') +
-        (e.pinned ? '<span class="material-symbols-sharp fav-mark">favorite</span>' : '') +
-      '</span>' +
+    return '<div class="cue-card' + (e.pinned ? ' pinned' : '') + '" data-id="' + e.id + '">' +
+      (e.pinned ? '<span class="material-symbols-sharp fav-mark cue-fav">favorite</span>' : '') +
+      '<span class="cue-card-title">' + esc(e.name || 'Untitled') + '</span>' +
       (preview ? '<span class="cue-card-preview">' + esc(preview) + '</span>' : '') +
       '<span class="cue-card-meta">' + esc(meta) + '</span>' +
     '</div>';
@@ -1819,7 +1826,8 @@ function renderDetail(e) {
         const breath = r.inex && INEX_LABELS[r.inex] ? INEX_LABELS[r.inex] : '';
         const bSpan = hasBreath ? '<span class="cd-cue-breath">' + esc(breath) + '</span>' : '';
         const sentence = buildCue(r);
-        const pose = (r.pose || '').trim();
+        // the pose always speaks in caps — in the line and in its seat
+        const pose = (r.pose || '').trim().toUpperCase();
         // the pose rides the line: alone it reads like a cue; with a
         // cue it lands at the sentence's end with its own period —
         // and either way it keeps the quiet seat on the right
@@ -1935,7 +1943,11 @@ function flowDrawerHtml(f, editable) {
     (editable ? '<button type="button" class="wsf-x" data-detach="' + f.id + '" title="Detach flow" data-tooltip="Detach flow" aria-label="Detach flow"><span class="material-symbols-sharp i-sm">close</span></button>' : '') +
     '<div class="wsf-body" hidden>' +
       '<div class="ws-flowref-text">' + esc(f.text || '') + '</div>' +
-      '<div class="wsf-foot"><a href="your-flows?id=' + f.id + '">Open in Your Flows</a></div>' +
+      '<div class="wsf-foot">' +
+        '<a class="wsf-open" href="your-flows?id=' + f.id + '" data-tooltip="Open in Your Flows" aria-label="Open in Your Flows">' +
+          '<span class="material-symbols-sharp i-sm">open_in_new</span>' +
+        '</a>' +
+      '</div>' +
     '</div>' +
   '</div>';
 }

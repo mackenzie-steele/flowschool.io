@@ -999,14 +999,18 @@ button svg {
 .btn-icon[data-tooltip],
 .song-swap-btn[data-tooltip],
 .db-pod-more-btn[data-tooltip],
-.vt-btn[data-tooltip] {
+.vt-btn[data-tooltip],
+.wsf-open[data-tooltip],
+.fd-cues-open[data-tooltip] {
   position: relative;
 }
 
 .btn-icon[data-tooltip]::before,
 .song-swap-btn[data-tooltip]::before,
 .db-pod-more-btn[data-tooltip]::before,
-.vt-btn[data-tooltip]::before {
+.vt-btn[data-tooltip]::before,
+.wsf-open[data-tooltip]::before,
+.fd-cues-open[data-tooltip]::before {
   content: attr(data-tooltip);
   position: absolute;
   bottom: calc(100% + 7px);
@@ -1030,7 +1034,9 @@ button svg {
 .btn-icon[data-tooltip]:hover::before,
 .song-swap-btn[data-tooltip]:hover::before,
 .db-pod-more-btn[data-tooltip]:hover::before,
-.vt-btn[data-tooltip]:hover::before {
+.vt-btn[data-tooltip]:hover::before,
+.wsf-open[data-tooltip]:hover::before,
+.fd-cues-open[data-tooltip]:hover::before {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
   transition-delay: 350ms;

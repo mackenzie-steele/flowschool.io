@@ -126,8 +126,19 @@
     }
 
     .class-index.list-view .class-card:hover { background: rgba(var(--ink-rgb), .03); }
-    .class-index.list-view .cc-top { margin: 0; min-height: 0; }
-    .class-index.list-view .cc-top:empty { display: none; }
+    /* the tag zone is a fixed lead column — tagged or not, every
+       title starts on the same line */
+    .class-index.list-view .cc-top {
+      margin: 0;
+      min-height: 0;
+      width: 96px;
+      flex-shrink: 0;
+    }
+    .class-index.list-view .cc-top .cc-tag {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .class-index.list-view .cc-title {
       margin: 0;
       flex: 1;
@@ -324,7 +335,7 @@
 
     /* story module in the writing column — a linked artifact */
     .cw-story-block { padding: 12px 0 20px; }
-    .cw-story-block .cw-add-row { display: inline-flex; }
+    .cw-story-block .cw-add-row { display: flex; }
 
     .cw-story-item {
       background: var(--raised), rgba(var(--ink-rgb), .025);
@@ -639,6 +650,8 @@
 
     .cw-remove-btn:hover { color: var(--danger); }
     .cw-remove-btn .material-symbols-sharp { font-size: var(--icon-sm); }
+    .cw-remove-btn.confirm-delete-armed,
+    .cw-remove-btn.confirm-delete-armed:hover { color: var(--danger); }
 
     /* linked to Your Flows: read-only but copyable — it edits at the
        parent, or detach. Outline only, no field fill: not an input. */
@@ -682,29 +695,50 @@
       color: var(--text-3);
     }
 
-    /* optional sections collapse to a quiet add-row until needed */
-    .cw-optional.collapsed { padding: 8px 0; }
-
+    /* the add rows wear the flows page's empty-drawer anatomy — a
+       full-width dashed bar holding the door open */
     .cw-add-row {
       display: none;
       align-items: center;
-      gap: 8px;
+      gap: 16px;
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: var(--r);
       background: none;
-      border: none;
-      padding: 8px 0;
+      border: 1px dashed rgba(var(--ink-rgb), .12);
       cursor: pointer;
       font-family: var(--font);
-      font-size: var(--text-ui);
+      text-align: left;
+      transition: border-color var(--transition-base);
+    }
+
+    .cw-add-row:hover { border-color: rgba(var(--ink-rgb), .30); }
+
+    .cw-attach-name {
+      flex: 1;
+      min-width: 0;
+      font-size: var(--text-body-sm);
       font-weight: var(--weight-medium);
-      color: var(--text-3);
+      color: var(--text-2);
       transition: color var(--transition-base);
     }
 
-    .cw-add-row .material-symbols-sharp { font-size: var(--icon-sm); }
-    .cw-add-row:hover { color: var(--text-1); }
+    .cw-add-row:hover .cw-attach-name { color: var(--text-1); }
 
-    .cw-optional.collapsed .cw-add-row { display: inline-flex; }
-    .cw-optional.collapsed .cw-section-body { display: none; }
+    .cw-attach-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-2);
+      line-height: 1;
+    }
+
+    .cw-add-row .material-symbols-sharp { color: var(--text-3); }
+
+    /* the add-a-flow door — always standing while a seat remains */
+    .cw-flow-add .cw-add-row { display: flex; }
 
     .cw-section-head {
       margin-bottom: 12px;
@@ -874,6 +908,118 @@
       white-space: pre-wrap;
       padding: 2px 0;
     }
+
+    /* ── cue drawers under a linked flow — the flow page's anatomy,
+          read-only in the teach view ── */
+    .tv-cues-stack { margin-top: 16px; }
+    .tv-cues-stack .fd-cues { margin-bottom: 12px; }
+
+    .fd-cues-head {
+      border-radius: var(--r);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(var(--ink-rgb), .02);
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top-color: rgba(var(--ink-rgb), .22);
+      font-family: var(--font);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color var(--transition-base);
+    }
+
+    .fd-cues-head:hover { border-color: rgba(var(--ink-rgb), .30); }
+    .fd-cues-head[aria-expanded="true"] { border-radius: var(--r) var(--r) 0 0; }
+
+    .fd-cues-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-2);
+      line-height: 1;
+    }
+
+    .fd-cues-name {
+      flex: 1;
+      min-width: 0;
+      font-size: var(--text-body-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-1);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+
+    .fd-cues-chev { color: var(--text-3); transition: transform var(--transition-base); }
+    .fd-cues-head[aria-expanded="true"] .fd-cues-chev { transform: rotate(180deg); }
+
+    .fd-cues-body {
+      border-radius: 0 0 var(--r) var(--r);
+      border: 1px solid rgba(var(--ink-rgb), .12);
+      border-top: none;
+      padding: 16px 20px 20px;
+    }
+
+    .fd-cue {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 8px 0;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .fd-cue:first-child { border-top: none; padding-top: 0; }
+
+    .fd-cue-breath {
+      flex-shrink: 0;
+      width: 46px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    .fd-cue-text {
+      flex: 1;
+      min-width: 0;
+      font-size: var(--text-body-sm);
+      line-height: 1.6;
+      color: var(--text-1);
+      overflow-wrap: break-word;
+    }
+
+    .fd-cue-pose {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    .fd-cues-none { font-style: italic; color: var(--text-3); }
+
+    .fd-cues-foot { display: flex; gap: 20px; margin-top: 14px; }
+
+    .fd-cues-foot a {
+      display: inline-flex;
+      align-items: center;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text-3);
+      transition: color var(--transition-base);
+    }
+
+    .fd-cues-foot a:hover { color: var(--text-1); }
 
     /* take notes */
     .tv-notes {
@@ -1081,9 +1227,10 @@
     @media print {
       @page { margin: 16mm 18mm; }
 
-      /* the sheet is the teaching view and nothing else */
+      /* the sheet is the teaching view and nothing else — the cue
+         drawers are an on-screen aside, not part of the printed sheet */
       .app-sidebar, .sidebar-toggle, .sidebar-overlay, .nav-sheet, .mobile-brand, nav,
-      .post-bar, footer, .post-actions, .tv-notes, .toast, .tv-menu,
+      .post-bar, footer, .post-actions, .tv-notes, .toast, .tv-menu, .tv-cues-stack,
       #list-view, #edit-view, #empty-view { display: none !important; }
 
       #teach-view[hidden] { display: none !important; }
@@ -1308,7 +1455,9 @@
 
           <div class="cw-section cw-story-block">
             <button type="button" class="cw-add-row" id="story-add-row">
-              <span class="material-symbols-sharp">add</span>Story
+              <span class="cw-attach-name">Add a story</span>
+              <span class="cw-attach-title">Story</span>
+              <span class="material-symbols-sharp i-md">add</span>
             </button>
             <div id="cw-story-body" hidden>
               <div class="cw-section-head">

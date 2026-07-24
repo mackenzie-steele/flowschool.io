@@ -109,6 +109,7 @@
     }
     #flow-index.list-view .fc-text { display: none; }
     #flow-index.list-view .fc-meta { margin: 0; padding: 0; border: none; white-space: nowrap; }
+    #flow-index.list-view .fc-fav { position: static; order: 5; margin: 0; }
 
     .fc-top {
       display: flex;
@@ -117,6 +118,10 @@
       gap: 12px;
       margin-bottom: 16px;
     }
+
+    /* the heart floats in the corner — the classes anatomy, one seat
+       across all three libraries */
+    .fc-fav { position: absolute; top: 19px; right: 20px; margin: 0; }
 
     .flow-more-btn { flex-shrink: 0; margin: -8px -8px 0 0; }
 
@@ -354,18 +359,72 @@
 
     .fd-cues-foot { display: flex; gap: 20px; margin-top: 14px; }
 
-    /* the picker rows borrow the class-row anatomy */
+    /* the picker grows into a workbench on desktop: room, a search
+       bar, and the availability chips; the list scrolls inside */
+    .fd-cues-card { width: min(560px, calc(100vw - 40px)); }
+
+    .fd-cues-search { margin-bottom: 12px; }
+    .fd-cues-search .search-input { padding-top: 11px; padding-bottom: 11px; }
+
+    .fd-cues-chips { display: flex; gap: 8px; margin-bottom: 16px; }
+
+    #fd-cues-list {
+      max-height: min(48vh, 460px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    /* the picker rows borrow the class-row anatomy — the full sheet
+       name reads; a quiet check rides right when it's in a flow */
     .fd-cues-row {
       width: 100%;
       background: none;
       border: none;
+      border-bottom: 1px solid var(--border-light);
       font-family: var(--font);
       cursor: pointer;
+      align-items: center;
+      text-align: left;
     }
 
-    /* spoken for — visible, named, not clickable */
+    .fd-cues-row .fl-class-title { white-space: normal; }
+
+    .fd-cues-mark { position: relative; flex-shrink: 0; display: flex; }
+    .fd-cues-check { color: var(--text-3); }
+    .fd-cues-check.is-here { color: var(--accent); }
+
+    /* the mark names its flow on hover — the house tooltip, seated to
+       the LEFT so the scrolling list never clips it */
+    .fd-cues-mark[data-tooltip]::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      right: calc(100% + 8px);
+      top: 50%;
+      transform: translateY(-50%) translateX(3px);
+      white-space: nowrap;
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: var(--weight-medium);
+      color: var(--paper-solid);
+      background: var(--ink-solid);
+      border-radius: var(--rb);
+      padding: 4px 8px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+      z-index: 2;
+    }
+
+    .fd-cues-row:hover .fd-cues-mark[data-tooltip]::before {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+      transition-delay: 350ms;
+    }
+
+    /* spoken for — visible, named, not clickable. The title recedes
+       to a whisper so available sheets read at a glance */
     .fd-cues-row.taken { cursor: default; }
-    .fd-cues-row.taken .fl-class-title { color: var(--text-3); }
+    .fd-cues-row.taken .fl-class-title { color: rgba(var(--ink-rgb), .35); }
     .fd-cues-row.taken:hover .fl-class-title { opacity: 1; }
 
     .fd-usedin { padding-top: 24px; }
@@ -1004,9 +1063,18 @@
 
   <!-- ── ATTACH CUES MODAL ── -->
   <div class="modal-backdrop" id="fd-cues-modal" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="fd-cues-modal-heading">
+    <div class="modal-card fd-cues-card" role="dialog" aria-modal="true" aria-labelledby="fd-cues-modal-heading">
       <h3 id="fd-cues-modal-heading">Attach cues</h3>
       <p class="modal-hint">Pick a cue sheet from Your Cues.</p>
+      <div class="search-wrap fd-cues-search">
+        <span class="search-icon"><span class="material-symbols-sharp">search</span></span>
+        <input type="text" class="search-input" id="fd-cues-q" placeholder="Search your cues&#8230;" autocomplete="off" aria-label="Search your cues">
+      </div>
+      <div class="fd-cues-chips" id="fd-cues-chips">
+        <button type="button" class="filter-chip active" data-cf="all">All</button>
+        <button type="button" class="filter-chip" data-cf="free">Available</button>
+        <button type="button" class="filter-chip" data-cf="taken">In a flow</button>
+      </div>
       <div id="fd-cues-list"></div>
       <div class="modal-actions">
         <button class="btn-ghost" id="fd-cues-modal-cancel">Cancel</button>
@@ -1165,14 +1233,19 @@
 
       index.innerHTML = '<div class="flow-grid">' + list.map(function (f) {
         var n = poseCount(f.text);
+        // the meta carries one relationship fact — the cue cards' rule
+        var used = classesUsing(f).length;
+        var bits = [n + (n === 1 ? ' pose' : ' poses')];
+        if (used) bits.push('in ' + used + (used === 1 ? ' class' : ' classes'));
+        bits.push(fmtDate(stampFor(f).ts));
         return '<div class="flow-card" data-id="' + f.id + '">' +
+          (f.pinned ? '<span class="material-symbols-sharp fav-mark fc-fav">favorite</span>' : '') +
           '<div class="fc-top">' +
             '<span class="flow-tag">' + (TAG_NAMES[f.type] || f.type) + '</span>' +
-            (f.pinned ? '<span class="material-symbols-sharp fav-mark" style="margin-left:auto">favorite</span>' : '') +
           '</div>' +
           '<span class="fc-title">' + esc(f.name || 'Untitled Flow') + '</span>' +
           '<span class="fc-text">' + esc(f.text || '') + '</span>' +
-          '<span class="fc-meta">' + n + (n === 1 ? ' pose' : ' poses') + ' &#183; ' + fmtDate(stampFor(f).ts) + '</span>' +
+          '<span class="fc-meta">' + bits.join(' &#183; ') + '</span>' +
         '</div>';
       }).join('') + '</div>';
 
@@ -1330,19 +1403,20 @@
       if (push) history.pushState({}, '', 'your-flows');
     }
 
-    function renderUsedIn(f, listEl) {
+    // only the explicit link counts — matching text is coincidence,
+    // not membership (same words ≠ inserted flow)
+    function classesUsing(f) {
       var classes = [];
       try { classes = JSON.parse(localStorage.getItem('flowschool_classes') || '[]'); } catch (_) {}
-      var text = (f.text || '').trim();
-      var hits = classes.filter(function (c) {
-        var metaHit = c.sectionMeta && Object.keys(c.sectionMeta).some(function (k) {
+      return classes.filter(function (c) {
+        return c.sectionMeta && Object.keys(c.sectionMeta).some(function (k) {
           return c.sectionMeta[k] && c.sectionMeta[k].flowId === f.id;
         });
-        var textHit = text.length > 12 && Object.keys(c.sections || {}).some(function (k) {
-          return (c.sections[k] || '').indexOf(text) !== -1;
-        });
-        return metaHit || textHit;
       });
+    }
+
+    function renderUsedIn(f, listEl) {
+      var hits = classesUsing(f);
       listEl.innerHTML = hits.length
         ? hits.map(function (c) {
             return '<a class="fl-class-row" href="your-classes?id=' + c.id + '">' +
@@ -1390,7 +1464,8 @@
       var verb = (r.verb || '').trim();
       var body = (r.body || '').trim();
       var dir  = (r.dir  || '').trim();
-      var pose = (r.pose || '').trim();
+      // the pose always speaks in caps — in the line and in its seat
+      var pose = (r.pose || '').trim().toUpperCase();
       if (!verb && !body && !dir && !pose) return null;
       var sentence = '';
       if (verb || body || dir) {
@@ -1442,7 +1517,9 @@
               }).join('')
             : '<p class="fd-cues-none">Nothing written on this sheet yet.</p>') +
           '<div class="fd-cues-foot">' +
-            '<a href="your-cues?edit=' + entry.id + '">Edit in Your Cues</a>' +
+            '<a class="fd-cues-open" href="your-cues?id=' + entry.id + '" data-tooltip="Open in Your Cues" aria-label="Open in Your Cues">' +
+              '<span class="material-symbols-sharp i-sm">open_in_new</span>' +
+            '</a>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -1510,41 +1587,88 @@
       var attachedIds = (p === 'fl' && editingId == null)
         ? pendingCueIds.slice()
         : (f ? cueSheetsFor(f.id).map(function (e) { return e.id; }) : []);
-      list.innerHTML = entries.length
-        ? entries.map(function (e) {
-            var d = new Date(e.savedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-            var attached = attachedIds.indexOf(e.id) !== -1;
-            var others = (e.flowIds || []).filter(function (fid) { return !(f && fid === f.id); });
-            var taken = attached || others.length > 0;
-            var info = attached ? 'Attached'
-              : (others.length ? 'Cues ' + esc(flowNames[others[0]] || 'a flow') : d);
-            return '<button type="button" class="fl-class-row fd-cues-row' + (taken ? ' taken' : '') + '"' +
-              (taken ? ' disabled' : ' data-id="' + e.id + '"') + '>' +
-              '<span class="fl-class-title">' + esc(e.name || 'Untitled') + '</span>' +
-              '<span class="fl-class-meta">' + info + '</span>' +
-            '</button>';
-          }).join('')
-        : '<p class="fd-cues-none">Nothing in Your Cues yet. Write a sheet there first.</p>';
-      list.querySelectorAll('.fd-cues-row:not(.taken)').forEach(function (row) {
-        row.addEventListener('click', function () {
-          var all = cueStore();
-          var entry = all.find(function (x) { return x.id === parseInt(row.dataset.id, 10); });
-          if (!entry) return;
-          if (p === 'fl' && editingId == null) {
-            // the link waits for the flow to exist
-            pendingCueIds.push(entry.id);
-            markDirty();
-          } else {
-            // seats, not appends — the sheet holds one flow
-            entry.flowIds = [f.id];
-            setCueStore(all);
-          }
-          closeCuesModal();
-          if (p === 'fd') renderFdCues(f); else renderFlCues();
-          toast('Cues attached.');
-        });
+
+      // each sheet, judged once: free / attached here / seated elsewhere
+      var judged = entries.map(function (e) {
+        var attached = attachedIds.indexOf(e.id) !== -1;
+        var others = (e.flowIds || []).filter(function (fid) { return !(f && fid === f.id); });
+        var owner = others.length ? (flowNames[others[0]] || 'a flow') : '';
+        return {
+          e: e,
+          here: attached,
+          taken: attached || others.length > 0,
+          owner: owner,
+          hay: ((e.name || 'Untitled') + ' ' + owner).toLowerCase(),
+        };
       });
+
+      var qEl = document.getElementById('fd-cues-q');
+      qEl.value = '';
+      var chips = document.querySelectorAll('#fd-cues-chips .filter-chip');
+      var cf = 'all';
+      chips.forEach(function (ch) { ch.classList.toggle('active', ch.dataset.cf === cf); });
+
+      function renderRows() {
+        var q = qEl.value.trim().toLowerCase();
+        var view = judged.filter(function (j) {
+          if (cf === 'free' && j.taken) return false;
+          if (cf === 'taken' && !j.taken) return false;
+          return !q || j.hay.indexOf(q) !== -1;
+        });
+        list.innerHTML = view.length
+          ? view.map(function (j) {
+              return '<button type="button" class="fl-class-row fd-cues-row' + (j.taken ? ' taken' : '') + '"' +
+                (j.taken ? ' disabled' : ' data-id="' + j.e.id + '"') + '>' +
+                '<span class="fl-class-title">' + esc(j.e.name || 'Untitled') + '</span>' +
+                // two marks: the accent check says "attached HERE"; the
+                // quiet info says "seated on another flow" — each names
+                // its flow on hover. The tooltip anchors on a wrapper:
+                // the glyph span itself is a clipped 1em box (icons.css)
+                // that would swallow the pseudo-element.
+                (j.here ? '<span class="fd-cues-mark" data-tooltip="Attached to this flow"><span class="material-symbols-sharp fd-cues-check is-here i-sm" aria-hidden="true">check</span></span>'
+                  : j.taken ? '<span class="fd-cues-mark" data-tooltip="' + esc('Cues ' + (j.owner.length > 40 ? j.owner.slice(0, 40) + '…' : j.owner)) + '"><span class="material-symbols-sharp fd-cues-check i-sm" aria-hidden="true">info</span></span>' : '') +
+              '</button>';
+            }).join('')
+          : '<p class="fd-cues-none">' +
+              (!entries.length ? 'Nothing in Your Cues yet. Write a sheet there first.'
+                : q ? 'Nothing matches “' + esc(qEl.value.trim()) + '”.'
+                : cf === 'free' ? 'Every sheet is already attached to a flow.'
+                : 'No sheets are attached to a flow yet.') +
+            '</p>';
+        list.querySelectorAll('.fd-cues-row:not(.taken)').forEach(function (row) {
+          row.addEventListener('click', function () {
+            var all = cueStore();
+            var entry = all.find(function (x) { return x.id === parseInt(row.dataset.id, 10); });
+            if (!entry) return;
+            if (p === 'fl' && editingId == null) {
+              // the link waits for the flow to exist
+              pendingCueIds.push(entry.id);
+              markDirty();
+            } else {
+              // seats, not appends — the sheet holds one flow
+              entry.flowIds = [f.id];
+              setCueStore(all);
+            }
+            closeCuesModal();
+            if (p === 'fd') renderFdCues(f); else renderFlCues();
+            toast('Cues attached.');
+          });
+        });
+      }
+
+      // fresh wiring per open — assignment, so ears never stack
+      qEl.oninput = renderRows;
+      chips.forEach(function (ch) {
+        ch.onclick = function () {
+          cf = ch.dataset.cf;
+          chips.forEach(function (c) { c.classList.toggle('active', c === ch); });
+          renderRows();
+        };
+      });
+
+      renderRows();
       document.getElementById('fd-cues-modal').removeAttribute('hidden');
+      qEl.focus();
     }
 
     document.getElementById('fd-cues-modal-cancel').addEventListener('click', closeCuesModal);
