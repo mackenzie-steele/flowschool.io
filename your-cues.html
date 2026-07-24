@@ -1381,8 +1381,8 @@ let sheetId = null; // the open sheet's id; null = a new, unsaved sheet
 // fs-cue-flows history: originally an object keyed by sheet NAME. The
 // library restructure (Jul 2026) made sheets id-keyed — an ARRAY of
 // {id, name, rows, flowIds: [], savedAt} — so renames stop breaking
-// links. flowIds is many-to-many (Jul 2026): a sheet may serve several
-// flows; the single legacy flowId folds into the array on read.
+// links. A sheet cues ONE flow (a flow may hold several sheets); the
+// array shape stays for storage compatibility, capped to one on read.
 // Ids derive deterministically from savedAt, so every reader that
 // normalizes the old shape lands on the same ids.
 function normalizeSheets(raw) {
@@ -1391,6 +1391,7 @@ function normalizeSheets(raw) {
     if (e.id == null) e.id = (Date.parse(e.savedAt) || 0) + i;
     if (e.editedAt == null) e.editedAt = Date.parse(e.savedAt) || e.id;
     if (e.flowIds == null) e.flowIds = (e.flowId != null ? [e.flowId] : []);
+    if (e.flowIds.length > 1) e.flowIds = e.flowIds.slice(0, 1);
     delete e.flowId;
     return e;
   });
@@ -1919,8 +1920,8 @@ function route() {
   showList(false);
 }
 
-// one drawer per attached flow — the same anatomy, stacked. The
-// attach door stays open below; a sheet may serve several flows.
+// the attached flow's drawer. A sheet cues ONE flow — the attach
+// door stands only while the seat is empty.
 function flowDrawerHtml(f, editable) {
   return '<div class="wsf' + (editable ? ' wsf-editable' : '') + '" data-fid="' + f.id + '">' +
     '<button type="button" class="wsf-head" aria-expanded="false">' +
@@ -1948,6 +1949,8 @@ function renderFlowStack(containerId, ids, editable) {
 
 function renderFlowRef() {
   renderFlowStack('ws-flowrefs', linkedFlowIds, true);
+  // one flow per sheet — the empty drawer yields once the seat is taken
+  document.getElementById('ws-attach-btn').hidden = linkedFlowIds.length > 0;
 }
 
 // one delegated ear per stack: heads unfold, the x detaches (editor)
@@ -1973,7 +1976,7 @@ function renderFlowRef() {
 function openImportModal() {
   const flows = loadFlowLib().sort((a, b) => (b.editedAt || b.id) - (a.editedAt || a.id));
   const list = document.getElementById('ws-import-list');
-  // links are many-to-many now — a flow's other sheets are information,
+  // a flow may hold several sheets — its other sheets are information,
   // not a lock; only flows already on THIS sheet sit out
   const linkedBy = {};
   getSheets().forEach(e => {
@@ -1995,7 +1998,8 @@ function openImportModal() {
     : '<div class="flow-list-empty">No flows in your library yet. Write one in Your Flows first.</div>';
   list.querySelectorAll('.flow-list-item:not(.taken)').forEach(el => {
     el.addEventListener('click', () => {
-      linkedFlowIds.push(parseInt(el.dataset.fid, 10));
+      // seats, not appends — the sheet holds one flow
+      linkedFlowIds = [parseInt(el.dataset.fid, 10)];
       renderFlowRef();
       closeImportModal();
       markDirty();

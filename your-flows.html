@@ -1006,7 +1006,7 @@
   <div class="modal-backdrop" id="fd-cues-modal" hidden>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="fd-cues-modal-heading">
       <h3 id="fd-cues-modal-heading">Attach cues</h3>
-      <p class="modal-hint">Pick a cue sheet from Your Cues. It sits under the poses, folded until wanted.</p>
+      <p class="modal-hint">Pick a cue sheet from Your Cues.</p>
       <div id="fd-cues-list"></div>
       <div class="modal-actions">
         <button class="btn-ghost" id="fd-cues-modal-cancel">Cancel</button>
@@ -1366,6 +1366,8 @@
         return list.filter(Boolean).map(function (e, i) {
           if (e.id == null) e.id = (Date.parse(e.savedAt) || 0) + i;
           if (e.flowIds == null) e.flowIds = (e.flowId != null ? [e.flowId] : []);
+          // a sheet cues one flow — Your Cues' normalizer keeps the same first
+          if (e.flowIds.length > 1) e.flowIds = e.flowIds.slice(0, 1);
           delete e.flowId;
           return e;
         });
@@ -1501,8 +1503,8 @@
       var entries = cueStore()
         .sort(function (a, b) { return new Date(b.savedAt) - new Date(a.savedAt); });
       var list = document.getElementById('fd-cues-list');
-      // links are many-to-many now — a sheet's other flows are
-      // information; only sheets already on THIS flow sit out
+      // a sheet cues ONE flow — sheets seated on another flow sit out,
+      // wearing that flow's name so the lock explains itself
       var flowNames = {};
       loadFlows2().forEach(function (fl) { flowNames[fl.id] = fl.name || 'Untitled Flow'; });
       var attachedIds = (p === 'fl' && editingId == null)
@@ -1513,12 +1515,11 @@
             var d = new Date(e.savedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
             var attached = attachedIds.indexOf(e.id) !== -1;
             var others = (e.flowIds || []).filter(function (fid) { return !(f && fid === f.id); });
+            var taken = attached || others.length > 0;
             var info = attached ? 'Attached'
-              : (others.length
-                  ? 'Also cues ' + esc(flowNames[others[0]] || 'a flow') + (others.length > 1 ? ' +' + (others.length - 1) : '')
-                  : d);
-            return '<button type="button" class="fl-class-row fd-cues-row' + (attached ? ' taken' : '') + '"' +
-              (attached ? ' disabled' : ' data-id="' + e.id + '"') + '>' +
+              : (others.length ? 'Cues ' + esc(flowNames[others[0]] || 'a flow') : d);
+            return '<button type="button" class="fl-class-row fd-cues-row' + (taken ? ' taken' : '') + '"' +
+              (taken ? ' disabled' : ' data-id="' + e.id + '"') + '>' +
               '<span class="fl-class-title">' + esc(e.name || 'Untitled') + '</span>' +
               '<span class="fl-class-meta">' + info + '</span>' +
             '</button>';
@@ -1534,8 +1535,8 @@
             pendingCueIds.push(entry.id);
             markDirty();
           } else {
-            entry.flowIds = entry.flowIds || [];
-            if (entry.flowIds.indexOf(f.id) === -1) entry.flowIds.push(f.id);
+            // seats, not appends — the sheet holds one flow
+            entry.flowIds = [f.id];
             setCueStore(all);
           }
           closeCuesModal();
@@ -1907,10 +1908,7 @@
         var cues = cueStore();
         pendingCueIds.forEach(function (pid) {
           var hit = cues.find(function (x) { return x.id === pid; });
-          if (hit && (hit.flowIds || []).indexOf(editingId) === -1) {
-            hit.flowIds = hit.flowIds || [];
-            hit.flowIds.push(editingId);
-          }
+          if (hit) hit.flowIds = [editingId]; // one flow per sheet
         });
         setCueStore(cues);
         pendingCueIds = [];

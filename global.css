@@ -2231,11 +2231,10 @@ textarea.fs-autogrow {
 }
 
 /* ── Sidebar logo ── */
-/* the header block: brand, a seam (which aligns with the post-bar's
-   81px hairline — one continuous line across the app), then you */
+/* the header block: the brand over a seam (which aligns with the
+   post-bar's 81px hairline — one continuous line across the app) */
 .sidebar-head {
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(var(--ink-rgb), .09);
 }
 
 .sidebar-logo-wrap {
@@ -2410,6 +2409,7 @@ textarea.fs-autogrow {
   align-items: center;
   justify-content: space-between;
   padding: 10px 24px 14px; /* left edge shared with the identity row + icon column */
+  border-top: 1px solid rgba(var(--ink-rgb), .08); /* the plate keeps its own compartment */
 }
 
 .sidebar-version {
