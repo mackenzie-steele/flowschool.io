@@ -10,6 +10,11 @@
   <link rel="stylesheet" href="global.css">
   <script src="lib/icons.js"></script>
   <style>
+    .sort-row .result-count { margin-left: 0; }
+
+    /* no filter chips on this page — the sort row makes its own room */
+    .sort-row { margin-top: 20px; }
+
     /* hidden must always win — several components set their own display */
     [hidden] { display: none !important; }
 
@@ -713,6 +718,33 @@
       background: var(--raised), rgba(var(--ink-rgb), .038);
     }
 
+    /* ── list view — the same cards, worn as scannable rows ── */
+    .cue-index.list-view { grid-template-columns: 1fr; gap: 0; margin-top: 16px; }
+
+    .cue-index.list-view .cue-card {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 14px;
+      padding: 13px 4px;
+      background: none;
+      box-shadow: none;
+      border: none;
+      border-bottom: 1px solid var(--border-light);
+      border-radius: 0;
+    }
+
+    .cue-index.list-view .cue-card:hover { background: rgba(var(--ink-rgb), .03); }
+    .cue-index.list-view .cue-card-title {
+      margin: 0;
+      flex: 1;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cue-index.list-view .cue-card-preview { display: none; }
+    .cue-index.list-view .cue-card-meta { border: none; padding: 0; white-space: nowrap; }
+
     .cue-card-title {
       font-size: var(--fs-h5);
       font-weight: var(--weight-medium);
@@ -967,6 +999,10 @@
         <span class="material-symbols-sharp i-sm" style="margin-right:5px">favorite</span>
         Favorites
       </button>
+      <div class="view-toggle" role="group" aria-label="View">
+          <button type="button" class="vt-btn active" id="vt-grid" data-tooltip="Grid view" aria-label="Grid view"><span class="material-symbols-sharp">grid_view</span></button>
+          <button type="button" class="vt-btn" id="vt-list" data-tooltip="List view" aria-label="List view"><span class="material-symbols-sharp">view_list</span></button>
+        </div>
       <span class="result-count" id="result-count"></span>
     </div>
     <div class="cue-index" id="cue-index"></div>
@@ -2732,6 +2768,24 @@ function init() {
   });
   renderWBWords();
 }
+
+// ── grid ⇄ list — remembered per library ──
+(function () {
+  var KEY = 'fs-view-cues';
+  var idx = document.getElementById('cue-index');
+  function apply(v) {
+    idx.classList.toggle('list-view', v === 'list');
+    document.getElementById('vt-grid').classList.toggle('active', v !== 'list');
+    document.getElementById('vt-list').classList.toggle('active', v === 'list');
+  }
+  document.getElementById('vt-grid').addEventListener('click', function () {
+    localStorage.setItem(KEY, 'grid'); apply('grid');
+  });
+  document.getElementById('vt-list').addEventListener('click', function () {
+    localStorage.setItem(KEY, 'list'); apply('list');
+  });
+  apply(localStorage.getItem(KEY) || 'grid');
+})();
 
 // the printed sheet signs itself (your-classes' pattern)
 (function () {

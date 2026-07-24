@@ -14,6 +14,8 @@
     /* display:flex components would defeat the hidden attribute */
     [hidden] { display: none !important; }
 
+    .sort-row .result-count { margin-left: 0; }
+
     /* ── Library bar ── */
     .library-bar {
       display: flex;
@@ -79,6 +81,34 @@
       border-color: rgba(var(--ink-rgb), .22);
       background: var(--raised), rgba(var(--ink-rgb), .038);
     }
+
+    /* ── list view — the same cards, worn as scannable rows ── */
+    #flow-index.list-view .flow-grid { grid-template-columns: 1fr; gap: 0; margin-top: 16px; }
+
+    #flow-index.list-view .flow-card {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 14px;
+      padding: 13px 4px;
+      background: none;
+      box-shadow: none;
+      border: none;
+      border-bottom: 1px solid var(--border-light);
+      border-radius: 0;
+    }
+
+    #flow-index.list-view .flow-card:hover { background: rgba(var(--ink-rgb), .03); }
+    #flow-index.list-view .fc-top { margin: 0; gap: 8px; }
+    #flow-index.list-view .fc-title {
+      margin: 0;
+      flex: 1;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #flow-index.list-view .fc-text { display: none; }
+    #flow-index.list-view .fc-meta { margin: 0; padding: 0; border: none; white-space: nowrap; }
 
     .fc-top {
       display: flex;
@@ -816,6 +846,11 @@
           <span class="material-symbols-sharp i-sm" style="margin-right:5px">favorite</span>
           Favorites
         </button>
+        <div class="view-toggle" role="group" aria-label="View">
+          <button type="button" class="vt-btn active" id="vt-grid" data-tooltip="Grid view" aria-label="Grid view"><span class="material-symbols-sharp">grid_view</span></button>
+          <button type="button" class="vt-btn" id="vt-list" data-tooltip="List view" aria-label="List view"><span class="material-symbols-sharp">view_list</span></button>
+        </div>
+        <span class="result-count" id="result-count"></span>
       </div>
       <div id="flow-index"></div>
     </div>
@@ -1062,8 +1097,9 @@
       el.innerHTML = '<button class="filter-chip' + (listFilter === 'all' ? ' active' : '') + '" data-f="all">All</button>' +
         FLOW_TYPES.map(function (t) {
           return '<button class="filter-chip' + (listFilter === t.key ? ' active' : '') + '" data-f="' + t.key + '">' + TAG_NAMES[t.key] + '</button>';
-        }).join('') +
-        '<span class="result-count">' + count + ' result' + (count !== 1 ? 's' : '') + '</span>';
+        }).join('');
+      document.getElementById('result-count').textContent =
+        count + ' result' + (count !== 1 ? 's' : '');
     }
 
     function renderList() {
@@ -2000,6 +2036,24 @@
         showList();
       }
     }
+
+    // ── grid ⇄ list — remembered per library ──
+    (function () {
+      var KEY = 'fs-view-flows';
+      var idx = document.getElementById('flow-index');
+      function apply(v) {
+        idx.classList.toggle('list-view', v === 'list');
+        document.getElementById('vt-grid').classList.toggle('active', v !== 'list');
+        document.getElementById('vt-list').classList.toggle('active', v === 'list');
+      }
+      document.getElementById('vt-grid').addEventListener('click', function () {
+        localStorage.setItem(KEY, 'grid'); apply('grid');
+      });
+      document.getElementById('vt-list').addEventListener('click', function () {
+        localStorage.setItem(KEY, 'list'); apply('list');
+      });
+      apply(localStorage.getItem(KEY) || 'grid');
+    })();
 
     // the printed sheet signs itself (your-classes' pattern)
     (function () {

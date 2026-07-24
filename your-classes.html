@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="global.css">
   <script src="lib/icons.js"></script>
   <style>
+    .sort-row .result-count { margin-left: 0; }
+
     /* hidden must always win — several components set their own display */
     [hidden] { display: none !important; }
 
@@ -41,8 +43,8 @@
     /* class cards — the flows-card language, one per row ── */
     .class-index {
       margin-top: 24px;
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 12px;
     }
 
@@ -79,6 +81,7 @@
       align-items: center;
       gap: 12px;
       margin-bottom: 16px;
+      min-height: 20px; /* the tag's height — empty zones hold the line */
     }
 
     .cc-title {
@@ -107,6 +110,36 @@
       -webkit-box-orient: vertical;
     }
 
+    /* ── list view — the same cards, worn as scannable rows ── */
+    .class-index.list-view { grid-template-columns: 1fr; gap: 0; }
+
+    .class-index.list-view .class-card {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 14px;
+      padding: 13px 4px;
+      background: none;
+      box-shadow: none;
+      border: none;
+      border-bottom: 1px solid var(--border-light);
+      border-radius: 0;
+    }
+
+    .class-index.list-view .class-card:hover { background: rgba(var(--ink-rgb), .03); }
+    .class-index.list-view .cc-top { margin: 0; min-height: 0; }
+    .class-index.list-view .cc-top:empty { display: none; }
+    .class-index.list-view .cc-title {
+      margin: 0;
+      flex: 1;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .class-index.list-view .cc-struct { display: none; }
+    .class-index.list-view .cc-meta { border: none; padding: 0; margin: 0; white-space: nowrap; }
+    .class-index.list-view .cc-fav { position: static; order: 5; margin: 0; }
+
     .cc-meta {
       font-family: var(--font-mono);
       font-size: 10px;
@@ -114,6 +147,7 @@
       color: var(--text-3);
       border-top: 1px solid var(--border-light);
       padding-top: 12px;
+      margin-top: auto; /* the meta line seats at the card's floor */
     }
 
     /* ── Top bar — component from global.css ── */
@@ -1191,6 +1225,10 @@
           <span class="material-symbols-sharp i-sm" style="margin-right:5px">favorite</span>
           Favorites
         </button>
+        <div class="view-toggle" role="group" aria-label="View">
+          <button type="button" class="vt-btn active" id="vt-grid" data-tooltip="Grid view" aria-label="Grid view"><span class="material-symbols-sharp">grid_view</span></button>
+          <button type="button" class="vt-btn" id="vt-list" data-tooltip="List view" aria-label="List view"><span class="material-symbols-sharp">view_list</span></button>
+        </div>
         <span class="result-count" id="result-count"></span>
       </div>
       <div class="class-index" id="class-index"></div>
